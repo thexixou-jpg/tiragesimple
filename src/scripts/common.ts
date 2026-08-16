@@ -1,5 +1,33 @@
 import { formatCount, parseList } from '../lib/lists';
 import { trackEvent } from '../lib/analytics';
+import { readConsent, saveConsent } from '../lib/consent';
+
+function initConsentBanner(): void {
+  const banner = document.querySelector<HTMLElement>('[data-consent-banner]');
+  if (!banner) return;
+  const options = banner.querySelector<HTMLElement>('[data-consent-options]');
+  const analytics = banner.querySelector<HTMLInputElement>('[data-consent-analytics]');
+  const advertising = banner.querySelector<HTMLInputElement>('[data-consent-advertising]');
+  const show = (customize = false): void => {
+    banner.hidden = false;
+    banner.setAttribute('aria-hidden', 'false');
+    if (options) options.hidden = !customize;
+    if (customize) analytics && (analytics.checked = readConsent()?.analytics === true);
+    if (customize) advertising && (advertising.checked = readConsent()?.advertising === true);
+  };
+  const hide = (): void => { banner.hidden = true; banner.setAttribute('aria-hidden', 'true'); };
+  const commit = (a: boolean, p: boolean): void => {
+    const preference = saveConsent({ analytics: a, advertising: p });
+    hide();
+    window.dispatchEvent(new CustomEvent('tiragesimple:consentchange', { detail: preference }));
+  };
+  if (!readConsent()) show();
+  banner.querySelector('[data-consent-accept]')?.addEventListener('click', () => commit(true, true));
+  banner.querySelector('[data-consent-reject]')?.addEventListener('click', () => commit(false, false));
+  banner.querySelector('[data-consent-customize]')?.addEventListener('click', () => show(true));
+  banner.querySelector('[data-consent-save]')?.addEventListener('click', () => commit(analytics?.checked === true, advertising?.checked === true));
+  document.querySelectorAll('[data-open-consent]').forEach((button) => button.addEventListener('click', () => show(true)));
+}
 
 function setTemporaryLabel(button: HTMLElement, text: string): void {
   const label = button.querySelector<HTMLElement>('[data-button-label]');
@@ -98,3 +126,4 @@ document.querySelectorAll<HTMLElement>('[data-copy-target]').forEach(initCopyBut
 document.querySelectorAll<HTMLElement>('[data-fullscreen-target]').forEach(initFullscreenButton);
 document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(initThemeToggle);
 document.querySelectorAll<HTMLButtonElement>('[data-share-target]').forEach(initResultShareButton);
+initConsentBanner();

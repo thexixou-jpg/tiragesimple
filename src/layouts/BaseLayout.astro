@@ -1,5 +1,6 @@
 ---
 import Footer from '../components/Footer.astro';
+import ConsentBanner from '../components/ConsentBanner.astro';
 import Header from '../components/Header.astro';
 import SeoHead from '../components/SeoHead.astro';
 import '../styles/global.css';
@@ -37,6 +38,7 @@ const { title, description, canonicalPath = Astro.url.pathname, noindex = false 
     <Header />
     <main id="main-content" tabindex="-1"><slot /></main>
     <Footer />
+    <ConsentBanner />
     <script>
       import '../scripts/common';
     </script>
