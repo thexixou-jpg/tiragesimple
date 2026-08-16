@@ -19,11 +19,16 @@ const {
 ---
 
 <div class="list-editor" data-list-editor data-minimum={minimum}>
-  <div class="field-heading">
-    <label for={id}>{label}</label>
+  <div class="list-editor-heading">
+    <div>
+      <span class="field-kicker">Liste de tirage</span>
+      <label for={id}>{label}</label>
+    </div>
     <span class="item-count" data-list-count aria-live="polite">0 élément</span>
   </div>
-  <textarea id={id} name={id} rows="9" {placeholder} spellcheck="false" data-list-input>{value}</textarea>
+  <div class="list-input-wrap">
+    <textarea id={id} name={id} rows="9" {placeholder} spellcheck="false" data-list-input>{value}</textarea>
+  </div>
   <div class="list-editor-footer">
     {showDuplicatesOption && (
       <label class="check-field">

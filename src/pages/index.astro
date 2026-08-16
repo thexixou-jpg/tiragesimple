@@ -11,17 +11,26 @@ const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', na
   description="Tirez un nom, faites tourner une roue ou créez vos équipes gratuitement. Des outils rapides, sans inscription et respectueux de vos données."
 >
   <section class="hero">
-    <div class="container">
-      <span class="eyebrow">Simple · Rapide · Privé</span>
-      <h1>Le hasard <span class="gradient-text">en un clic.</span></h1>
-      <p class="hero-copy">Tirez un nom, faites tourner une roue ou créez vos équipes gratuitement.</p>
-      <div class="hero-actions">
-        <a class="button button-primary" href="/roue-aleatoire">Faire tourner la roue <span aria-hidden="true">→</span></a>
-        <a class="button button-secondary" href="#tous-les-outils">Voir tous les outils</a>
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <span class="eyebrow"><span aria-hidden="true">✦</span> Simple · Rapide · Privé</span>
+        <h1>Le hasard <span class="gradient-text">en un clic.</span></h1>
+        <p class="hero-copy">Une roue, un tirage, des équipes : laissez le hasard décider avec des outils gratuits, clairs et instantanés.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="/roue-aleatoire">Faire tourner la roue <span aria-hidden="true">→</span></a>
+          <a class="button button-secondary" href="#tous-les-outils">Explorer les outils</a>
+        </div>
+        <ul class="trust-list" aria-label="Avantages">
+          <li>Sans inscription</li><li>Données dans votre navigateur</li><li>Résultat immédiat</li>
+        </ul>
       </div>
-      <ul class="trust-list" aria-label="Avantages">
-        <li>Gratuit</li><li>Sans inscription</li><li>Instantané</li>
-      </ul>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-orbit hero-orbit-one"></div>
+        <div class="hero-orbit hero-orbit-two"></div>
+        <img src="/images/hero-wheel.webp" width="900" height="900" alt="" fetchpriority="high" decoding="async" />
+        <div class="hero-float-card hero-float-card-top"><span>✦</span> Le hasard est prêt</div>
+        <div class="hero-float-card hero-float-card-bottom"><span class="live-dot"></span> 100 % côté navigateur</div>
+      </div>
     </div>
   </section>
   <section class="section section-surface" aria-labelledby="popular-title">
@@ -31,6 +40,23 @@ const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', na
         <p>Les raccourcis les plus utiles pour laisser le hasard décider.</p>
       </div></div>
       <ToolGrid tools={popularTools} />
+    </div>
+  </section>
+  <section class="section workflow-section" aria-labelledby="workflow-title">
+    <div class="container workflow-grid">
+      <div class="workflow-visual">
+        <img src="/images/tools-flow.webp" width="1100" height="733" alt="Illustration de listes, équipes et gagnant tiré au sort" loading="lazy" decoding="async" />
+      </div>
+      <div class="workflow-copy">
+        <span class="eyebrow">Un seul réflexe</span>
+        <h2 id="workflow-title">Décidez vite.<br /><span class="gradient-text">Restez impartial.</span></h2>
+        <p>Ajoutez vos choix, lancez le tirage et partagez le résultat. Tout se passe directement dans votre navigateur.</p>
+        <ol class="workflow-steps">
+          <li><span>01</span><div><strong>Ajoutez votre liste</strong><small>Collez des noms ou créez vos choix en quelques secondes.</small></div></li>
+          <li><span>02</span><div><strong>Lancez l’outil</strong><small>Notre moteur aléatoire utilise Web Crypto lorsque disponible.</small></div></li>
+          <li><span>03</span><div><strong>Gardez ou partagez</strong><small>Votre résultat reste visible et prêt à être copié.</small></div></li>
+        </ol>
+      </div>
     </div>
   </section>
   <section class="section" id="tous-les-outils" aria-labelledby="all-tools-title">
