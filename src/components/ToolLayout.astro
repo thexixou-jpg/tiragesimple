@@ -16,6 +16,31 @@ interface Props {
 const { slug, description, intro, faq = [] } = Astro.props;
 const tool = getTool(slug);
 const pageTitle = Astro.props.title ?? `${tool.title} gratuite | TirageSimple`;
+const url = new URL(`/${slug}`, Astro.site ?? Astro.url.origin).toString();
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': `${url}#application`,
+      name: tool.title,
+      url,
+      description,
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Web',
+      browserRequirements: 'JavaScript requis',
+      isAccessibleForFree: true,
+      inLanguage: 'fr-FR',
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Accueil', item: new URL('/', Astro.site ?? Astro.url.origin).toString() },
+        { '@type': 'ListItem', position: 2, name: tool.title, item: url },
+      ],
+    },
+  ],
+};
 ---
 
 <BaseLayout title={pageTitle} {description} canonicalPath={`/${slug}`}>
@@ -38,3 +63,4 @@ const pageTitle = Astro.props.title ?? `${tool.title} gratuite | TirageSimple`;
     <RelatedTools tools={getRelatedTools(slug)} />
   </div>
 </BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

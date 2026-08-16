@@ -8,13 +8,14 @@ interface Props {
 
 const { title, description, canonicalPath, noindex = false } = Astro.props;
 const canonical = new URL(canonicalPath, Astro.site ?? Astro.url.origin);
-const socialImage = new URL('/og.png', Astro.site ?? Astro.url.origin);
+const socialImage = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
 ---
 
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
-{noindex && <meta name="robots" content="noindex,nofollow" />}
+<meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'} />
+<meta name="googlebot" content={noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'} />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="fr_FR" />
 <meta property="og:site_name" content="TirageSimple" />
@@ -22,10 +23,14 @@ const socialImage = new URL('/og.png', Astro.site ?? Astro.url.origin);
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
 <meta property="og:image" content={socialImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="TirageSimple — outils de tirage au sort gratuits" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={socialImage} />
+<meta name="twitter:image:alt" content="TirageSimple — outils de tirage au sort gratuits" />
 <meta name="theme-color" content="#6757e8" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="/favicon.ico" sizes="any" />

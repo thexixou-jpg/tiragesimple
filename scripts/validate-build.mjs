@@ -24,6 +24,18 @@ for (const file of pages) {
     ['OpenGraph title', /<meta property="og:title" content="[^"]+"/u],
   ];
   for (const [name, pattern] of required) if (!pattern.test(html)) failures.push(`${page}: ${name} manquant`);
+  const schemas = [];
+  for (const match of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gu)) {
+    try { schemas.push(JSON.parse(match[1])); }
+    catch { failures.push(`${page}: données structurées JSON-LD invalides`); }
+  }
+  if (page === 'index.html' && !schemas.some((schema) => schema['@graph']?.some((item) => item['@type'] === 'WebSite'))) {
+    failures.push(`${page}: données structurées WebSite manquantes`);
+  }
+  if (page !== 'index.html' && page !== '404.html' && page !== 'mentions-legales/index.html' && page !== 'confidentialite/index.html' && page !== 'cookies/index.html'
+    && !schemas.some((schema) => schema['@graph']?.some((item) => item['@type'] === 'WebApplication'))) {
+    failures.push(`${page}: données structurées WebApplication manquantes`);
+  }
   const h1Count = [...html.matchAll(/<h1(?:\s[^>]*)?>/gu)].length;
   if (h1Count !== 1) failures.push(`${page}: ${h1Count} H1 trouvés`);
 
@@ -47,7 +59,7 @@ for (const file of pages) {
   }
 }
 
-for (const asset of ['robots.txt', 'sitemap-index.xml', 'og.png', '404.html']) {
+for (const asset of ['robots.txt', 'sitemap-index.xml', 'og.jpg', '404.html']) {
   if (!existsSync(join(dist, asset))) failures.push(`Fichier absent : ${asset}`);
 }
 

@@ -4,7 +4,13 @@ import { categoryOrder } from '../data/navigation';
 import { categoryLabels, tools } from '../data/tools';
 import BaseLayout from '../layouts/BaseLayout.astro';
 const popularTools = tools.filter((tool) => tool.popular);
-const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', name: 'TirageSimple', url: 'https://tiragesimple.fr', description: 'Outils de tirage au sort et de choix aléatoires gratuits.' };
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'WebSite', '@id': 'https://tiragesimple.fr/#website', name: 'TirageSimple', url: 'https://tiragesimple.fr/', inLanguage: 'fr-FR', description: 'Outils de tirage au sort, roues et choix aléatoires gratuits.' },
+    { '@type': 'Organization', '@id': 'https://tiragesimple.fr/#organization', name: 'TirageSimple', url: 'https://tiragesimple.fr/', description: 'Outils gratuits de tirage au sort et de choix aléatoires.' },
+  ],
+};
 ---
 <BaseLayout
   title="TirageSimple – Tirage au sort et outils aléatoires gratuits"
