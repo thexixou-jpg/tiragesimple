@@ -1,9 +1,9 @@
 ---
 import type { ToolDefinition } from '../data/tools';
 import ToolCard from './ToolCard.astro';
-interface Props { tools: ToolDefinition[]; }
-const { tools } = Astro.props;
+interface Props { tools: ToolDefinition[]; compact?: boolean; }
+const { tools, compact = false } = Astro.props;
 ---
 <div class="tool-grid">
-  {tools.map((tool) => <ToolCard {tool} />)}
+  {tools.map((tool) => <ToolCard {tool} {compact} />)}
 </div>

@@ -9,8 +9,11 @@ interface WheelState {
   participants: string[];
   removeDuplicates: boolean;
   sound: boolean;
+  displaySize?: WheelSize;
 }
 
+type WheelSize = 'compact' | 'standard' | 'large';
+interface SharedWheelConfig extends Pick<WheelState, 'participants' | 'removeDuplicates'> { result?: { winner: string; timestamp: number }; }
 interface HistoryEntry { winner: string; timestamp: number; }
 interface HistoryState { wheel?: HistoryEntry[]; chance?: HistoryEntry[]; }
 
@@ -32,6 +35,8 @@ function initWheel(root: HTMLElement): void {
   const removeButton = root.querySelector<HTMLButtonElement>('[data-remove-winner]');
   const soundButton = root.querySelector<HTMLButtonElement>('[data-sound-toggle]');
   const shareButton = root.querySelector<HTMLButtonElement>('[data-share-button]');
+  const shareResultButton = root.querySelector<HTMLButtonElement>('[data-share-result="wheel"]');
+  const sizeButtons = root.querySelectorAll<HTMLButtonElement>('[data-wheel-size]');
   const status = root.querySelector<HTMLElement>('[data-wheel-status]');
   const resultCard = root.querySelector<HTMLElement>('[data-result-card]');
   const resultValue = root.querySelector<HTMLElement>('[data-result-value]');
@@ -42,11 +47,12 @@ function initWheel(root: HTMLElement): void {
 
   const storageKey = variant === 'chance' ? `${STORAGE_KEYS.wheel}:chance` : STORAGE_KEYS.wheel;
   const saved = loadLocal<WheelState | null>(storageKey, null);
-  const shared = readSharedConfig<Pick<WheelState, 'participants' | 'removeDuplicates'>>();
+  const shared = readSharedConfig<SharedWheelConfig>();
   const initial = shared ?? saved;
   if (initial?.participants?.length) input.value = serializeList(initial.participants);
   if (dedupe && typeof initial?.removeDuplicates === 'boolean') dedupe.checked = initial.removeDuplicates;
   let sound = saved?.sound ?? true;
+  let displaySize: WheelSize = saved?.displaySize ?? 'standard';
   let participants: string[] = [];
   let rotation = 0;
   let spinning = false;
@@ -70,8 +76,15 @@ function initWheel(root: HTMLElement): void {
     soundButton.replaceChildren(icon, document.createTextNode(` Son ${sound ? 'activé' : 'désactivé'}`));
   };
 
+  const updateDisplaySize = (size: WheelSize): void => {
+    displaySize = size;
+    root.dataset.wheelSize = size;
+    sizeButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.wheelSize === size)));
+    requestAnimationFrame(drawWheel);
+  };
+
   const saveState = (): void => {
-    saveLocal(storageKey, { participants, removeDuplicates: dedupe?.checked ?? false, sound } satisfies WheelState);
+    saveLocal(storageKey, { participants, removeDuplicates: dedupe?.checked ?? false, sound, displaySize } satisfies WheelState);
   };
 
   const saveHistory = (): void => {
@@ -250,6 +263,12 @@ function initWheel(root: HTMLElement): void {
   });
   soundButton?.addEventListener('click', () => { sound = !sound; updateSoundButton(); saveState(); });
   clearHistory?.addEventListener('click', () => { history = []; saveHistory(); renderHistory(); });
+  sizeButtons.forEach((button) => button.addEventListener('click', () => {
+    const size = button.dataset.wheelSize;
+    if (size !== 'compact' && size !== 'standard' && size !== 'large') return;
+    updateDisplaySize(size);
+    saveState();
+  }));
   shareButton?.addEventListener('click', async () => {
     try {
       const url = buildShareUrl({ participants, removeDuplicates: dedupe?.checked ?? false });
@@ -261,11 +280,30 @@ function initWheel(root: HTMLElement): void {
       setStatus(error instanceof Error ? error.message : 'Impossible de partager cette roue.');
     }
   });
+  shareResultButton?.addEventListener('click', async () => {
+    if (!lastWinner) return;
+    try {
+      const url = buildShareUrl({ participants, removeDuplicates: dedupe?.checked ?? false, result: { winner: lastWinner, timestamp: Date.now() } });
+      const mode = await shareUrl(url, `Résultat : ${lastWinner} – TirageSimple`);
+      const label = shareResultButton.querySelector<HTMLElement>('[data-button-label]');
+      if (label) label.textContent = mode === 'copied' ? 'Lien copié !' : 'Partagé !';
+      trackEvent('share_clicked', { tool: variant === 'chance' ? 'roue-de-la-chance' : 'roue-aleatoire', content: 'result' });
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Impossible de partager ce résultat.');
+    }
+  });
 
   new ResizeObserver(drawWheel).observe(stage);
   updateSoundButton();
+  updateDisplaySize(displaySize);
   renderHistory();
   updateParticipants();
+  if (shared?.result?.winner) {
+    lastWinner = shared.result.winner;
+    resultValue.textContent = lastWinner;
+    resultValue.dataset.copyValue = lastWinner;
+    resultCard.hidden = false;
+  }
   window.addEventListener('themechange', drawWheel);
 }
 

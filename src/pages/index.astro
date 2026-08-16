@@ -25,9 +25,9 @@ const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', na
         </ul>
       </div>
       <div class="hero-visual" aria-hidden="true">
-        <div class="hero-orbit hero-orbit-one"></div>
-        <div class="hero-orbit hero-orbit-two"></div>
-        <img src="/images/hero-wheel.webp" width="900" height="900" alt="" fetchpriority="high" decoding="async" />
+        <div class="hero-orbit hero-orbit-one"></div><div class="hero-orbit hero-orbit-two"></div>
+        <div class="hero-wheel-teaser"><div class="teaser-pointer"></div><div class="teaser-wheel"><div class="teaser-center">✦</div></div></div>
+        <div class="hero-list-preview"><span class="field-kicker">Participants</span><strong>6 choix prêts</strong><div><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
         <div class="hero-float-card hero-float-card-top"><span>✦</span> Le hasard est prêt</div>
         <div class="hero-float-card hero-float-card-bottom"><span class="live-dot"></span> 100 % côté navigateur</div>
       </div>
@@ -44,8 +44,8 @@ const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', na
   </section>
   <section class="section workflow-section" aria-labelledby="workflow-title">
     <div class="container workflow-grid">
-      <div class="workflow-visual">
-        <img src="/images/tools-flow.webp" width="1100" height="733" alt="Illustration de listes, équipes et gagnant tiré au sort" loading="lazy" decoding="async" />
+      <div class="workflow-visual" aria-hidden="true">
+        <div class="workflow-board"><div class="workflow-board-head"><span>Votre tirage</span><i></i></div><div class="workflow-winner"><small>Résultat</small><strong>Chloé</strong><span>✓ Tirage effectué</span></div><div class="workflow-board-list"><span><i></i>Alice</span><span><i></i>Benoît</span><span class="is-winner"><i></i>Chloé</span><span><i></i>David</span></div></div>
       </div>
       <div class="workflow-copy">
         <span class="eyebrow">Un seul réflexe</span>
@@ -63,12 +63,15 @@ const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', na
     <div class="container">
       <div class="section-heading"><div>
         <h2 id="all-tools-title">Tous les outils</h2>
-        <p>Un outil clair pour chaque type de tirage.</p>
+        <p>Choisissez une catégorie, puis ouvrez l’outil dont vous avez besoin.</p>
       </div></div>
+      <nav class="category-pills" aria-label="Catégories d’outils">
+        {categoryOrder.map((category) => <a href={`#category-${category}`}>{categoryLabels[category]}</a>)}
+      </nav>
       {categoryOrder.map((category) => (
-        <section class="category-block" aria-labelledby={`category-${category}`}>
-          <h3 class="category-title" id={`category-${category}`}>{categoryLabels[category]}</h3>
-          <ToolGrid tools={tools.filter((tool) => tool.category === category)} />
+        <section class="category-block catalog-category" aria-labelledby={`category-${category}`}>
+          <div class="catalog-category-heading"><h3 class="category-title" id={`category-${category}`}>{categoryLabels[category]}</h3><span>{tools.filter((tool) => tool.category === category).length} outils</span></div>
+          <ToolGrid tools={tools.filter((tool) => tool.category === category)} compact />
         </section>
       ))}
     </div>

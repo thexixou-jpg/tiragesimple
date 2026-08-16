@@ -3,6 +3,7 @@ import CopyButton from './CopyButton.astro';
 import FullscreenButton from './FullscreenButton.astro';
 import ListEditor from './ListEditor.astro';
 import ResultCard from './ResultCard.astro';
+import ResultShareButton from './ResultShareButton.astro';
 import ShareButton from './ShareButton.astro';
 
 interface Props { variant?: 'standard' | 'chance'; }
@@ -27,7 +28,7 @@ const defaults = variant === 'chance'
       <p class="field-error" data-wheel-status role="status" hidden></p>
     </div>
     <div class="wheel-display" id={`${variant}-wheel-board`}>
-      <div class="wheel-display-header"><span class="field-kicker">Aperçu</span><span>La roue est prête</span></div>
+      <div class="wheel-display-header"><span class="field-kicker">Aperçu</span><div class="wheel-size-control" role="group" aria-label="Taille de la roue"><span>Taille</span><button type="button" data-wheel-size="compact" aria-pressed="false">S</button><button type="button" data-wheel-size="standard" aria-pressed="true">M</button><button type="button" data-wheel-size="large" aria-pressed="false">L</button></div></div>
       <div class="wheel-stage" data-wheel-stage>
         <div class="wheel-pointer" aria-hidden="true"></div>
         <canvas data-wheel-canvas role="img" aria-label="Roue avec 6 choix"></canvas>
@@ -43,6 +44,7 @@ const defaults = variant === 'chance'
 
   <ResultCard id={`${variant}-wheel-result`} title="Gagnant" hidden>
     <CopyButton target={`#${variant}-wheel-result [data-result-value]`} />
+    <ResultShareButton target={`#${variant}-wheel-result [data-result-value]`} wheel />
     <button class="button button-secondary button-small" type="button" data-replay>Rejouer</button>
     <button class="button button-primary button-small" type="button" data-remove-winner>Retirer et recommencer</button>
   </ResultCard>

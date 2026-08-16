@@ -77,7 +77,24 @@ function initThemeToggle(button: HTMLButtonElement): void {
   });
 }
 
+function initResultShareButton(button: HTMLButtonElement): void {
+  if (button.dataset.shareResult === 'wheel') return;
+  button.addEventListener('click', async () => {
+    const target = document.querySelector<HTMLElement>(button.dataset.shareTarget ?? '');
+    const result = target?.dataset.copyValue ?? target?.innerText ?? '';
+    if (!result) return;
+    const shareData = { title: 'Résultat TirageSimple', text: `Résultat du tirage : ${result}`, url: window.location.href };
+    const supportsShare = typeof (navigator as { share?: unknown }).share === 'function';
+    try {
+      if (supportsShare) await navigator.share(shareData);
+      else await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+      setTemporaryLabel(button, supportsShare ? 'Partagé !' : 'Lien copié !');
+    } catch { /* Closing the share sheet does not need an error message. */ }
+  });
+}
+
 document.querySelectorAll<HTMLElement>('[data-list-editor]').forEach(initListEditor);
 document.querySelectorAll<HTMLElement>('[data-copy-target]').forEach(initCopyButton);
 document.querySelectorAll<HTMLElement>('[data-fullscreen-target]').forEach(initFullscreenButton);
 document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(initThemeToggle);
+document.querySelectorAll<HTMLButtonElement>('[data-share-target]').forEach(initResultShareButton);

@@ -1,0 +1,8 @@
+---
+interface Props { target: string; label?: string; wheel?: boolean; }
+const { target, label = 'Partager le résultat', wheel = false } = Astro.props;
+---
+
+<button class="button button-secondary button-small" type="button" data-share-result={wheel ? 'wheel' : undefined} data-share-target={target}>
+  <span aria-hidden="true">↗</span><span data-button-label>{label}</span>
+</button>

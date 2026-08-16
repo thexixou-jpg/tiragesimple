@@ -2,6 +2,7 @@
 import CopyButton from './CopyButton.astro';
 import ListEditor from './ListEditor.astro';
 import ResultCard from './ResultCard.astro';
+import ResultShareButton from './ResultShareButton.astro';
 
 interface Props { mode: 'multiple' | 'without-replacement'; }
 const { mode } = Astro.props;
@@ -41,6 +42,7 @@ const isMultiple = mode === 'multiple';
   </div>
   <ResultCard title={isMultiple ? 'Gagnant' : 'Élément tiré'} hidden>
     <CopyButton target="[data-draw-tool] [data-result-value]" />
+    <ResultShareButton target="[data-draw-tool] [data-result-value]" />
   </ResultCard>
   {!isMultiple && (
     <section class="draw-history" aria-labelledby="draw-history-title">
