@@ -4,13 +4,9 @@ import { readConsent, saveConsent } from '../lib/consent';
 import { ADSENSE_CLIENT } from '../config/monetization';
 
 function loadAdsIfConsented(): void {
-  if (readConsent()?.advertising !== true || !ADSENSE_CLIENT || document.querySelector('[data-adsense-script]')) return;
+  if (readConsent()?.advertising !== true || !ADSENSE_CLIENT) return;
   const slots = document.querySelectorAll<HTMLElement>('[data-ad-slot]');
   if (!slots.length) return;
-  const script = document.createElement('script');
-  script.async = true; script.dataset.adsenseScript = 'true'; script.crossOrigin = 'anonymous';
-  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
-  document.head.appendChild(script);
   slots.forEach((slot) => { slot.hidden = false; slot.querySelector('.adsbygoogle')?.setAttribute('data-ad-client', ADSENSE_CLIENT); try { ((window as unknown as { adsbygoogle?: unknown[] }).adsbygoogle ||= []).push({}); } catch { /* blocked */ } });
 }
 
