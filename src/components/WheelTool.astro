@@ -1,0 +1,61 @@
+---
+import CopyButton from './CopyButton.astro';
+import FullscreenButton from './FullscreenButton.astro';
+import ListEditor from './ListEditor.astro';
+import ResultCard from './ResultCard.astro';
+import ShareButton from './ShareButton.astro';
+
+interface Props { variant?: 'standard' | 'chance'; }
+const { variant = 'standard' } = Astro.props;
+const inputId = variant === 'chance' ? 'chance-items' : 'wheel-participants';
+const defaults = variant === 'chance'
+  ? 'Super lot\nSurprise\nBonus\nRejouez\nCadeau\nPetit lot'
+  : 'Alice\nBenoît\nChloé\nDavid\nEmma\nFarid';
+---
+
+<div class:list={['wheel-tool', { 'wheel-chance': variant === 'chance' }]} data-wheel data-variant={variant}>
+  <div class="tool-columns wheel-columns">
+    <div class="wheel-controls">
+      <ListEditor id={inputId} label={variant === 'chance' ? 'Choix de la roue' : 'Participants'} value={defaults} minimum={1} />
+      <div class="wheel-options">
+        <button class="text-button sound-toggle" type="button" data-sound-toggle aria-pressed="true">
+          <span aria-hidden="true" data-sound-icon>♪</span> Son activé
+        </button>
+        <ShareButton label="Partager la roue" />
+      </div>
+      <p class="field-error" data-wheel-status role="status" hidden></p>
+    </div>
+    <div class="wheel-display" id={`${variant}-wheel-board`}>
+      <div class="wheel-stage" data-wheel-stage>
+        <div class="wheel-pointer" aria-hidden="true"></div>
+        <canvas data-wheel-canvas role="img" aria-label="Roue avec 6 choix"></canvas>
+        <div class="confetti-layer" data-confetti aria-hidden="true"></div>
+        <div class="wheel-center" aria-hidden="true"></div>
+      </div>
+      <div class="wheel-main-action">
+        <button class="button button-primary spin-button" type="button" data-spin>Tourner la roue</button>
+        <FullscreenButton target={`#${variant}-wheel-board`} />
+      </div>
+    </div>
+  </div>
+
+  <ResultCard id={`${variant}-wheel-result`} title="Gagnant" hidden>
+    <CopyButton target={`#${variant}-wheel-result [data-result-value]`} />
+    <button class="button button-secondary button-small" type="button" data-replay>Rejouer</button>
+    <button class="button button-primary button-small" type="button" data-remove-winner>Retirer et recommencer</button>
+  </ResultCard>
+
+  <section class="wheel-history" aria-labelledby={`${variant}-history-title`}>
+    <div class="field-heading">
+      <h2 class="panel-title" id={`${variant}-history-title`}>Historique</h2>
+      <button class="text-button" type="button" data-clear-history>Effacer</button>
+    </div>
+    <ol class="history-list" data-wheel-history>
+      <li class="empty-state">Aucun tirage pour le moment.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  import '../scripts/wheel';
+</script>

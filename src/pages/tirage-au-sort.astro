@@ -1,0 +1,26 @@
+---
+import DrawTool from '../components/DrawTool.astro';
+import ToolLayout from '../components/ToolLayout.astro';
+const faq = [
+  { question: 'Puis-je tirer plusieurs gagnants ?', answer: 'Oui. Indiquez le nombre souhaité. Avec l’option sans remise, chaque participant ne peut apparaître qu’une fois.' },
+  { question: 'Les doublons sont-ils autorisés ?', answer: 'Ils sont conservés par défaut. Activez « Supprimer les doublons » pour ne garder qu’une occurrence exacte de chaque ligne.' },
+  { question: 'Le tirage est-il enregistré en ligne ?', answer: 'Non. La liste reste dans votre navigateur et aucun compte n’est nécessaire.' },
+];
+---
+<ToolLayout
+  slug="tirage-au-sort"
+  title="Tirage au sort gratuit en ligne | TirageSimple"
+  description="Effectuez un tirage au sort gratuit parmi une liste de noms. Choisissez un ou plusieurs gagnants, avec ou sans remise."
+  intro="Collez votre liste, choisissez le nombre de gagnants et lancez un tirage instantané."
+  {faq}
+>
+  <DrawTool slot="tool" mode="multiple" />
+  <div slot="content">
+    <h2>Comment faire un tirage au sort ?</h2>
+    <ol><li>Ajoutez un participant par ligne.</li><li>Indiquez le nombre de gagnants.</li><li>Lancez le tirage et copiez le résultat.</li></ol>
+    <h2>Avec ou sans remise</h2>
+    <p>Le mode sans remise, activé par défaut, garantit qu’un même participant ne gagne qu’une fois. Désactivez-le si chaque tirage doit rester indépendant.</p>
+    <h2>Concours, classe ou groupe d’amis</h2>
+    <p>L’outil convient aux petits choix quotidiens comme aux longues listes. Les données sont traitées localement pour un résultat immédiat.</p>
+  </div>
+</ToolLayout>

@@ -1,0 +1,8 @@
+---
+import QuickRandomTool from '../components/QuickRandomTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
+const faq = [{ question: 'Quels dés sont disponibles ?', answer: 'Vous pouvez lancer des D4, D6, D8, D10, D12, D20 et D100.' }, { question: 'Puis-je lancer plusieurs dés ?', answer: 'Oui, jusqu’à 100 dés à la fois. Chaque résultat et le total sont affichés.' }];
+---
+<ToolLayout slug="de-en-ligne" title="Dé en ligne gratuit – D4, D6, D20 et plus | TirageSimple" description="Lancez gratuitement un ou plusieurs dés en ligne : D4, D6, D8, D10, D12, D20 ou D100, avec résultats et total." intro="Choisissez vos dés, lancez-les et obtenez immédiatement chaque résultat et le total." {faq}>
+  <QuickRandomTool slot="tool" mode="dice" />
+  <div slot="content"><h2>Comment lancer un dé en ligne ?</h2><p>Choisissez le nombre de faces et la quantité, puis lancez les dés. Chaque valeur est indépendante.</p><h2>Pour les jeux et les exercices</h2><p>Cette version légère remplace les dés physiques sans simulation 3D lourde.</p></div>
+</ToolLayout>

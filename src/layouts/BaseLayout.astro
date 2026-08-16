@@ -1,0 +1,33 @@
+---
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import SeoHead from '../components/SeoHead.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+}
+
+const { title, description, canonicalPath = Astro.url.pathname, noindex = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <SeoHead {title} {description} {canonicalPath} {noindex} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Aller au contenu</a>
+    <Header />
+    <main id="main-content" tabindex="-1"><slot /></main>
+    <Footer />
+    <script>
+      import '../scripts/common';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+---
+import CopyButton from './CopyButton.astro';
+import ListEditor from './ListEditor.astro';
+import ResultCard from './ResultCard.astro';
+
+interface Props { mode: 'multiple' | 'without-replacement'; }
+const { mode } = Astro.props;
+const isMultiple = mode === 'multiple';
+---
+
+<div class="tool-panel" data-draw-tool data-mode={mode}>
+  <ListEditor
+    id={isMultiple ? 'draw-list' : 'remaining-list'}
+    label={isMultiple ? 'Participants' : 'Éléments à tirer'}
+    value={'Alice\nBenoît\nChloé\nDavid\nEmma\nFarid'}
+  />
+  {isMultiple ? (
+    <div class="form-row draw-options">
+      <div class="field">
+        <label for="winner-count">Nombre de gagnants</label>
+        <input id="winner-count" type="number" value="1" min="1" inputmode="numeric" data-draw-count />
+      </div>
+      <label class="check-field option-card">
+        <input type="checkbox" checked data-without-replacement />
+        <span><strong>Sans remise</strong><small>Un participant ne peut gagner qu’une fois.</small></span>
+      </label>
+    </div>
+  ) : (
+    <div class="remaining-summary" aria-live="polite">
+      <strong data-remaining-count>6</strong><span> éléments restants</span>
+    </div>
+  )}
+  <p class="field-error" data-error role="alert" hidden></p>
+  <div class="actions">
+    <button class="button button-primary" type="button" data-draw-button>{isMultiple ? 'Tirer au sort' : 'Tirer un élément'}</button>
+    {isMultiple ? (
+      <button class="button button-secondary" type="button" data-redraw>Recommencer</button>
+    ) : (
+      <button class="button button-secondary" type="button" data-reset-draw>Réinitialiser</button>
+    )}
+  </div>
+  <ResultCard title={isMultiple ? 'Gagnant' : 'Élément tiré'} hidden>
+    <CopyButton target="[data-draw-tool] [data-result-value]" />
+  </ResultCard>
+  {!isMultiple && (
+    <section class="draw-history" aria-labelledby="draw-history-title">
+      <h2 class="panel-title" id="draw-history-title">Historique du tirage</h2>
+      <ol class="history-list" data-draw-history><li class="empty-state">Aucun élément tiré.</li></ol>
+    </section>
+  )}
+</div>
+
+<script>
+  import '../scripts/draw';
+</script>

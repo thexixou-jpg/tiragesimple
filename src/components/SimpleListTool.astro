@@ -1,0 +1,23 @@
+---
+import CopyButton from './CopyButton.astro';
+import ListEditor from './ListEditor.astro';
+import ResultCard from './ResultCard.astro';
+interface Props { mode: 'shuffle' | 'order' | 'name'; }
+const { mode } = Astro.props;
+const labels = {
+  shuffle: { button: 'Mélanger la liste', result: 'Liste mélangée' },
+  order: { button: 'Générer un ordre', result: 'Ordre aléatoire' },
+  name: { button: 'Tirer un nom', result: 'Nom tiré' },
+};
+---
+<div class="tool-panel" data-simple-list-tool data-mode={mode}>
+  <ListEditor id={`${mode}-list`} label={mode === 'name' ? 'Noms' : 'Votre liste'} value={'Alice\nBenoît\nChloé\nDavid\nEmma'} />
+  <p class="field-error" data-error role="alert" hidden></p>
+  <div class="actions">
+    <button class="button button-primary" type="button" data-list-action>{labels[mode].button}</button>
+    <button class="button button-secondary" type="button" data-list-redraw>Recommencer</button>
+    {mode === 'shuffle' && <button class="button button-secondary" type="button" data-replace-list hidden>Remplacer la liste</button>}
+  </div>
+  <ResultCard title={labels[mode].result} hidden><CopyButton target="[data-simple-list-tool] [data-result-value]" /></ResultCard>
+</div>
+<script>import '../scripts/list-tools';</script>

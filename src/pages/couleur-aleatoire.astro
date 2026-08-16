@@ -1,0 +1,8 @@
+---
+import ColorTool from '../components/ColorTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
+const faq = [{ question: 'Quels formats sont affichés ?', answer: 'Chaque couleur est fournie en HEX, RGB et HSL, avec un bouton de copie pour chaque format.' }, { question: 'Les formats représentent-ils la même couleur ?', answer: 'Oui. Les trois valeurs sont calculées depuis les mêmes composantes rouge, verte et bleue.' }];
+---
+<ToolLayout slug="couleur-aleatoire" title="Générateur de couleur aléatoire – HEX, RGB, HSL | TirageSimple" description="Générez une couleur aléatoire et copiez instantanément ses codes HEX, RGB et HSL." intro="Découvrez une nouvelle couleur et récupérez ses codes HEX, RGB et HSL." {faq}>
+  <ColorTool slot="tool" />
+  <div slot="content"><h2>Comment générer une couleur ?</h2><p>Un clic produit trois composantes aléatoires et affiche immédiatement la couleur dans les principaux formats web.</p><h2>HEX, RGB et HSL</h2><p>Copiez le format adapté à votre outil de design ou à votre feuille de style.</p></div>
+</ToolLayout>

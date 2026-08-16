@@ -1,17 +1,51 @@
 ---
-
+import ToolGrid from '../components/ToolGrid.astro';
+import { categoryOrder } from '../data/navigation';
+import { categoryLabels, tools } from '../data/tools';
+import BaseLayout from '../layouts/BaseLayout.astro';
+const popularTools = tools.filter((tool) => tool.popular);
+const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', name: 'TirageSimple', url: 'https://tiragesimple.fr', description: 'Outils de tirage au sort et de choix aléatoires gratuits.' };
 ---
-
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  title="TirageSimple – Tirage au sort et outils aléatoires gratuits"
+  description="Tirez un nom, faites tourner une roue ou créez vos équipes gratuitement. Des outils rapides, sans inscription et respectueux de vos données."
+>
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">Simple · Rapide · Privé</span>
+      <h1>Le hasard <span class="gradient-text">en un clic.</span></h1>
+      <p class="hero-copy">Tirez un nom, faites tourner une roue ou créez vos équipes gratuitement.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="/roue-aleatoire">Faire tourner la roue <span aria-hidden="true">→</span></a>
+        <a class="button button-secondary" href="#tous-les-outils">Voir tous les outils</a>
+      </div>
+      <ul class="trust-list" aria-label="Avantages">
+        <li>Gratuit</li><li>Sans inscription</li><li>Instantané</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section section-surface" aria-labelledby="popular-title">
+    <div class="container">
+      <div class="section-heading"><div>
+        <h2 id="popular-title">Outils populaires</h2>
+        <p>Les raccourcis les plus utiles pour laisser le hasard décider.</p>
+      </div></div>
+      <ToolGrid tools={popularTools} />
+    </div>
+  </section>
+  <section class="section" id="tous-les-outils" aria-labelledby="all-tools-title">
+    <div class="container">
+      <div class="section-heading"><div>
+        <h2 id="all-tools-title">Tous les outils</h2>
+        <p>Un outil clair pour chaque type de tirage.</p>
+      </div></div>
+      {categoryOrder.map((category) => (
+        <section class="category-block" aria-labelledby={`category-${category}`}>
+          <h3 class="category-title" id={`category-${category}`}>{categoryLabels[category]}</h3>
+          <ToolGrid tools={tools.filter((tool) => tool.category === category)} />
+        </section>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} is:inline />

@@ -1,0 +1,26 @@
+---
+import TeamTool from '../components/TeamTool.astro';
+import ToolLayout from '../components/ToolLayout.astro';
+const faq = [
+  { question: 'Comment sont réparties les personnes ?', answer: 'La liste est d’abord mélangée au hasard puis distribuée équitablement entre les groupes.' },
+  { question: 'Est-ce adapté à une classe ?', answer: 'Oui. Vous pouvez coller une liste d’élèves, choisir un nombre de groupes ou une taille, puis copier la répartition.' },
+  { question: 'Que se passe-t-il si la division n’est pas exacte ?', answer: 'Les personnes restantes sont réparties une par une. L’écart entre les groupes ne dépasse pas une personne.' },
+];
+---
+<ToolLayout
+  slug="generateur-groupes"
+  title="Générateur de groupes aléatoires en ligne | TirageSimple"
+  description="Formez gratuitement des groupes aléatoires et équilibrés pour une classe, un atelier ou un groupe de travail."
+  intro="Créez des groupes équilibrés pour une classe, un atelier ou une séance de travail."
+  {faq}
+>
+  <TeamTool slot="tool" variant="groups" />
+  <div slot="content">
+    <h2>Comment générer des groupes ?</h2>
+    <p>Collez les participants, choisissez votre mode de répartition et créez les groupes. Vous pouvez remélanger jusqu’à obtenir une nouvelle composition.</p>
+    <h2>Nombre de groupes ou taille souhaitée</h2>
+    <p>Les deux méthodes utilisent le même moteur équilibré. Le mode taille calcule automatiquement combien de groupes sont nécessaires.</p>
+    <h2>Classes et ateliers</h2>
+    <p>La formulation et la copie du résultat sont pensées pour les cours, ateliers, formations et groupes de travail.</p>
+  </div>
+</ToolLayout>

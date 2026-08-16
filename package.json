@@ -1,5 +1,5 @@
 {
-  "name": "outputs-tiragesimple",
+  "name": "tiragesimple",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -8,10 +8,21 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:build": "node scripts/validate-build.mjs",
+    "validate": "npm run test && npm run check && npm run build && npm run test:build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
     "astro": "^7.2.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   }
 }

@@ -1,0 +1,17 @@
+---
+import { mainNavigation } from '../data/navigation';
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" title="Accueil TirageSimple">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      <span>Tirage<span>Simple</span></span>
+    </a>
+    <nav aria-label="Navigation principale">
+      <ul class="nav-list">
+        {mainNavigation.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,14 @@
+---
+import type { ToolDefinition } from '../data/tools';
+import ToolGrid from './ToolGrid.astro';
+interface Props { tools: ToolDefinition[]; }
+const { tools } = Astro.props;
+---
+
+<section class="related-tools" aria-labelledby="related-tools-title">
+  <div class="section-heading"><div>
+    <h2 id="related-tools-title">Outils associés</h2>
+    <p>Continuez votre tirage avec un outil complémentaire.</p>
+  </div></div>
+  <ToolGrid {tools} />
+</section>

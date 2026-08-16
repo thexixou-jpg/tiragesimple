@@ -1,43 +1,59 @@
-# Astro Starter Kit: Minimal
+# TirageSimple.fr
+
+Site statique français de tirages au sort et de choix aléatoires. Toutes les données utilisateur restent dans le navigateur.
+
+## Principes
+
+- Astro et TypeScript strict
+- sortie 100 % statique
+- aucun backend, compte, base de données ou API payante
+- hasard centralisé avec Web Crypto
+- composants et contrôleurs mutualisés par famille d’outils
+- mobile first, accessible et SEO-friendly
+
+## Commandes
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev
+npm run validate
+npm run preview
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+`npm run validate` exécute les tests unitaires, le contrôle TypeScript/Astro, le build puis la validation des métadonnées, H1, liens internes et fichiers SEO.
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Architecture
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/
+├── components/   composants Astro partagés
+├── data/         registre central des outils et navigation
+├── layouts/      layouts général, outil et légal
+├── lib/          moteurs purs et utilitaires testés
+├── pages/        routes statiques
+├── scripts/      contrôleurs navigateur par famille d’outils
+└── styles/       design system global
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Le registre `src/data/tools.ts` est la source des cartes, catégories et outils associés. Pour ajouter un outil, créer sa définition, sa page et réutiliser le contrôleur de famille adapté.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Déploiement Cloudflare Pages
 
-Any static assets, like images, can be placed in the `public/` directory.
+- version Node : 22
+- commande de build : `npm run build`
+- dossier de sortie : `dist`
+- domaine de production attendu : `tiragesimple.fr`
 
-## 🧞 Commands
+Les fichiers `public/_headers` et `public/robots.txt` sont copiés dans le build. Le sitemap est généré automatiquement.
 
-All commands are run from the root of the project, from a terminal:
+## Avant ouverture publique
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+1. Compléter l’identité, le contact et l’hébergeur dans `src/pages/mentions-legales.astro`.
+2. Connecter le repository GitHub au projet Cloudflare Pages.
+3. Configurer `tiragesimple.fr`, le certificat HTTPS et la redirection éventuelle de `www`.
+4. Vérifier les pages légales avec le responsable du site.
+5. Ne charger une régie publicitaire ou un outil d’analytics qu’après avoir raccordé le système de consentement prévu dans `src/lib/consent.ts`.
 
-## 👀 Want to learn more?
+## Confidentialité
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Les listes sont traitées localement. Le partage est volontaire et encode la configuration dans l’URL ; il ne doit pas être utilisé pour des données sensibles.

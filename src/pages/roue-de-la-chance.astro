@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../components/ToolLayout.astro'; import WheelTool from '../components/WheelTool.astro';
+const faq = [{ question: 'Quelle différence avec la roue aléatoire ?', answer: 'Le moteur et la fiabilité sont identiques. Cette version adopte une présentation plus colorée pour les lots et animations.' }, { question: 'Puis-je personnaliser les choix ?', answer: 'Oui. Remplacez librement tous les exemples par vos lots, défis ou possibilités.' }];
+---
+<ToolLayout slug="roue-de-la-chance" title="Roue de la chance gratuite en ligne | TirageSimple" description="Créez une roue de la chance colorée et personnalisée pour tirer un lot, un défi ou une surprise au hasard." intro="Personnalisez une roue vive et colorée pour vos lots, surprises et défis." {faq}>
+  <WheelTool slot="tool" variant="chance" />
+  <div slot="content"><h2>Créer une roue de la chance</h2><p>Remplacez les exemples, partagez la configuration et lancez la roue. Le résultat est fixé avant la fin de l’animation.</p><h2>Lots, défis et animations</h2><p>Cette présentation plus colorée convient aux événements et jeux sans jamais modifier la logique fiable de la roue principale.</p></div>
+</ToolLayout>

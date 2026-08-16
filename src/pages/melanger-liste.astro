@@ -1,0 +1,8 @@
+---
+import SimpleListTool from '../components/SimpleListTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
+const faq = [{ question: 'La liste originale est-elle modifiée ?', answer: 'Non. Le résultat apparaît séparément. Vous pouvez ensuite choisir de remplacer la liste originale.' }, { question: 'Puis-je remélanger plusieurs fois ?', answer: 'Oui. Chaque clic produit un nouvel ordre aléatoire.' }];
+---
+<ToolLayout slug="melanger-liste" title="Mélanger une liste aléatoirement en ligne | TirageSimple" description="Mélangez gratuitement une liste de noms ou d’éléments et copiez le nouvel ordre en un clic." intro="Collez votre liste et réorganisez-la instantanément au hasard." {faq}>
+  <SimpleListTool slot="tool" mode="shuffle" />
+  <div slot="content"><h2>Comment mélanger une liste ?</h2><p>Ajoutez un élément par ligne, lancez le mélange puis copiez le résultat ou remplacez la liste de départ.</p><h2>Un mélange sans modifier vos données</h2><p>L’algorithme crée une nouvelle liste et ne modifie jamais l’original tant que vous ne le demandez pas.</p></div>
+</ToolLayout>

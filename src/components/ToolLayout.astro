@@ -1,0 +1,40 @@
+---
+import { getRelatedTools, getTool } from '../data/tools';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AdSlot from './AdSlot.astro';
+import FAQ, { type FAQItem } from './FAQ.astro';
+import RelatedTools from './RelatedTools.astro';
+
+interface Props {
+  slug: string;
+  title?: string;
+  description: string;
+  intro: string;
+  faq?: FAQItem[];
+}
+
+const { slug, description, intro, faq = [] } = Astro.props;
+const tool = getTool(slug);
+const pageTitle = Astro.props.title ?? `${tool.title} gratuite | TirageSimple`;
+---
+
+<BaseLayout title={pageTitle} {description} canonicalPath={`/${slug}`}>
+  <header class="tool-hero">
+    <div class="container tool-heading">
+      <a class="breadcrumb" href="/#tous-les-outils">Tous les outils</a>
+      <h1>{tool.title}</h1>
+      <p>{intro}</p>
+    </div>
+  </header>
+  <div class="container tool-page">
+    <section class="tool-shell" aria-label={`Outil ${tool.title}`}>
+      <slot name="tool" />
+    </section>
+    <AdSlot />
+    <article class="tool-content prose">
+      <slot name="content" />
+    </article>
+    {faq.length > 0 && <FAQ items={faq} />}
+    <RelatedTools tools={getRelatedTools(slug)} />
+  </div>
+</BaseLayout>

@@ -1,0 +1,8 @@
+---
+import QuickRandomTool from '../components/QuickRandomTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
+const faq = [{ question: 'Les réponses sont-elles équiprobables ?', answer: 'Oui. « Oui » et « Non » ont chacun la même chance d’apparaître.' }, { question: 'L’outil donne-t-il des conseils ?', answer: 'Non. Il fournit seulement une réponse aléatoire et ne remplace pas votre jugement pour une décision importante.' }];
+---
+<ToolLayout slug="oui-ou-non" title="Oui ou non – Réponse aléatoire instantanée | TirageSimple" description="Obtenez une réponse Oui ou Non au hasard en un clic. Un outil gratuit et instantané pour les décisions légères." intro="Posez une question simple et obtenez une réponse aléatoire : oui ou non." {faq}>
+  <QuickRandomTool slot="tool" mode="yesno" />
+  <div slot="content"><h2>Comment obtenir une réponse ?</h2><p>Formulez une question fermée, puis appuyez sur le bouton. La réponse apparaît immédiatement.</p><h2>Pour les choix sans enjeu</h2><p>Cet outil ludique convient aux hésitations légères, pas aux décisions médicales, juridiques ou financières.</p></div>
+</ToolLayout>

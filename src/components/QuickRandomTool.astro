@@ -1,0 +1,36 @@
+---
+interface Props { mode: 'dice' | 'coin' | 'yesno'; }
+const { mode } = Astro.props;
+---
+<div class="tool-panel quick-tool" data-quick-tool data-mode={mode}>
+  {mode === 'dice' && (
+    <>
+      <div class="form-row">
+        <div class="field"><label for="dice-type">Type de dé</label><select id="dice-type" data-dice-type>{[4,6,8,10,12,20,100].map((faces) => <option value={faces} selected={faces === 6}>D{faces}</option>)}</select></div>
+        <div class="field"><label for="dice-count">Nombre de dés</label><input id="dice-count" type="number" value="1" min="1" max="100" data-dice-count /></div>
+      </div>
+      <p class="field-error" data-error role="alert" hidden></p>
+      <button class="button button-primary quick-main-button" type="button" data-quick-action>Lancer les dés</button>
+      <section class="quick-result" aria-live="polite" data-quick-result hidden>
+        <div class="dice-grid" data-dice-grid></div>
+        <p class="dice-total">Total : <strong data-dice-total>0</strong></p>
+      </section>
+    </>
+  )}
+  {mode === 'coin' && (
+    <>
+      <div class="coin" data-coin aria-hidden="true"><span data-coin-face>?</span></div>
+      <button class="button button-primary quick-main-button" type="button" data-quick-action>Lancer la pièce</button>
+      <p class="quick-answer" data-quick-answer aria-live="polite">Prêt pour le lancer.</p>
+      <ol class="short-history" data-quick-history aria-label="Historique des lancers"></ol>
+    </>
+  )}
+  {mode === 'yesno' && (
+    <>
+      <div class="answer-orb" data-answer-orb aria-hidden="true">?</div>
+      <button class="button button-primary quick-main-button" type="button" data-quick-action>Obtenir une réponse</button>
+      <p class="quick-answer" data-quick-answer aria-live="polite">Posez votre question, puis laissez le hasard répondre.</p>
+    </>
+  )}
+</div>
+<script>import '../scripts/quick-random';</script>

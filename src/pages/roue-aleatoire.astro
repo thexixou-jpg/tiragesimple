@@ -1,0 +1,33 @@
+---
+import ToolLayout from '../components/ToolLayout.astro';
+import WheelTool from '../components/WheelTool.astro';
+
+const faq = [
+  { question: 'La roue aléatoire est-elle vraiment gratuite ?', answer: 'Oui. Vous pouvez l’utiliser sans limite, sans inscription et sans installer quoi que ce soit.' },
+  { question: 'Les noms saisis sont-ils envoyés sur un serveur ?', answer: 'Non. Votre liste et votre historique restent dans votre navigateur. Seul un clic volontaire sur « Partager » place la configuration dans le lien.' },
+  { question: 'Comment le gagnant est-il choisi ?', answer: 'Le gagnant est déterminé avec le générateur sécurisé Web Crypto de votre navigateur, puis l’animation se termine précisément sur son segment.' },
+  { question: 'Combien de noms puis-je ajouter ?', answer: 'La roue reste utilisable avec plusieurs milliers de lignes. Pour préserver la lisibilité, les noms sont masqués sur la roue au-delà de 100 choix, sans supprimer les données.' },
+];
+---
+
+<ToolLayout
+  slug="roue-aleatoire"
+  title="Roue aléatoire gratuite – Tirage au sort en ligne | TirageSimple"
+  description="Créez une roue aléatoire gratuite, ajoutez vos noms et faites tourner la roue pour choisir un gagnant au hasard. Sans inscription."
+  intro="Ajoutez vos noms, faites tourner la roue et obtenez un gagnant impartial en quelques secondes."
+  {faq}
+>
+  <WheelTool slot="tool" />
+  <div slot="content">
+    <h2>Comment utiliser la roue aléatoire ?</h2>
+    <ol>
+      <li>Remplacez les exemples par vos participants, un nom par ligne.</li>
+      <li>Choisissez si les doublons doivent être supprimés.</li>
+      <li>Appuyez sur « Tourner la roue » et laissez le hasard décider.</li>
+    </ol>
+    <h2>Un tirage simple et transparent</h2>
+    <p>Le gagnant est choisi avant la fin de l’animation grâce au générateur aléatoire sécurisé de votre navigateur. La roue ne fait qu’afficher ce résultat de manière claire et agréable.</p>
+    <h2>Pour quels usages ?</h2>
+    <p>Utilisez cette roue pour un concours, un ordre de passage, une activité en classe, un repas entre amis ou tout choix où une décision impartiale est utile.</p>
+  </div>
+</ToolLayout>

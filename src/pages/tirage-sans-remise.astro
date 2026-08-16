@@ -1,0 +1,26 @@
+---
+import DrawTool from '../components/DrawTool.astro';
+import ToolLayout from '../components/ToolLayout.astro';
+const faq = [
+  { question: 'Que signifie « sans remise » ?', answer: 'Chaque élément tiré est retiré de la liste. Il ne peut donc pas être choisi une seconde fois avant la réinitialisation.' },
+  { question: 'Puis-je voir les tirages précédents ?', answer: 'Oui. L’historique visible conserve l’ordre de tous les éléments tirés pendant la session.' },
+  { question: 'Comment recommencer depuis le début ?', answer: 'Utilisez le bouton « Réinitialiser » pour remettre tous les éléments dans la liste et effacer l’historique.' },
+];
+---
+<ToolLayout
+  slug="tirage-sans-remise"
+  title="Tirage sans remise gratuit en ligne | TirageSimple"
+  description="Tirez des noms ou des éléments sans remise : chaque résultat est retiré automatiquement jusqu’à épuisement de la liste."
+  intro="Tirez chaque élément une seule fois et suivez facilement l’historique jusqu’à épuisement."
+  {faq}
+>
+  <DrawTool slot="tool" mode="without-replacement" />
+  <div slot="content">
+    <h2>Comment fonctionne le tirage sans remise ?</h2>
+    <p>À chaque clic, un élément est choisi au hasard puis retiré de la liste active. Le compteur et l’historique sont mis à jour immédiatement.</p>
+    <h2>À quoi sert ce mode ?</h2>
+    <p>Il est idéal pour définir un ordre de passage, distribuer des sujets, attribuer des tâches ou vider progressivement une liste sans répétition.</p>
+    <h2>Un résultat impartial dans votre navigateur</h2>
+    <p>Le choix utilise Web Crypto et ne transmet jamais le contenu de votre liste à un serveur.</p>
+  </div>
+</ToolLayout>

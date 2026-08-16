@@ -1,0 +1,16 @@
+---
+interface Props {
+  id?: string;
+  title?: string;
+  emptyText?: string;
+  live?: 'polite' | 'assertive';
+  hidden?: boolean;
+}
+const { id, title = 'Résultat', emptyText = 'Votre résultat apparaîtra ici.', live = 'polite', hidden = false } = Astro.props;
+---
+
+<section class="result-card" {id} data-result-card aria-live={live} hidden={hidden}>
+  <p class="result-label">{title}</p>
+  <div class="result-value" data-result-value>{emptyText}</div>
+  <div class="result-actions"><slot /></div>
+</section>

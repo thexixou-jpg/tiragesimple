@@ -1,0 +1,19 @@
+---
+import CopyButton from './CopyButton.astro';
+import ResultCard from './ResultCard.astro';
+---
+<div class="tool-panel" data-number-tool>
+  <div class="form-row">
+    <div class="field"><label for="number-min">Minimum</label><input id="number-min" type="number" value="1" step="1" data-number-min /></div>
+    <div class="field"><label for="number-max">Maximum</label><input id="number-max" type="number" value="100" step="1" data-number-max /></div>
+  </div>
+  <div class="form-row">
+    <div class="field"><label for="number-count">Quantité</label><input id="number-count" type="number" value="1" min="1" max="10000" step="1" data-number-count /></div>
+    <div class="field"><label for="number-order">Ordre</label><select id="number-order" data-number-order><option value="draw">Ordre du tirage</option><option value="sorted">Ordre croissant</option></select></div>
+  </div>
+  <label class="check-field option-card"><input type="checkbox" data-number-unique /><span><strong>Sans doublons</strong><small>Chaque nombre ne peut apparaître qu’une fois.</small></span></label>
+  <p class="field-error" data-error role="alert" hidden></p>
+  <div class="actions"><button class="button button-primary" type="button" data-generate-numbers>Générer</button></div>
+  <ResultCard title="Nombres générés" hidden><CopyButton target="[data-number-tool] [data-result-value]" /></ResultCard>
+</div>
+<script>import '../scripts/numbers';</script>

@@ -1,0 +1,13 @@
+---
+import CopyButton from './CopyButton.astro';
+---
+<div class="tool-panel color-tool" data-color-tool>
+  <div class="color-preview" data-color-preview aria-label="Aperçu de la couleur"></div>
+  <button class="button button-primary" type="button" data-generate-color>Générer une couleur</button>
+  <div class="color-values" aria-live="polite">
+    {['HEX', 'RGB', 'HSL'].map((format) => (
+      <div class="color-row"><div><span>{format}</span><strong id={`color-${format.toLowerCase()}`} data-color-format={format.toLowerCase()}>—</strong></div><CopyButton target={`#color-${format.toLowerCase()}`} /></div>
+    ))}
+  </div>
+</div>
+<script>import '../scripts/generators';</script>

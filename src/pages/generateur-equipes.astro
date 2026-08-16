@@ -1,0 +1,26 @@
+---
+import TeamTool from '../components/TeamTool.astro';
+import ToolLayout from '../components/ToolLayout.astro';
+const faq = [
+  { question: 'Les équipes ont-elles la même taille ?', answer: 'Oui, autant que le nombre de participants le permet. L’écart entre deux équipes ne dépasse jamais une personne.' },
+  { question: 'Puis-je choisir une taille par équipe ?', answer: 'Oui. Sélectionnez « Taille par équipe » puis indiquez le nombre maximal de personnes souhaité.' },
+  { question: 'Peut-on renommer les équipes ?', answer: 'Oui. Modifiez directement le nom affiché au-dessus de chaque équipe avant de copier le résultat.' },
+];
+---
+<ToolLayout
+  slug="generateur-equipes"
+  title="Générateur d’équipes aléatoires et équilibrées | TirageSimple"
+  description="Créez gratuitement des équipes aléatoires et équilibrées. Choisissez le nombre d’équipes ou la taille par équipe."
+  intro="Répartissez votre liste en équipes aléatoires, équilibrées et faciles à partager."
+  {faq}
+>
+  <TeamTool slot="tool" variant="teams" />
+  <div slot="content">
+    <h2>Comment créer des équipes aléatoires ?</h2>
+    <ol><li>Ajoutez tous les participants.</li><li>Choisissez un nombre d’équipes ou une taille maximale.</li><li>Créez, renommez puis copiez les équipes.</li></ol>
+    <h2>Une répartition équilibrée</h2>
+    <p>La liste est mélangée avec Web Crypto, puis distribuée pour limiter l’écart d’effectif entre les équipes à une seule personne.</p>
+    <h2>Pour le sport, les jeux et les projets</h2>
+    <p>Le générateur convient aux matchs, ateliers, soirées et projets collectifs, sans inscription ni transfert des noms.</p>
+  </div>
+</ToolLayout>

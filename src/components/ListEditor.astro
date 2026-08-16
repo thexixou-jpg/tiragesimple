@@ -1,0 +1,37 @@
+---
+interface Props {
+  id: string;
+  label?: string;
+  value?: string;
+  placeholder?: string;
+  minimum?: number;
+  showDuplicatesOption?: boolean;
+}
+
+const {
+  id,
+  label = 'Votre liste',
+  value = '',
+  placeholder = 'Un élément par ligne…',
+  minimum = 1,
+  showDuplicatesOption = true,
+} = Astro.props;
+---
+
+<div class="list-editor" data-list-editor data-minimum={minimum}>
+  <div class="field-heading">
+    <label for={id}>{label}</label>
+    <span class="item-count" data-list-count aria-live="polite">0 élément</span>
+  </div>
+  <textarea id={id} name={id} rows="9" {placeholder} spellcheck="false" data-list-input>{value}</textarea>
+  <div class="list-editor-footer">
+    {showDuplicatesOption && (
+      <label class="check-field">
+        <input type="checkbox" data-remove-duplicates />
+        <span>Supprimer les doublons</span>
+      </label>
+    )}
+    <button class="text-button" type="button" data-clear-list>Vider la liste</button>
+  </div>
+  <p class="field-hint">Collez directement une colonne depuis Excel ou Google Sheets.</p>
+</div>

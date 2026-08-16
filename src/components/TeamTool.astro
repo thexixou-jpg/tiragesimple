@@ -1,0 +1,35 @@
+---
+import CopyButton from './CopyButton.astro';
+import ListEditor from './ListEditor.astro';
+interface Props { variant: 'teams' | 'groups'; }
+const { variant } = Astro.props;
+const isTeams = variant === 'teams';
+---
+
+<div class="tool-panel" data-team-tool data-variant={variant}>
+  <ListEditor id={`${variant}-participants`} label="Participants" value={'Alice\nBenoît\nChloé\nDavid\nEmma\nFarid\nGabrielle'} />
+  <div class="form-row">
+    <div class="field">
+      <label for={`${variant}-mode`}>Répartir par</label>
+      <select id={`${variant}-mode`} data-team-mode>
+        <option value="count">Nombre d’{isTeams ? 'équipes' : 'groupes'}</option>
+        <option value="size">Taille par {isTeams ? 'équipe' : 'groupe'}</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for={`${variant}-value`} data-team-value-label>Nombre d’{isTeams ? 'équipes' : 'groupes'}</label>
+      <input id={`${variant}-value`} type="number" value="2" min="1" inputmode="numeric" data-team-value />
+    </div>
+  </div>
+  <p class="field-error" data-error role="alert" hidden></p>
+  <div class="actions">
+    <button class="button button-primary" type="button" data-create-teams>Créer les {isTeams ? 'équipes' : 'groupes'}</button>
+    <button class="button button-secondary" type="button" data-remix hidden>Remélanger</button>
+    <CopyButton target="[data-team-output]" label={`Copier les ${isTeams ? 'équipes' : 'groupes'}`} />
+  </div>
+  <section class="team-output" data-team-output aria-live="polite" hidden></section>
+</div>
+
+<script>
+  import '../scripts/teams';
+</script>

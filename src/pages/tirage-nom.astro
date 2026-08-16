@@ -1,0 +1,8 @@
+---
+import SimpleListTool from '../components/SimpleListTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
+const faq = [{ question: 'Combien de noms sont tirés ?', answer: 'Cette version volontairement simple choisit un seul nom à chaque clic.' }, { question: 'Les noms restent-ils privés ?', answer: 'Oui. Le tirage est entièrement réalisé dans votre navigateur.' }];
+---
+<ToolLayout slug="tirage-nom" title="Tirage d’un nom au hasard gratuit | TirageSimple" description="Tirez instantanément un nom au hasard dans une liste. Outil gratuit, rapide et sans inscription." intro="Ajoutez vos noms et choisissez-en un au hasard, sans réglage superflu." {faq}>
+  <SimpleListTool slot="tool" mode="name" />
+  <div slot="content"><h2>Comment tirer un nom ?</h2><p>Saisissez ou collez les noms, puis appuyez sur le bouton. Le résultat apparaît immédiatement.</p><h2>Le tirage le plus rapide</h2><p>Cette page légère est idéale quand vous n’avez besoin que d’un gagnant, sans animation longue.</p></div>
+</ToolLayout>

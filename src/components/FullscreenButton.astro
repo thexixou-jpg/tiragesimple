@@ -1,0 +1,7 @@
+---
+interface Props { target: string; }
+const { target } = Astro.props;
+---
+<button class="icon-button" type="button" data-fullscreen-target={target} aria-label="Afficher en plein écran" title="Plein écran">
+  <span aria-hidden="true">⛶</span>
+</button>

@@ -1,0 +1,7 @@
+---
+interface Props { label?: string; }
+const { label = 'Partager' } = Astro.props;
+---
+<button class="button button-secondary button-small" type="button" data-share-button>
+  <span aria-hidden="true">↗</span><span data-button-label>{label}</span>
+</button>

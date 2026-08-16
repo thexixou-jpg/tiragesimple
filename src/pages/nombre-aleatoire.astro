@@ -1,0 +1,17 @@
+---
+import NumberTool from '../components/NumberTool.astro';
+import ToolLayout from '../components/ToolLayout.astro';
+const faq = [
+  { question: 'Les bornes sont-elles incluses ?', answer: 'Oui. Le minimum et le maximum peuvent tous les deux être tirés.' },
+  { question: 'Comment éviter les doublons ?', answer: 'Activez « Sans doublons ». La quantité ne doit alors pas dépasser le nombre de valeurs possibles dans l’intervalle.' },
+  { question: 'Puis-je trier les résultats ?', answer: 'Oui. Choisissez « Ordre croissant » avant la génération.' },
+];
+---
+<ToolLayout slug="nombre-aleatoire" title="Générateur de nombre aléatoire gratuit | TirageSimple" description="Générez gratuitement un ou plusieurs nombres aléatoires entre deux bornes, avec ou sans doublons." intro="Choisissez vos bornes et générez instantanément des nombres aléatoires fiables." {faq}>
+  <NumberTool slot="tool" />
+  <div slot="content">
+    <h2>Comment générer un nombre aléatoire ?</h2><p>Indiquez les bornes inclusives, la quantité souhaitée et choisissez si les doublons sont autorisés.</p>
+    <h2>Un générateur précis et impartial</h2><p>Les valeurs sont produites avec Web Crypto et une méthode qui évite les biais liés aux intervalles.</p>
+    <h2>Cas d’usage</h2><p>Numéros de lots, exercices, ordre de départ ou simples décisions : les résultats sont prêts à copier.</p>
+  </div>
+</ToolLayout>

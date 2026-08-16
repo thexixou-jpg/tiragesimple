@@ -1,0 +1,8 @@
+---
+import LetterTool from '../components/LetterTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
+const faq = [{ question: 'Quelles lettres sont utilisées ?', answer: 'Par défaut, l’alphabet A à Z. Vous pouvez ajouter les principales lettres accentuées françaises.' }, { question: 'Comment éviter une lettre répétée ?', answer: 'Activez « Sans doublons ». La quantité reste alors limitée à la taille de l’alphabet sélectionné.' }];
+---
+<ToolLayout slug="lettre-aleatoire" title="Générateur de lettre aléatoire A à Z | TirageSimple" description="Tirez une ou plusieurs lettres aléatoires de A à Z, avec option lettres accentuées et sans doublons." intro="Générez des lettres au hasard, avec ou sans accents et répétitions." {faq}>
+  <LetterTool slot="tool" />
+  <div slot="content"><h2>Comment tirer une lettre aléatoire ?</h2><p>Choisissez la quantité, les accents et l’autorisation des doublons, puis générez votre résultat.</p><h2>Jeux de lettres et apprentissage</h2><p>L’outil convient aux exercices, jeux de vocabulaire et choix de catégories.</p></div>
+</ToolLayout>

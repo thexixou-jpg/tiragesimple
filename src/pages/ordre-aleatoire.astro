@@ -1,0 +1,8 @@
+---
+import SimpleListTool from '../components/SimpleListTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
+const faq = [{ question: 'L’ordre est-il numéroté ?', answer: 'Oui. Chaque élément reçoit automatiquement une position de 1 à N.' }, { question: 'Puis-je générer un autre ordre ?', answer: 'Oui. Utilisez « Recommencer » autant de fois que nécessaire.' }];
+---
+<ToolLayout slug="ordre-aleatoire" title="Générateur d’ordre aléatoire en ligne | TirageSimple" description="Générez un ordre aléatoire numéroté à partir d’une liste de noms ou d’éléments." intro="Créez un ordre de passage impartial, numéroté et prêt à copier." {faq}>
+  <SimpleListTool slot="tool" mode="order" />
+  <div slot="content"><h2>Créer un ordre de passage</h2><p>Collez les participants puis générez une liste numérotée. Un nouveau clic suffit pour remélanger.</p><h2>Pour les présentations et les tours</h2><p>Utilisez cet outil en classe, en réunion, pendant un tournoi ou pour répartir un ordre de parole.</p></div>
+</ToolLayout>
