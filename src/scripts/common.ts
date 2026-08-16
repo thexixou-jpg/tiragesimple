@@ -1,15 +1,6 @@
 import { formatCount, parseList } from '../lib/lists';
 import { trackEvent } from '../lib/analytics';
-import { readConsent } from '../lib/consent';
-
-function loadAdsIfConsented(): void {
-  if (readConsent()?.advertising !== true || !ADSENSE_CLIENT) return;
-  const slots = document.querySelectorAll<HTMLElement>('[data-ad-slot]');
-  if (!slots.length) return;
-  slots.forEach((slot) => { slot.hidden = false; slot.querySelector('.adsbygoogle')?.setAttribute('data-ad-client', ADSENSE_CLIENT); try { ((window as unknown as { adsbygoogle?: unknown[] }).adsbygoogle ||= []).push({}); } catch { /* blocked */ } });
-}
-
-/* Consent is managed by Google's certified CMP. */
+/* Consent is managed externally when enabled. */
 /*
 function initConsentBanner(): void {
   const banner = document.querySelector<HTMLElement>('[data-consent-banner]');
