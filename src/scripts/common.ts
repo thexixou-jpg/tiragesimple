@@ -1,6 +1,6 @@
 import { formatCount, parseList } from '../lib/lists';
 import { trackEvent } from '../lib/analytics';
-import { readConsent, saveConsent } from '../lib/consent';
+import { readConsent } from '../lib/consent';
 import { ADSENSE_CLIENT } from '../config/monetization';
 
 function loadAdsIfConsented(): void {
@@ -10,6 +10,8 @@ function loadAdsIfConsented(): void {
   slots.forEach((slot) => { slot.hidden = false; slot.querySelector('.adsbygoogle')?.setAttribute('data-ad-client', ADSENSE_CLIENT); try { ((window as unknown as { adsbygoogle?: unknown[] }).adsbygoogle ||= []).push({}); } catch { /* blocked */ } });
 }
 
+/* Consent is managed by Google's certified CMP. */
+/*
 function initConsentBanner(): void {
   const banner = document.querySelector<HTMLElement>('[data-consent-banner]');
   if (!banner) return;
@@ -38,6 +40,7 @@ function initConsentBanner(): void {
   banner.querySelector('[data-consent-save]')?.addEventListener('click', () => commit(analytics?.checked === true, advertising?.checked === true));
   document.querySelectorAll('[data-open-consent]').forEach((button) => button.addEventListener('click', () => show(true)));
 }
+*/
 
 function setTemporaryLabel(button: HTMLElement, text: string): void {
   const label = button.querySelector<HTMLElement>('[data-button-label]');
