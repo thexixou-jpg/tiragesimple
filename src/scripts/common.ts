@@ -57,6 +57,27 @@ function initFullscreenButton(button: HTMLElement): void {
   });
 }
 
+function initThemeToggle(button: HTMLButtonElement): void {
+  const icon = button.querySelector<HTMLElement>('[data-theme-icon]');
+  const label = button.querySelector<HTMLElement>('[data-theme-label]');
+  const applyTheme = (theme: 'light' | 'dark'): void => {
+    document.documentElement.dataset.theme = theme;
+    button.setAttribute('aria-pressed', String(theme === 'dark'));
+    button.setAttribute('aria-label', theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre');
+    if (icon) icon.textContent = theme === 'dark' ? '☀' : '◐';
+    if (label) label.textContent = theme === 'dark' ? 'Thème clair' : 'Thème sombre';
+    window.dispatchEvent(new CustomEvent('themechange'));
+  };
+  const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  applyTheme(current);
+  button.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('tiragesimple:theme', next); } catch { /* Theme still changes for this visit. */ }
+    applyTheme(next);
+  });
+}
+
 document.querySelectorAll<HTMLElement>('[data-list-editor]').forEach(initListEditor);
 document.querySelectorAll<HTMLElement>('[data-copy-target]').forEach(initCopyButton);
 document.querySelectorAll<HTMLElement>('[data-fullscreen-target]').forEach(initFullscreenButton);
+document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(initThemeToggle);

@@ -122,7 +122,7 @@ function initWheel(root: HTMLElement): void {
       context.moveTo(center, center);
       context.arc(center, center, radius, start, end);
       context.closePath();
-      context.fillStyle = participants.length > 0 ? colors[index % colors.length]! : '#deddea';
+      context.fillStyle = participants.length > 0 ? colors[index % colors.length]! : getComputedStyle(document.documentElement).getPropertyValue('--wheel-empty').trim();
       context.fill();
       context.strokeStyle = 'rgba(255,255,255,.75)';
       context.lineWidth = items.length > 200 ? 0.25 : 1.5;
@@ -134,7 +134,7 @@ function initWheel(root: HTMLElement): void {
         context.rotate(start + segment / 2);
         context.textAlign = 'right';
         context.textBaseline = 'middle';
-        context.fillStyle = participants.length > 0 ? '#fff' : '#656477';
+        context.fillStyle = participants.length > 0 ? '#fff' : getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim();
         context.font = `700 ${Math.max(9, Math.min(15, 250 / items.length + 8))}px Inter, system-ui, sans-serif`;
         const maxLength = items.length > 24 ? 12 : 24;
         const label = item.length > maxLength ? `${item.slice(0, maxLength - 1)}…` : item;
@@ -266,6 +266,7 @@ function initWheel(root: HTMLElement): void {
   updateSoundButton();
   renderHistory();
   updateParticipants();
+  window.addEventListener('themechange', drawWheel);
 }
 
 document.querySelectorAll<HTMLElement>('[data-wheel]').forEach(initWheel);

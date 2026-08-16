@@ -19,6 +19,17 @@ const { title, description, canonicalPath = Astro.url.pathname, noindex = false 
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
+    <script is:inline>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem('tiragesimple:theme');
+          const theme = savedTheme === 'dark' || savedTheme === 'light'
+            ? savedTheme
+            : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.dataset.theme = theme;
+        } catch { /* Keep the default light theme when storage is unavailable. */ }
+      })();
+    </script>
     <SeoHead {title} {description} {canonicalPath} {noindex} />
   </head>
   <body>
