@@ -1,6 +1,7 @@
 ---
 import { getRelatedTools, getTool } from '../data/tools';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AdSlot from './AdSlot.astro';
 import FAQ, { type FAQItem } from './FAQ.astro';
 import RelatedTools from './RelatedTools.astro';
 
@@ -54,6 +55,7 @@ const structuredData = {
     <section class="tool-shell" aria-label={`Outil ${tool.title}`}>
       <slot name="tool" />
     </section>
+    <AdSlot />
     <article class="tool-content prose">
       <slot name="content" />
     </article>

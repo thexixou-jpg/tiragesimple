@@ -1,6 +1,7 @@
 import { formatCount, parseList } from '../lib/lists';
 import { trackEvent } from '../lib/analytics';
 import { readConsent } from '../lib/consent';
+import { ADSENSE_CLIENT } from '../config/monetization';
 
 function loadAdsIfConsented(): void {
   if (readConsent()?.advertising !== true || !ADSENSE_CLIENT) return;
