@@ -136,4 +136,3 @@ document.querySelectorAll<HTMLElement>('[data-copy-target]').forEach(initCopyBut
 document.querySelectorAll<HTMLElement>('[data-fullscreen-target]').forEach(initFullscreenButton);
 document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(initThemeToggle);
 document.querySelectorAll<HTMLButtonElement>('[data-share-target]').forEach(initResultShareButton);
-initConsentBanner();
