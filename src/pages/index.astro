@@ -7,8 +7,9 @@ const popularTools = tools.filter((tool) => tool.popular);
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'WebSite', '@id': 'https://tiragesimple.fr/#website', name: 'TirageSimple', url: 'https://tiragesimple.fr/', inLanguage: 'fr-FR', description: 'Outils de tirage au sort, roues et choix aléatoires gratuits.' },
-    { '@type': 'Organization', '@id': 'https://tiragesimple.fr/#organization', name: 'TirageSimple', url: 'https://tiragesimple.fr/', description: 'Outils gratuits de tirage au sort et de choix aléatoires.' },
+    { '@type': 'WebSite', '@id': 'https://tiragesimple.fr/#website', name: 'TirageSimple', alternateName: 'Tirage Simple', url: 'https://tiragesimple.fr/', inLanguage: 'fr-FR', description: 'Outils de tirage au sort, roues et choix aléatoires gratuits.', publisher: { '@id': 'https://tiragesimple.fr/#publisher' } },
+    { '@type': 'Person', '@id': 'https://tiragesimple.fr/#publisher', name: 'Bertrand Da Silva', url: 'https://tiragesimple.fr/mentions-legales' },
+    { '@type': 'ItemList', name: 'Outils de tirage au sort et choix aléatoire', itemListElement: tools.map((tool, position) => ({ '@type': 'ListItem', position: position + 1, name: tool.title, url: `https://tiragesimple.fr/${tool.slug}` })) },
   ],
 };
 ---
