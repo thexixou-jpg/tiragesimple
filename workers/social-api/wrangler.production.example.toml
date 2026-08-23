@@ -1,0 +1,30 @@
+# Copy to wrangler.production.toml locally. Never commit the copy: it contains
+# your Cloudflare database ID and deployment-specific routes.
+name = "tiragesimple-social-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-23"
+workers_dev = false
+
+[vars]
+YOUTUBE_ENABLED = "true"
+ALLOWED_ORIGIN = "https://tiragesimple.fr"
+PUBLIC_SITE_URL = "https://tiragesimple.fr"
+RETENTION_DAYS = "30"
+MAX_PARTICIPANTS = "10000"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tiragesimple-social"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[queues.producers]]
+binding = "SOCIAL_IMPORT_QUEUE"
+queue = "tiragesimple-social-imports"
+
+[[queues.consumers]]
+queue = "tiragesimple-social-imports"
+max_batch_size = 1
+max_retries = 3
+
+[triggers]
+crons = ["0 4 * * *"]

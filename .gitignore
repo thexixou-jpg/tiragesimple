@@ -16,6 +16,8 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+workers/social-api/wrangler.production.toml
+workers/social-api/.dev.vars
 
 # macOS-specific files
 .DS_Store
