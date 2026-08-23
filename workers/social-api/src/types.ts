@@ -9,6 +9,7 @@ export interface ContestRules {
   requiredKeyword?: string;
   minimumMentions?: number;
   includeReplies: boolean;
+  excludePublicationAuthor: boolean;
 }
 
 export interface ProviderCapabilities {
@@ -56,6 +57,7 @@ export interface Env {
   ALLOWED_ORIGIN?: string;
   MAX_PARTICIPANTS?: string;
   RETENTION_DAYS?: string;
+  SESSION_SIGNING_SECRET?: string;
   DB?: D1Database;
   SOCIAL_IMPORT_QUEUE?: Queue<SocialImportJob>;
 }
@@ -63,6 +65,5 @@ export interface Env {
 export interface SocialImportJob {
   provider: ProviderId;
   importId: string;
-  publicationUrl: string;
-  rules: ContestRules;
+  pageToken?: string;
 }

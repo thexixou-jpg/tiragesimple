@@ -8,6 +8,10 @@ export const providerCapabilities: Record<ProviderId, ProviderCapabilities> = {
   tiktok: { comments: false, likes: false, reposts: false, mentions: false, followers: false, replies: false },
 };
 
+export function getProviderCapabilities(provider: ProviderId): ProviderCapabilities {
+  return providerCapabilities[provider];
+}
+
 export function providerStatus(env: Env): Record<ProviderId, string> {
   return {
     youtube: env.YOUTUBE_ENABLED === 'true' && Boolean(env.YOUTUBE_API_KEY) ? 'enabled' : 'beta',

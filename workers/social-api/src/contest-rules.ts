@@ -12,6 +12,7 @@ export function normalizeRules(input: Partial<ContestRules>): ContestRules {
     requiredKeyword: input.requiredKeyword?.trim().toLocaleLowerCase('fr-FR') || undefined,
     minimumMentions: input.minimumMentions && input.minimumMentions > 0 ? Math.min(20, Math.trunc(input.minimumMentions)) : undefined,
     includeReplies: input.includeReplies ?? false,
+    excludePublicationAuthor: input.excludePublicationAuthor ?? true,
   };
 }
 
@@ -70,4 +71,57 @@ export async function sha256(value: string): Promise<string> {
   const bytes = new TextEncoder().encode(value);
   const hash = await crypto.subtle.digest('SHA-256', bytes);
   return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function randomSeed(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function seededIndex(maxExclusive: number, seed: string, counter: number): Promise<{ index: number; counter: number }> {
+  if (!Number.isSafeInteger(maxExclusive) || maxExclusive < 1) throw new Error('Invalid draw range');
+  const limit = Math.floor(0x1_0000_0000 / maxExclusive) * maxExclusive;
+  let nextCounter = counter;
+  while (true) {
+    const digest = await sha256(`${seed}:${nextCounter++}`);
+    const value = Number.parseInt(digest.slice(0, 8), 16);
+    if (value < limit) return { index: value % maxExclusive, counter: nextCounter };
+  }
+}
+
+/**
+ * Creates a reproducible draw from a cryptographically random seed. It is not
+ * an external certification: publishing the seed only lets somebody replay a
+ * draw against the same participant snapshot.
+ */
+export async function verifiableDraw(participants: Participant[], rules: ContestRules): Promise<{
+  winners: Participant[];
+  alternates: Participant[];
+  verificationSeed: string;
+  commitmentHash: string;
+}> {
+  const pool = participants.filter((participant) => participant.eligible).flatMap((participant) =>
+    Array.from({ length: rules.duplicateEntries ? participant.entriesCount : 1 }, () => participant),
+  );
+  const target = Math.min(rules.winnerCount + rules.alternateCount, new Set(pool.map((item) => item.providerUserId)).size);
+  const seed = randomSeed();
+  const selected = new Set<string>();
+  const result: Participant[] = [];
+  let counter = 0;
+  while (result.length < target && pool.length) {
+    const next = await seededIndex(pool.length, seed, counter);
+    counter = next.counter;
+    const candidate = pool.splice(next.index, 1)[0];
+    if (!selected.has(candidate.providerUserId)) {
+      selected.add(candidate.providerUserId);
+      result.push(candidate);
+    }
+  }
+  return {
+    winners: result.slice(0, rules.winnerCount),
+    alternates: result.slice(rules.winnerCount),
+    verificationSeed: seed,
+    commitmentHash: await sha256(seed),
+  };
 }
