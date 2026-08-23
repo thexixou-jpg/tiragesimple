@@ -69,9 +69,9 @@ export default {
       return new Response(null, { headers: { 'access-control-allow-origin': origin, 'access-control-allow-credentials': 'true', 'access-control-allow-methods': 'GET,POST,OPTIONS', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400', 'vary': 'Origin' } });
     }
     const url = new URL(request.url);
-    // The Worker can run on api.tiragesimple.fr or behind the same-site Pages route
-    // /api/social/*, so browser privacy extensions do not need to allow a new host.
-    const pathname = url.pathname.startsWith('/api/social/') ? url.pathname.slice('/api/social'.length) : url.pathname;
+    // The Worker can run behind the neutral same-site route /_tiragesimple/*.
+    // It avoids a separate host and common blocker patterns such as "api"/"social".
+    const pathname = url.pathname.startsWith('/_tiragesimple/') ? url.pathname.slice('/_tiragesimple'.length) : url.pathname;
     if (request.method === 'GET' && pathname === '/v1/providers') return json({ providers: providerStatus(env) }, 200, origin);
     const sharedPageMatch = pathname.match(/^\/tirage\/(TS-\d{8}-[A-Z2-9]+)$/u);
     if (request.method === 'GET' && sharedPageMatch) {
