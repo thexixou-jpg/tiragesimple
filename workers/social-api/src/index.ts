@@ -69,15 +69,18 @@ export default {
       return new Response(null, { headers: { 'access-control-allow-origin': origin, 'access-control-allow-credentials': 'true', 'access-control-allow-methods': 'GET,POST,OPTIONS', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400', 'vary': 'Origin' } });
     }
     const url = new URL(request.url);
-    if (request.method === 'GET' && url.pathname === '/v1/providers') return json({ providers: providerStatus(env) }, 200, origin);
-    const sharedPageMatch = url.pathname.match(/^\/tirage\/(TS-\d{8}-[A-Z2-9]+)$/u);
+    // The Worker can run on api.tiragesimple.fr or behind the same-site Pages route
+    // /api/social/*, so browser privacy extensions do not need to allow a new host.
+    const pathname = url.pathname.startsWith('/api/social/') ? url.pathname.slice('/api/social'.length) : url.pathname;
+    if (request.method === 'GET' && pathname === '/v1/providers') return json({ providers: providerStatus(env) }, 200, origin);
+    const sharedPageMatch = pathname.match(/^\/tirage\/(TS-\d{8}-[A-Z2-9]+)$/u);
     if (request.method === 'GET' && sharedPageMatch) {
       const result = await publicDraw(env, sharedPageMatch[1]);
       return result
         ? new Response(publicDrawPage(result), { headers: { 'content-type': 'text/html; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } })
         : new Response('Résultat introuvable ou expiré.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } });
     }
-    if (request.method === 'POST' && url.pathname === '/v1/youtube/publication') {
+    if (request.method === 'POST' && pathname === '/v1/youtube/publication') {
       try {
         const input = await request.json() as { url?: string };
         if (!input.url) return json({ error: 'A YouTube URL is required' }, 400, origin);
@@ -86,7 +89,7 @@ export default {
         return json({ error: error instanceof Error ? error.message : 'Unable to load the YouTube publication' }, backendUnavailable(error) ? 503 : 400, origin);
       }
     }
-    if (request.method === 'POST' && url.pathname === '/v1/youtube/imports') {
+    if (request.method === 'POST' && pathname === '/v1/youtube/imports') {
       try {
         const input = await request.json() as { url?: string; rules?: Partial<ContestRules> };
         if (!input.url) return json({ error: 'A YouTube URL is required' }, 400, origin);
@@ -98,7 +101,7 @@ export default {
         return json({ error: error instanceof Error ? error.message : 'Unable to start the YouTube import' }, backendUnavailable(error) ? 503 : 400, origin);
       }
     }
-    const importMatch = url.pathname.match(/^\/v1\/imports\/([\w-]+)$/u);
+    const importMatch = pathname.match(/^\/v1\/imports\/([\w-]+)$/u);
     if (request.method === 'GET' && importMatch) {
       try {
         const session = await ownerSession(request, env);
@@ -108,7 +111,7 @@ export default {
         return json({ error: error instanceof Error ? error.message : 'Unable to load the import' }, backendUnavailable(error) ? 503 : 400, origin);
       }
     }
-    const drawMatch = url.pathname.match(/^\/v1\/imports\/([\w-]+)\/draw$/u);
+    const drawMatch = pathname.match(/^\/v1\/imports\/([\w-]+)\/draw$/u);
     if (request.method === 'POST' && drawMatch) {
       try {
         const session = await ownerSession(request, env);
@@ -121,7 +124,7 @@ export default {
         return json({ error: error instanceof Error ? error.message : 'Unable to create the draw' }, backendUnavailable(error) ? 503 : 400, origin);
       }
     }
-    const publicDrawMatch = url.pathname.match(/^\/v1\/draws\/(TS-\d{8}-[A-Z2-9]+)$/u);
+    const publicDrawMatch = pathname.match(/^\/v1\/draws\/(TS-\d{8}-[A-Z2-9]+)$/u);
     if (request.method === 'GET' && publicDrawMatch) {
       const result = await publicDraw(env, publicDrawMatch[1]);
       return result ? json(result, 200, origin) : json({ error: 'Draw not found' }, 404, origin);
