@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { socialProviders } from '../data/social-contests';
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Tirage au sort réseaux sociaux',
+  url: 'https://tiragesimple.fr/tirage-au-sort-reseaux-sociaux/',
+  inLanguage: 'fr-FR',
+  mainEntity: { '@type': 'ItemList', itemListElement: socialProviders.map((provider, position) => ({ '@type': 'ListItem', position: position + 1, name: `Tirage au sort ${provider.name}`, url: `https://tiragesimple.fr/tirage-au-sort-${provider.id}/` })) },
+};
+---
+
+<BaseLayout title="Tirage au sort réseaux sociaux : YouTube, Instagram et plus | TirageSimple" description="Préparez des tirages au sort transparents pour YouTube, Instagram, Facebook, X et TikTok, uniquement avec les API officielles disponibles." canonicalPath="/tirage-au-sort-reseaux-sociaux">
+  <header class="tool-hero">
+    <div class="container tool-heading">
+      <a class="breadcrumb" href="/tirage-au-sort">Tirage au sort</a>
+      <h1>Tirage au sort réseaux sociaux</h1>
+      <p>Choisissez une plateforme. Chaque connecteur indique seulement les données qu’il peut récupérer et vérifier via son API officielle.</p>
+    </div>
+  </header>
+  <div class="container tool-page">
+    <section class="social-provider-grid" aria-label="Plateformes disponibles">
+      {socialProviders.map((provider) => (
+        <a class="social-provider-card" href={`/tirage-au-sort-${provider.id}`}>
+          <span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span>
+          <h2>{provider.name}</h2>
+          <p>{provider.description}</p>
+          <span class="tool-link">Voir les capacités <span aria-hidden="true">→</span></span>
+        </a>
+      ))}
+    </section>
+    <article class="tool-content prose">
+      <h2>Des tirages basés sur les règles réellement vérifiables</h2>
+      <p>Un commentaire, une réponse, un mot-clé ou une mention ne sont proposés comme condition que si l’API de la plateforme permet de les récupérer. TirageSimple ne demandera jamais de mot de passe, cookie ou jeton collé manuellement.</p>
+    </article>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

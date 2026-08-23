@@ -1,0 +1,7 @@
+name = "tiragesimple-social-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-23"
+workers_dev = true
+
+# Bind the production D1 database and queue with `wrangler d1 create` and
+# `wrangler queues create`, then add their IDs/bindings outside version control.

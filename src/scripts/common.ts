@@ -1,46 +1,5 @@
 import { formatCount, parseList } from '../lib/lists';
 import { trackEvent } from '../lib/analytics';
-import { readConsent } from '../lib/consent';
-import { ADSENSE_CLIENT } from '../config/monetization';
-
-function loadAdsIfConsented(): void {
-  if (readConsent()?.advertising !== true || !ADSENSE_CLIENT) return;
-  const slots = document.querySelectorAll<HTMLElement>('[data-ad-slot]');
-  if (!slots.length) return;
-  slots.forEach((slot) => { slot.hidden = false; slot.querySelector('.adsbygoogle')?.setAttribute('data-ad-client', ADSENSE_CLIENT); try { ((window as unknown as { adsbygoogle?: unknown[] }).adsbygoogle ||= []).push({}); } catch { /* blocked */ } });
-}
-
-/* Consent is managed by Google's certified CMP. */
-/*
-function initConsentBanner(): void {
-  const banner = document.querySelector<HTMLElement>('[data-consent-banner]');
-  if (!banner) return;
-  const options = banner.querySelector<HTMLElement>('[data-consent-options]');
-  const analytics = banner.querySelector<HTMLInputElement>('[data-consent-analytics]');
-  const advertising = banner.querySelector<HTMLInputElement>('[data-consent-advertising]');
-  const show = (customize = false): void => {
-    banner.hidden = false;
-    banner.setAttribute('aria-hidden', 'false');
-    if (options) options.hidden = !customize;
-    if (customize) analytics && (analytics.checked = readConsent()?.analytics === true);
-    if (customize) advertising && (advertising.checked = readConsent()?.advertising === true);
-  };
-  const hide = (): void => { banner.hidden = true; banner.setAttribute('aria-hidden', 'true'); };
-  const commit = (a: boolean, p: boolean): void => {
-    const preference = saveConsent({ analytics: a, advertising: p });
-    hide();
-    window.dispatchEvent(new CustomEvent('tiragesimple:consentchange', { detail: preference }));
-    if (p) loadAdsIfConsented();
-  };
-  if (!readConsent()) show();
-  loadAdsIfConsented();
-  banner.querySelector('[data-consent-accept]')?.addEventListener('click', () => commit(true, true));
-  banner.querySelector('[data-consent-reject]')?.addEventListener('click', () => commit(false, false));
-  banner.querySelector('[data-consent-customize]')?.addEventListener('click', () => show(true));
-  banner.querySelector('[data-consent-save]')?.addEventListener('click', () => commit(analytics?.checked === true, advertising?.checked === true));
-  document.querySelectorAll('[data-open-consent]').forEach((button) => button.addEventListener('click', () => show(true)));
-}
-*/
 
 function setTemporaryLabel(button: HTMLElement, text: string): void {
   const label = button.querySelector<HTMLElement>('[data-button-label]');

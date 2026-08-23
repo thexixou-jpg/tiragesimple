@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSocialProvider, type SocialProviderId } from '../data/social-contests';
+
+interface Props { provider: SocialProviderId; }
+const { provider: providerId } = Astro.props;
+const provider = getSocialProvider(providerId);
+const statusClass = `social-status social-status-${provider.status}`;
+const pageUrl = new URL(`/tirage-au-sort-${provider.id}`, Astro.site ?? Astro.url.origin).toString();
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: `Tirage au sort ${provider.name}`,
+  url: pageUrl,
+  description: provider.description,
+  inLanguage: 'fr-FR',
+  isPartOf: { '@id': new URL('/#website', Astro.site ?? Astro.url.origin).toString() },
+};
+const capabilityLabels = [
+  ['comments', 'Commentaires'], ['replies', 'Réponses'], ['likes', 'Likes'], ['reposts', 'Reposts'], ['mentions', 'Mentions'], ['followers', 'Abonnés'],
+] as const;
+---
+
+<BaseLayout title={provider.title} description={provider.description} canonicalPath={`/tirage-au-sort-${provider.id}`}>
+  <header class="tool-hero">
+    <div class="container tool-heading">
+      <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux">Tirages réseaux sociaux</a>
+      <p class={statusClass}>{provider.statusLabel}</p>
+      <h1>Tirage au sort {provider.name}</h1>
+      <p>{provider.intro}</p>
+    </div>
+  </header>
+  <div class="container tool-page">
+    <section class="tool-shell social-contest-shell" aria-labelledby="social-setup-title">
+      <h2 id="social-setup-title">Connecteur {provider.name}</h2>
+      <p>{provider.connection}</p>
+      <p class="social-setup-note">Cette page sera activée uniquement lorsque le connecteur officiel et les autorisations nécessaires seront opérationnels.</p>
+    </section>
+    <article class="tool-content prose">
+      <h2>Critères vérifiables</h2>
+      <ul class="capability-list">
+        {capabilityLabels.map(([capability, label]) => <li class:list={{ 'is-supported': provider.capabilities[capability] }}><span aria-hidden="true">{provider.capabilities[capability] ? '✓' : '–'}</span>{label} {provider.capabilities[capability] ? 'pris en charge selon les autorisations' : 'non vérifiable automatiquement'}</li>)}
+      </ul>
+      <h2>Limites annoncées clairement</h2>
+      <ul>{provider.limitations.map((item) => <li>{item}</li>)}</ul>
+      <h2>Transparence du futur tirage</h2>
+      <p>Quand le connecteur sera actif, le tirage indiquera précisément les règles appliquées, le nombre de commentaires analysés, les participants uniques et les critères effectivement vérifiés. Aucun résultat ne sera présenté comme certifié sans certification externe.</p>
+    </article>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

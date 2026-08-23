@@ -32,7 +32,8 @@ for (const file of pages) {
   if (page === 'index.html' && !schemas.some((schema) => schema['@graph']?.some((item) => item['@type'] === 'WebSite'))) {
     failures.push(`${page}: données structurées WebSite manquantes`);
   }
-  if (page !== 'index.html' && page !== '404.html' && page !== 'mentions-legales/index.html' && page !== 'confidentialite/index.html' && page !== 'cookies/index.html'
+  const isSocialInformationPage = page === 'tirage-au-sort-reseaux-sociaux/index.html' || page.startsWith('tirage-au-sort-instagram/') || page.startsWith('tirage-au-sort-youtube/') || page.startsWith('tirage-au-sort-x/') || page.startsWith('tirage-au-sort-tiktok/') || page.startsWith('tirage-au-sort-facebook/');
+  if (page !== 'index.html' && page !== '404.html' && page !== 'mentions-legales/index.html' && page !== 'confidentialite/index.html' && page !== 'cookies/index.html' && !isSocialInformationPage
     && !schemas.some((schema) => schema['@graph']?.some((item) => item['@type'] === 'WebApplication'))) {
     failures.push(`${page}: données structurées WebApplication manquantes`);
   }
