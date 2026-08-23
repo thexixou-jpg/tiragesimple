@@ -68,6 +68,7 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
       if (!response.ok) throw new Error(payload.error ?? 'Le service YouTube est indisponible.');
       return payload;
     };
+    if (apiUrl) setFeedback('Prêt à analyser une vidéo ou un Short YouTube.');
     const rules = () => {
       if (!(form instanceof HTMLFormElement)) return {};
       const data = new FormData(form);
