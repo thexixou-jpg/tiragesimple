@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getSocialProvider, type SocialProviderId } from '../data/social-contests';
+import YouTubeContestTool from './YouTubeContestTool.astro';
 
 interface Props { provider: SocialProviderId; }
 const { provider: providerId } = Astro.props;
@@ -31,11 +32,11 @@ const capabilityLabels = [
     </div>
   </header>
   <div class="container tool-page">
-    <section class="tool-shell social-contest-shell" aria-labelledby="social-setup-title">
+    {providerId === 'youtube' ? <YouTubeContestTool /> : <section class="tool-shell social-contest-shell" aria-labelledby="social-setup-title">
       <h2 id="social-setup-title">Connecteur {provider.name}</h2>
       <p>{provider.connection}</p>
       <p class="social-setup-note">Cette page sera activée uniquement lorsque le connecteur officiel et les autorisations nécessaires seront opérationnels.</p>
-    </section>
+    </section>}
     <article class="tool-content prose">
       <h2>Critères vérifiables</h2>
       <ul class="capability-list">

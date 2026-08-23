@@ -119,6 +119,23 @@ button { cursor: pointer; }
 .social-contest-shell { padding: 1.25rem; }
 .social-contest-shell h2 { margin-top: 0; }
 .social-setup-note { margin-bottom: 0; color: var(--color-text-muted); font-size: .9rem; }
+.social-youtube-tool { display: grid; padding: clamp(1rem, 3vw, 1.5rem); gap: 1rem; }
+.social-youtube-tool h2 { margin: .45rem 0; font-size: clamp(1.5rem, 4vw, 2rem); }
+.social-youtube-tool .tool-panel-intro p:last-child { max-width: 44rem; margin-bottom: 0; color: var(--color-text-muted); }
+.social-import-form { display: grid; gap: 1rem; }
+.social-rule-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.social-rule-grid .option-card { display: flex; min-height: 5.6rem; gap: .65rem; align-items: flex-start; }
+.social-rule-grid input, .social-draw-panel .option-card input { width: 1rem; height: 1rem; margin-top: .18rem; accent-color: var(--color-primary); }
+.option-card.is-unavailable { opacity: .66; }
+.social-import-feedback { min-height: 1.5rem; padding: .8rem 1rem; border-radius: var(--radius-sm); color: var(--color-text-muted); background: var(--color-bg); font-size: .9rem; }
+.social-publication-card { display: flex; padding: .8rem; align-items: center; gap: 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); }
+.social-publication-card[hidden], .social-draw-panel[hidden] { display: none; }
+.social-publication-card img { width: 10rem; aspect-ratio: 16 / 9; border-radius: .5rem; object-fit: cover; background: var(--color-surface); }
+.social-publication-card div { display: grid; gap: .2rem; }
+.social-publication-card span { color: var(--color-text-muted); font-size: .86rem; }
+.social-draw-panel { display: grid; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+.social-draw-panel > p { margin: 0; font-weight: 700; }
+.social-draw-panel .option-card { display: flex; gap: .65rem; align-items: flex-start; }
 .capability-list { padding: 0; list-style: none; }
 .capability-list li { display: flex; gap: .5rem; margin-block: .45rem; color: var(--color-text-muted); }
 .capability-list .is-supported { color: var(--color-text); }
@@ -132,6 +149,8 @@ button { cursor: pointer; }
   .consent-options { grid-template-columns: 1fr; }
   .consent-options .button { grid-column: auto; justify-self: stretch; }
   .social-provider-grid { grid-template-columns: 1fr; }
+  .social-rule-grid { grid-template-columns: 1fr; }
+  .social-publication-card { align-items: flex-start; flex-direction: column; }
 }
 
 .skip-link {
