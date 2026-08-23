@@ -56,6 +56,7 @@ export async function processYouTubeImport(job: SocialImportJob, env: Env): Prom
 
 export interface DrawResult {
   publicId: string;
+  publicUrl?: string;
   participantSnapshotHash: string;
   randomCommitmentHash: string;
   resultHash: string;
@@ -94,5 +95,6 @@ export async function createYouTubeDraw(env: Env, importId: string, publicVisibi
     ...drawn.winners.map((winner, index) => env.DB!.prepare('INSERT INTO contest_winners (id, draw_id, participant_id, rank, kind, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(crypto.randomUUID(), id, selected.get(winner.providerUserId)!.id, index + 1, 'winner', now)),
     ...drawn.alternates.map((alternate, index) => env.DB!.prepare('INSERT INTO contest_winners (id, draw_id, participant_id, rank, kind, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(crypto.randomUUID(), id, selected.get(alternate.providerUserId)!.id, index + 1, 'alternate', now)),
   ]);
-  return { publicId, participantSnapshotHash, randomCommitmentHash: drawn.commitmentHash, resultHash, verificationSeed: drawn.verificationSeed, winners: drawn.winners.map((winner) => selected.get(winner.providerUserId)!), alternates: drawn.alternates.map((alternate) => selected.get(alternate.providerUserId)!) };
+  const publicUrl = publicVisibility && env.PUBLIC_SITE_URL ? new URL(`/tirage/${publicId}`, env.PUBLIC_SITE_URL).toString() : undefined;
+  return { publicId, publicUrl, participantSnapshotHash, randomCommitmentHash: drawn.commitmentHash, resultHash, verificationSeed: drawn.verificationSeed, winners: drawn.winners.map((winner) => selected.get(winner.providerUserId)!), alternates: drawn.alternates.map((alternate) => selected.get(alternate.providerUserId)!) };
 }

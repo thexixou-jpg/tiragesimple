@@ -55,6 +55,7 @@ export interface Env {
   YOUTUBE_ENABLED?: string;
   YOUTUBE_API_KEY?: string;
   ALLOWED_ORIGIN?: string;
+  PUBLIC_SITE_URL?: string;
   MAX_PARTICIPANTS?: string;
   RETENTION_DAYS?: string;
   SESSION_SIGNING_SECRET?: string;

@@ -123,7 +123,7 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
       setFeedback('Tirage sécurisé en cours…');
       try {
         const visibility = root.querySelector('[data-public-visibility]');
-        const payload = await request(`/v1/imports/${importId}/draw`, { method: 'POST', body: JSON.stringify({ publicVisibility: visibility instanceof HTMLInputElement && visibility.checked }) }) as { draw: { publicId: string; winners: Array<{ displayName?: string; username?: string }>; alternates: Array<{ displayName?: string; username?: string }> } };
+        const payload = await request(`/v1/imports/${importId}/draw`, { method: 'POST', body: JSON.stringify({ publicVisibility: visibility instanceof HTMLInputElement && visibility.checked }) }) as { draw: { publicId: string; publicUrl?: string; winners: Array<{ displayName?: string; username?: string }>; alternates: Array<{ displayName?: string; username?: string }> } };
         const winnerNames = payload.draw.winners.map((winner) => winner.displayName ?? winner.username ?? 'Participant').join(', ');
         const alternateNames = payload.draw.alternates.map((alternate) => alternate.displayName ?? alternate.username ?? 'Participant').join(', ');
         if (result instanceof HTMLElement) {
@@ -133,7 +133,11 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
           const names = document.createElement('p'); names.className = 'result-value'; names.textContent = winnerNames;
           result.append(heading, names);
           if (alternateNames) { const alternates = document.createElement('p'); alternates.textContent = `Suppléant(s) : ${alternateNames}`; result.append(alternates); }
-          if (visibility instanceof HTMLInputElement && visibility.checked) { const proof = document.createElement('p'); proof.className = 'field-hint'; proof.textContent = `Référence partageable : ${payload.draw.publicId}`; result.append(proof); }
+          if (visibility instanceof HTMLInputElement && visibility.checked) {
+            const proof = document.createElement('a'); proof.className = 'field-hint'; proof.href = payload.draw.publicUrl ?? '#'; proof.textContent = payload.draw.publicUrl ? 'Ouvrir le résultat partageable' : `Référence partageable : ${payload.draw.publicId}`;
+            if (payload.draw.publicUrl) { proof.target = '_blank'; proof.rel = 'noopener'; }
+            result.append(proof);
+          }
         }
         setFeedback('Tirage terminé.');
       } catch (error) { showError(error); }

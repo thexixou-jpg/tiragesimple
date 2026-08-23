@@ -17,6 +17,7 @@ Le site public reste statique sur `tiragesimple.fr`. Les appels sociaux et les d
 - `GET /v1/imports/:id` : expose la progression uniquement au navigateur qui a créé l’import (cookie signé, `HttpOnly`, `Secure`) ;
 - `POST /v1/imports/:id/draw` : sélectionne gagnants et suppléants avec Web Crypto ;
 - `GET /v1/draws/:id` : expose une preuve seulement si l’organisateur a explicitement rendu le résultat public.
+- `GET /tirage/:id` : page publique de résultat, non indexable. Le Worker devra recevoir la route Cloudflare `tiragesimple.fr/tirage/*` pour tenir cette URL publique.
 
 Les réponses YouTube sont volontairement refusées dans ce MVP : l’endpoint officiel `commentThreads.list` ne retourne qu’un sous-ensemble possible des réponses intégrées. Les annoncer comme exhaustives serait trompeur. Une pagination dédiée `comments.list(parentId)` sera ajoutée avant d’activer cette option.
 

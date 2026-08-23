@@ -52,6 +52,16 @@ async function publicDraw(env: Env, publicId: string): Promise<Record<string, un
   };
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? '').replace(/[&<>"']/gu, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ?? character);
+}
+
+function publicDrawPage(payload: Record<string, unknown>): string {
+  const draw = payload.draw as { id: string; createdAt: string; platform: string; publication: { url: string; title?: string }; winners: Array<{ rank: number; kind: string; username?: string; displayName?: string }>; notice: string };
+  const winnerRows = draw.winners.map((winner) => `<li><span>${winner.kind === 'winner' ? 'Gagnant' : 'Suppléant'} ${escapeHtml(winner.rank)}</span><strong>${escapeHtml(winner.displayName || winner.username || 'Participant')}</strong></li>`).join('');
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Résultat ${escapeHtml(draw.id)} | TirageSimple</title><style>body{margin:0;background:#f7f8fc;color:#19182a;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(calc(100% - 2rem),44rem);margin:4rem auto}.card{padding:clamp(1.25rem,4vw,2rem);border:1px solid #e3e3ed;border-radius:22px;background:#fff;box-shadow:0 16px 48px rgb(37 31 86 / 10%)}.tag{display:inline-block;padding:.25rem .55rem;border-radius:999px;background:#efedff;color:#5141cf;font-size:.8rem;font-weight:800}h1{line-height:1.1;letter-spacing:-.04em}a{color:#5141cf}ul{margin:1.5rem 0;padding:0;list-style:none}li{display:flex;padding:1rem;justify-content:space-between;gap:1rem;border-radius:12px;background:#f7f8fc}li+li{margin-top:.5rem}li span{color:#656477;font-size:.85rem}small{color:#656477}</style></head><body><main class="wrap"><article class="card"><span class="tag">Résultat partagé</span><h1>Tirage ${escapeHtml(draw.id)}</h1><p>Plateforme : <strong>${escapeHtml(draw.platform)}</strong><br>Publié le ${escapeHtml(new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(draw.createdAt)))}</p><p><a href="${escapeHtml(draw.publication.url)}" rel="noopener noreferrer">${escapeHtml(draw.publication.title || 'Voir la publication')}</a></p><ul>${winnerRows}</ul><small>${escapeHtml(draw.notice)} Cette page n’est pas indexée par les moteurs de recherche.</small></article></main></body></html>`;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const origin = allowOrigin(request, env);
@@ -60,6 +70,13 @@ export default {
     }
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/v1/providers') return json({ providers: providerStatus(env) }, 200, origin);
+    const sharedPageMatch = url.pathname.match(/^\/tirage\/(TS-\d{8}-[A-Z2-9]+)$/u);
+    if (request.method === 'GET' && sharedPageMatch) {
+      const result = await publicDraw(env, sharedPageMatch[1]);
+      return result
+        ? new Response(publicDrawPage(result), { headers: { 'content-type': 'text/html; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } })
+        : new Response('Résultat introuvable ou expiré.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } });
+    }
     if (request.method === 'POST' && url.pathname === '/v1/youtube/publication') {
       try {
         const input = await request.json() as { url?: string };
