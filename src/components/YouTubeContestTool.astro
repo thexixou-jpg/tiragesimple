@@ -15,11 +15,17 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
   <form class="social-import-form" data-contest-form>
     <div class="youtube-form-section youtube-form-section--source">
       <div class="youtube-section-heading"><span>01</span><div><strong>Source du concours</strong><small>La vidéo reste publique et ses commentaires doivent être activés.</small></div></div>
-      <label class="field">
-        <span>URL de la vidéo ou du Short</span>
-        <input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=…" required />
-        <small class="field-hint">Vidéos publiques uniquement. Les commentaires désactivés ne peuvent pas être importés.</small>
-      </label>
+      <div class="youtube-source-grid">
+        <label class="field">
+          <span>URL de la vidéo ou du Short</span>
+          <input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=…" required data-video-url />
+          <small class="field-hint">Collez un lien : l’aperçu est chargé automatiquement.</small>
+        </label>
+        <aside class="youtube-preview" data-preview data-state="idle" aria-live="polite">
+          <div class="youtube-preview__empty"><span class="youtube-preview__play" aria-hidden="true">▶</span><div><strong>Aperçu de la vidéo</strong><small>La miniature, la chaîne et la date apparaîtront ici.</small></div></div>
+          <div class="youtube-preview__content" data-publication hidden><img data-thumbnail alt="" width="480" height="270" /><div><span class="youtube-preview__label">Vidéo sélectionnée</span><strong data-publication-title></strong><span data-publication-meta></span></div></div>
+        </aside>
+      </div>
     </div>
     <div class="youtube-form-section youtube-form-section--settings">
       <div class="youtube-section-heading"><span>02</span><div><strong>Paramètres du tirage</strong><small>Configurez le nombre de gagnants et un filtre facultatif.</small></div></div>
@@ -45,10 +51,6 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
     </div>
   </form>
   <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Le connecteur est en préparation.</div>
-  <div class="social-publication-card" data-publication hidden>
-    <img data-thumbnail alt="" width="160" height="90" />
-    <div><strong data-publication-title></strong><span data-publication-meta></span></div>
-  </div>
   <div class="social-draw-panel" data-draw hidden>
     <p data-progress></p>
     <label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Rendre le résultat partageable</strong><small>Les gagnants et la preuve technique seront visibles à toute personne ayant le lien.</small></span></label>
@@ -64,6 +66,8 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
     const form = root.querySelector('[data-contest-form]');
     const feedback = root.querySelector('[data-feedback]');
     const publication = root.querySelector('[data-publication]');
+    const preview = root.querySelector('[data-preview]');
+    const urlInput = root.querySelector('[data-video-url]');
     const importButton = root.querySelector('[data-import]');
     const drawPanel = root.querySelector('[data-draw]');
     const progress = root.querySelector('[data-progress]');
@@ -86,6 +90,57 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
       return { winnerCount: Number(data.get('winnerCount')), alternateCount: Number(data.get('alternateCount')), requiredKeyword: String(data.get('requiredKeyword') ?? '').trim() || undefined, uniqueParticipants: !duplicateEntries, duplicateEntries, includeReplies: false, excludePublicationAuthor: data.get('excludePublicationAuthor') === 'on' };
     };
     const videoUrl = () => form instanceof HTMLFormElement ? String(new FormData(form).get('url') ?? '').trim() : '';
+    const isYouTubeUrl = (value: string) => /(?:youtu\.be\/|(?:www\.)?youtube\.com\/(?:watch\?|shorts\/))/iu.test(value);
+    let previewTimer: number | undefined;
+    let analysisRequest = 0;
+    let analyzedUrl = '';
+    const setPreviewState = (state: 'idle' | 'loading' | 'ready' | 'error') => {
+      if (preview instanceof HTMLElement) preview.dataset.state = state;
+    };
+    const resetPreview = () => {
+      if (publication instanceof HTMLElement) publication.hidden = true;
+      if (importButton instanceof HTMLButtonElement) importButton.disabled = true;
+      setPreviewState('idle');
+    };
+    const analyzeVideo = async (manual = false) => {
+      const url = videoUrl();
+      if (!url) {
+        if (manual) setFeedback('Ajoutez l’URL d’une vidéo YouTube.');
+        return;
+      }
+      if (!manual && !isYouTubeUrl(url)) return;
+      if (!manual && url === analyzedUrl) return;
+
+      const requestId = ++analysisRequest;
+      setPreviewState('loading');
+      setFeedback(manual ? 'Analyse de la vidéo…' : 'Chargement de l’aperçu…');
+      try {
+        const payload = await request('/v1/youtube/publication', { method: 'POST', body: JSON.stringify({ url }) }) as { publication: { title?: string; authorName?: string; publishedAt?: string; thumbnailUrl?: string } };
+        if (requestId !== analysisRequest) return;
+        const data = payload.publication;
+        const image = root.querySelector('[data-thumbnail]');
+        const title = root.querySelector('[data-publication-title]');
+        const meta = root.querySelector('[data-publication-meta]');
+        const videoTitle = data.title ?? 'Vidéo YouTube';
+        if (image instanceof HTMLImageElement) {
+          image.src = data.thumbnailUrl ?? '';
+          image.alt = data.thumbnailUrl ? `Miniature : ${videoTitle}` : '';
+          image.hidden = !data.thumbnailUrl;
+        }
+        if (title) title.textContent = videoTitle;
+        if (meta) meta.textContent = [data.authorName, data.publishedAt ? new Intl.DateTimeFormat('fr-FR').format(new Date(data.publishedAt)) : ''].filter(Boolean).join(' · ');
+        if (publication instanceof HTMLElement) publication.hidden = false;
+        if (importButton instanceof HTMLButtonElement) importButton.disabled = false;
+        analyzedUrl = url;
+        setPreviewState('ready');
+        setFeedback('Aperçu prêt. Ajustez les règles puis importez les commentaires.');
+      } catch (error) {
+        if (requestId !== analysisRequest) return;
+        setPreviewState('error');
+        if (manual) showError(error);
+        else setFeedback('Impossible de charger l’aperçu. Vérifiez le lien YouTube.');
+      }
+    };
     const updateProgress = async () => {
       if (!importId) return;
       try {
@@ -102,23 +157,16 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
         window.setTimeout(updateProgress, 1600);
       } catch (error) { showError(error); }
     };
-    form?.addEventListener('submit', async (event) => {
+    form?.addEventListener('submit', (event) => {
       event.preventDefault();
-      if (!videoUrl()) { setFeedback('Ajoutez l’URL d’une vidéo YouTube.'); return; }
-      setFeedback('Analyse de la vidéo…');
-      try {
-        const payload = await request('/v1/youtube/publication', { method: 'POST', body: JSON.stringify({ url: videoUrl() }) }) as { publication: { title?: string; authorName?: string; publishedAt?: string; thumbnailUrl?: string } };
-        const data = payload.publication;
-        const image = root.querySelector('[data-thumbnail]');
-        const title = root.querySelector('[data-publication-title]');
-        const meta = root.querySelector('[data-publication-meta]');
-        if (image instanceof HTMLImageElement) { image.src = data.thumbnailUrl ?? ''; image.hidden = !data.thumbnailUrl; }
-        if (title) title.textContent = data.title ?? 'Vidéo YouTube';
-        if (meta) meta.textContent = [data.authorName, data.publishedAt ? new Intl.DateTimeFormat('fr-FR').format(new Date(data.publishedAt)) : ''].filter(Boolean).join(' · ');
-        if (publication instanceof HTMLElement) publication.hidden = false;
-        if (importButton instanceof HTMLButtonElement) importButton.disabled = false;
-        setFeedback('Vidéo trouvée. Vérifiez les règles puis importez les commentaires.');
-      } catch (error) { showError(error); }
+      void analyzeVideo(true);
+    });
+    urlInput?.addEventListener('input', () => {
+      analyzedUrl = '';
+      resetPreview();
+      window.clearTimeout(previewTimer);
+      if (!(urlInput instanceof HTMLInputElement) || !isYouTubeUrl(urlInput.value.trim())) return;
+      previewTimer = window.setTimeout(() => { void analyzeVideo(); }, 650);
     });
     importButton?.addEventListener('click', async () => {
       setFeedback('Import des commentaires lancé…');
