@@ -38,7 +38,14 @@ const capabilityLabels = [
       <p>{provider.connection}</p>
       <p class="social-setup-note">Cette page sera activée uniquement lorsque le connecteur officiel et les autorisations nécessaires seront opérationnels.</p>
     </section>}
-    <article class="tool-content prose">
+    {providerId === 'youtube' ? <article class="tool-content prose youtube-information">
+      <p class="eyebrow">Un tirage clair, pas une promesse floue</p>
+      <h2>Comment réaliser un tirage au sort YouTube ?</h2>
+      <ol class="youtube-guide-steps"><li><strong>Collez le lien</strong><span>Utilisez une vidéo ou un Short public dont les commentaires sont activés.</span></li><li><strong>Définissez les règles</strong><span>Choisissez les gagnants, les suppléants, un mot obligatoire et le mode de déduplication.</span></li><li><strong>Importez puis tirez</strong><span>Les commentaires éligibles sont analysés avant une sélection aléatoire via Web Crypto.</span></li></ol>
+      <aside class="youtube-limit-note"><strong>Ce qui est réellement vérifié</strong><p>Les commentaires publics, leur auteur, leur contenu et le mot obligatoire éventuel. Les likes individuels, les abonnements à une chaîne et les publications Communauté YouTube ne sont pas vérifiables ici.</p></aside>
+      <h2>Un gagnant par chaîne, sauf si vous choisissez autrement</h2>
+      <p>Par défaut, plusieurs commentaires publiés par une même chaîne ne créent qu’une seule participation. Vous pouvez activer « Chaque commentaire compte » si votre règlement prévoit plusieurs chances.</p>
+    </article> : <article class="tool-content prose">
       <h2>Critères vérifiables</h2>
       <ul class="capability-list">
         {capabilityLabels.map(([capability, label]) => <li class:list={{ 'is-supported': provider.capabilities[capability] }}><span aria-hidden="true">{provider.capabilities[capability] ? '✓' : '–'}</span>{label} {provider.capabilities[capability] ? 'pris en charge selon les autorisations' : 'non vérifiable automatiquement'}</li>)}
@@ -47,7 +54,7 @@ const capabilityLabels = [
       <ul>{provider.limitations.map((item) => <li>{item}</li>)}</ul>
       <h2>Transparence du futur tirage</h2>
       <p>Quand le connecteur sera actif, le tirage indiquera précisément les règles appliquées, le nombre de commentaires analysés, les participants uniques et les critères effectivement vérifiés. Aucun résultat ne sera présenté comme certifié sans certification externe.</p>
-    </article>
+    </article>}
   </div>
 </BaseLayout>
 <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

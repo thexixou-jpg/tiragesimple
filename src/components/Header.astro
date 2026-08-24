@@ -1,5 +1,7 @@
 ---
 import { mainNavigation } from '../data/navigation';
+const currentPath = Astro.url.pathname;
+const isCurrent = (href: string) => href === currentPath || (href !== '/' && currentPath.startsWith(`${href}/`));
 ---
 
 <header class="site-header">
@@ -8,16 +10,18 @@ import { mainNavigation } from '../data/navigation';
       <span class="brand-mark" aria-hidden="true">T</span>
       <span>Tirage<span>Simple</span></span>
     </a>
-    <nav aria-label="Navigation principale">
+    <nav class="site-nav" id="site-navigation" data-site-nav aria-label="Navigation principale">
       <ul class="nav-list">
-        {mainNavigation.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
-        <li>
-          <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Activer le thème sombre" title="Changer de thème">
-            <span aria-hidden="true" data-theme-icon>◐</span>
-            <span class="theme-toggle-label" data-theme-label>Thème sombre</span>
-          </button>
-        </li>
+        {mainNavigation.map((item) => <li><a class:list={{ 'is-active': isCurrent(item.href), 'nav-link--social': item.href === '/tirage-au-sort-reseaux-sociaux' }} href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>)}
+        <li><a href="/#tous-les-outils">Tous les outils <span aria-hidden="true">↗</span></a></li>
       </ul>
     </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Activer le thème sombre" title="Changer de thème">
+        <span aria-hidden="true" data-theme-icon>◐</span>
+        <span class="theme-toggle-label" data-theme-label>Thème sombre</span>
+      </button>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-controls="site-navigation" aria-expanded="false" aria-label="Ouvrir le menu"><span></span><span></span><span></span></button>
+    </div>
   </div>
 </header>

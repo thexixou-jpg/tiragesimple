@@ -4,12 +4,14 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
 
 <section class="tool-shell social-youtube-tool" data-youtube-contest data-api-url={apiUrl} aria-labelledby="youtube-import-title">
   <div class="tool-panel-intro">
-    <div>
-      <p class="eyebrow">MVP officiel</p>
+    <div class="youtube-tool-intro-copy">
+      <p class="eyebrow"><span aria-hidden="true">▶</span> Import officiel YouTube</p>
       <h2 id="youtube-import-title">Importer les commentaires YouTube</h2>
-      <p>Collez l’URL d’une vidéo ou d’un Short. Les participants sont dédupliqués avec l’identifiant de leur chaîne, pas seulement leur pseudo.</p>
+      <p>Collez l’URL d’une vidéo ou d’un Short public. Les participants sont dédupliqués avec l’identifiant de leur chaîne, pas seulement leur pseudo.</p>
     </div>
+    <ul class="youtube-tool-assurances" aria-label="Garanties du tirage YouTube"><li><span aria-hidden="true">✓</span> API officielle</li><li><span aria-hidden="true">✓</span> Sans connexion</li><li><span aria-hidden="true">✓</span> Tirage Web Crypto</li></ul>
   </div>
+  <ol class="youtube-flow" aria-label="Étapes du tirage"><li class="is-current"><span>1</span><div><strong>Analyser</strong><small>Vérifiez la vidéo</small></div></li><li><span>2</span><div><strong>Importer</strong><small>Appliquez vos règles</small></div></li><li><span>3</span><div><strong>Tirer</strong><small>Partagez le résultat</small></div></li></ol>
   <form class="social-import-form" data-contest-form>
     <label class="field">
       <span>URL de la vidéo ou du Short</span>
@@ -24,11 +26,11 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
       <span>Mot ou expression obligatoire <small>facultatif</small></span>
       <input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. concours" />
     </label>
-    <div class="social-rule-grid">
-      <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par chaîne.</small></span></label>
-      <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>La chaîne de la vidéo ne participe pas.</small></span></label>
-      <label class="option-card is-unavailable" title="Les réponses ne sont pas encore importées intégralement par le MVP."><input type="checkbox" disabled /><span><strong>Inclure les réponses</strong><small>Indisponible pour éviter un import incomplet.</small></span></label>
-    </div>
+    <fieldset class="youtube-rules"><legend>Règles du concours</legend><p>Seuls les critères affichés sont réellement vérifiés pendant l’import.</p><div class="social-rule-grid">
+        <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par chaîne.</small></span></label>
+        <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>La chaîne de la vidéo ne participe pas.</small></span></label>
+        <label class="option-card is-unavailable" title="Les réponses ne sont pas encore importées intégralement par le MVP."><input type="checkbox" disabled /><span><strong>Inclure les réponses</strong><small>Indisponible pour éviter un import incomplet.</small></span></label>
+      </div></fieldset>
     <div class="actions">
       <button class="button button-secondary" type="submit" data-analyze>Analyser la vidéo</button>
       <button class="button button-primary" type="button" data-import disabled>Importer les commentaires</button>

@@ -77,6 +77,20 @@ function initThemeToggle(button: HTMLButtonElement): void {
   });
 }
 
+function initNavigationToggle(button: HTMLButtonElement): void {
+  const navigationId = button.getAttribute('aria-controls');
+  const navigation = navigationId ? document.getElementById(navigationId) : null;
+  if (!(navigation instanceof HTMLElement)) return;
+  const setOpen = (open: boolean): void => {
+    navigation.dataset.open = String(open);
+    button.setAttribute('aria-expanded', String(open));
+    button.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+  };
+  button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+  navigation.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setOpen(false); });
+}
+
 function initResultShareButton(button: HTMLButtonElement): void {
   if (button.dataset.shareResult === 'wheel') return;
   button.addEventListener('click', async () => {
@@ -97,4 +111,5 @@ document.querySelectorAll<HTMLElement>('[data-list-editor]').forEach(initListEdi
 document.querySelectorAll<HTMLElement>('[data-copy-target]').forEach(initCopyButton);
 document.querySelectorAll<HTMLElement>('[data-fullscreen-target]').forEach(initFullscreenButton);
 document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(initThemeToggle);
+document.querySelectorAll<HTMLButtonElement>('[data-nav-toggle]').forEach(initNavigationToggle);
 document.querySelectorAll<HTMLButtonElement>('[data-share-target]').forEach(initResultShareButton);
