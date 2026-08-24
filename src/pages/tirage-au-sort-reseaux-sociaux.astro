@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
 import { socialProviders } from '../data/social-contests';
 const structuredData = {
   '@context': 'https://schema.org',
@@ -12,18 +13,22 @@ const structuredData = {
 ---
 
 <BaseLayout title="Tirage au sort réseaux sociaux : YouTube, Instagram et plus | TirageSimple" description="Préparez des tirages au sort transparents pour YouTube, Instagram, Facebook, X et TikTok, uniquement avec les API officielles disponibles." canonicalPath="/tirage-au-sort-reseaux-sociaux">
-  <header class="tool-hero">
-    <div class="container tool-heading">
-      <a class="breadcrumb" href="/tirage-au-sort">Tirage au sort</a>
-      <h1>Tirage au sort réseaux sociaux</h1>
-      <p>Choisissez une plateforme. Chaque connecteur indique seulement les données qu’il peut récupérer et vérifier via son API officielle.</p>
+  <header class="social-hub-hero">
+    <div class="container social-hub-hero__inner">
+      <div class="social-hub-hero__copy">
+        <a class="breadcrumb" href="/tirage-au-sort">Tirage au sort</a>
+        <p class="eyebrow">Concours connectés</p>
+        <h1>Tirage au sort réseaux sociaux</h1>
+        <p>Choisissez une plateforme. Chaque connecteur indique seulement les données qu’il peut récupérer et vérifier via son API officielle.</p>
+      </div>
+      <img src="/images/social-contests-hero.webp" width="960" height="960" alt="Illustration d’un tirage au sort pour réseaux sociaux" decoding="async" />
     </div>
   </header>
   <div class="container tool-page">
     <section class="social-provider-grid" aria-label="Plateformes disponibles">
       {socialProviders.map((provider) => (
         <a class="social-provider-card" href={`/tirage-au-sort-${provider.id}`}>
-          <span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span>
+          <span class="social-provider-card__top"><SocialProviderIcon provider={provider.id} /><span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span></span>
           <h2>{provider.name}</h2>
           <p>{provider.description}</p>
           <span class="tool-link">Voir les capacités <span aria-hidden="true">→</span></span>

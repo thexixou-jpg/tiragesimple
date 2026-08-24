@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SocialProviderIcon from './SocialProviderIcon.astro';
 import { getSocialProvider, type SocialProviderId } from '../data/social-contests';
 import YouTubeContestTool from './YouTubeContestTool.astro';
 
@@ -26,7 +27,7 @@ const capabilityLabels = [
   <header class="tool-hero">
     <div class="container tool-heading">
       <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux">Tirages réseaux sociaux</a>
-      <p class={statusClass}>{provider.statusLabel}</p>
+      <div class="social-tool-identity"><SocialProviderIcon provider={provider.id} /><p class={statusClass}>{provider.statusLabel}</p></div>
       <h1>Tirage au sort {provider.name}</h1>
       <p>{provider.intro}</p>
     </div>

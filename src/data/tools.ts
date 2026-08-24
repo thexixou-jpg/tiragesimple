@@ -1,4 +1,4 @@
-export type ToolCategory = 'roues' | 'tirages' | 'groupes' | 'hasard' | 'listes' | 'reseaux';
+export type ToolCategory = 'roues' | 'tirages' | 'groupes' | 'hasard' | 'listes';
 
 export interface ToolDefinition {
   slug: string;
@@ -17,13 +17,11 @@ export const categoryLabels: Record<ToolCategory, string> = {
   groupes: 'Groupes',
   hasard: 'Hasard',
   listes: 'Outils de listes',
-  reseaux: 'Réseaux sociaux',
 };
 
 export const tools: ToolDefinition[] = [
   { slug: 'roue-aleatoire', title: 'Roue aléatoire', shortTitle: 'Roue aléatoire', description: 'Ajoutez vos choix et laissez la roue désigner un gagnant.', category: 'roues', icon: '◉', related: ['tirage-au-sort', 'tirage-sans-remise', 'roue-de-la-chance'], popular: true },
   { slug: 'tirage-au-sort', title: 'Tirage au sort', shortTitle: 'Tirage au sort', description: 'Tirez un ou plusieurs gagnants dans une liste.', category: 'tirages', icon: '✦', related: ['roue-aleatoire', 'tirage-nom', 'tirage-sans-remise'], popular: true },
-  { slug: 'tirage-au-sort-youtube', title: 'Tirage au sort YouTube', shortTitle: 'YouTube', description: 'Importez les commentaires d’une vidéo ou d’un Short et tirez vos gagnants.', category: 'reseaux', icon: '▶', related: ['tirage-au-sort', 'roue-aleatoire', 'tirage-sans-remise'], popular: true },
   { slug: 'tirage-sans-remise', title: 'Tirage sans remise', shortTitle: 'Sans remise', description: 'Tirez chaque élément une seule fois, jusqu’à épuisement.', category: 'tirages', icon: '↻', related: ['tirage-au-sort', 'ordre-aleatoire', 'roue-aleatoire'] },
   { slug: 'generateur-equipes', title: 'Générateur d’équipes', shortTitle: 'Équipes', description: 'Créez rapidement des équipes aléatoires et équilibrées.', category: 'groupes', icon: '◆', related: ['generateur-groupes', 'melanger-liste', 'ordre-aleatoire'], popular: true },
   { slug: 'generateur-groupes', title: 'Générateur de groupes', shortTitle: 'Groupes', description: 'Répartissez une classe ou un atelier en groupes équilibrés.', category: 'groupes', icon: '⬡', related: ['generateur-equipes', 'ordre-aleatoire', 'melanger-liste'] },
