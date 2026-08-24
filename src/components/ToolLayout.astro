@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import AdSlot from './AdSlot.astro';
 import FAQ, { type FAQItem } from './FAQ.astro';
 import RelatedTools from './RelatedTools.astro';
+import ToolIcon from './ToolIcon.astro';
 
 interface Props {
   slug: string;
@@ -48,10 +49,22 @@ const structuredData = {
 
 <BaseLayout title={pageTitle} {description} canonicalPath={`/${slug}`}>
   <header class="tool-hero">
-    <div class="container tool-heading">
-      <a class="breadcrumb" href="/#tous-les-outils">Tous les outils</a>
-      <h1>{tool.title}</h1>
-      <p>{intro}</p>
+    <div class="container tool-heading tool-heading--visual">
+      <div>
+        <a class="breadcrumb" href="/#tous-les-outils">Tous les outils</a>
+        <h1>{tool.title}</h1>
+        <p>{intro}</p>
+        <ul class="tool-hero-points" aria-label="Atouts de l’outil">
+          <li>Gratuit</li><li>Sans inscription</li><li>Résultat instantané</li>
+        </ul>
+      </div>
+      <div class="tool-hero-art" data-category={tool.category} aria-hidden="true">
+        <span class="tool-hero-art__glow"></span>
+        <span class="tool-hero-art__ring tool-hero-art__ring--one"></span>
+        <span class="tool-hero-art__ring tool-hero-art__ring--two"></span>
+        <span class="tool-hero-art__icon"><ToolIcon name={tool.slug} /></span>
+        <span class="tool-hero-art__label">Prêt à lancer</span>
+      </div>
     </div>
   </header>
   <div class="container tool-page">

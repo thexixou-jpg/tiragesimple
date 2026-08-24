@@ -4,7 +4,7 @@ import ToolIcon from './ToolIcon.astro';
 interface Props { tool: ToolDefinition; compact?: boolean; }
 const { tool, compact = false } = Astro.props;
 ---
-<a class:list={['tool-card', { 'tool-card-compact': compact }]} href={`/${tool.slug}`}>
+<a class:list={['tool-card', { 'tool-card-compact': compact }]} data-category={tool.category} href={`/${tool.slug}`}>
   <span class="tool-icon"><ToolIcon name={tool.slug} /></span>
   <h3>{tool.title}</h3>
   <p>{tool.description}</p>
