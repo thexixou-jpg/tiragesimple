@@ -13,20 +13,28 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
   </div>
   <ol class="youtube-flow" aria-label="Étapes du tirage"><li class="is-current"><span>1</span><div><strong>Analyser</strong><small>Vérifiez la vidéo</small></div></li><li><span>2</span><div><strong>Importer</strong><small>Appliquez vos règles</small></div></li><li><span>3</span><div><strong>Tirer</strong><small>Partagez le résultat</small></div></li></ol>
   <form class="social-import-form" data-contest-form>
-    <label class="field">
-      <span>URL de la vidéo ou du Short</span>
-      <input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=…" required />
-      <small class="field-hint">Vidéos publiques uniquement. Les commentaires désactivés ne peuvent pas être importés.</small>
-    </label>
-    <div class="form-row">
-      <label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label>
-      <label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Source du concours</strong><small>La vidéo reste publique et ses commentaires doivent être activés.</small></div></div>
+      <label class="field">
+        <span>URL de la vidéo ou du Short</span>
+        <input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=…" required />
+        <small class="field-hint">Vidéos publiques uniquement. Les commentaires désactivés ne peuvent pas être importés.</small>
+      </label>
     </div>
-    <label class="field">
-      <span>Mot ou expression obligatoire <small>facultatif</small></span>
-      <input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. concours" />
-    </label>
-    <fieldset class="youtube-rules"><legend>Règles du concours</legend><p>Seuls les critères affichés sont réellement vérifiés pendant l’import.</p><div class="social-rule-grid">
+    <div class="youtube-form-section youtube-form-section--settings">
+      <div class="youtube-section-heading"><span>02</span><div><strong>Paramètres du tirage</strong><small>Configurez le nombre de gagnants et un filtre facultatif.</small></div></div>
+      <div class="youtube-settings-grid">
+        <div class="form-row">
+          <label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label>
+          <label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label>
+        </div>
+        <label class="field">
+          <span>Mot ou expression obligatoire <small>facultatif</small></span>
+          <input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. concours" />
+        </label>
+      </div>
+    </div>
+    <fieldset class="youtube-rules"><legend><span>03</span> Règles d’éligibilité</legend><p>Seuls les critères affichés sont réellement vérifiés pendant l’import.</p><div class="social-rule-grid">
         <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par chaîne.</small></span></label>
         <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>La chaîne de la vidéo ne participe pas.</small></span></label>
         <label class="option-card is-unavailable" title="Les réponses ne sont pas encore importées intégralement par le MVP."><input type="checkbox" disabled /><span><strong>Inclure les réponses</strong><small>Indisponible pour éviter un import incomplet.</small></span></label>

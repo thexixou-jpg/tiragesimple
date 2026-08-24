@@ -32,7 +32,7 @@ const capabilityLabels = [
       <p>{provider.intro}</p>
     </div>
   </header>
-  <div class="container tool-page">
+  <div class:list={['container', 'tool-page', { 'tool-page--youtube': providerId === 'youtube' }]}>
     {providerId === 'youtube' ? <YouTubeContestTool /> : <section class="tool-shell social-contest-shell" aria-labelledby="social-setup-title">
       <h2 id="social-setup-title">Connecteur {provider.name}</h2>
       <p>{provider.connection}</p>
