@@ -25,7 +25,7 @@ export interface SocialProviderDefinition {
 
 export const socialProviders: SocialProviderDefinition[] = [
   {
-    id: 'youtube', name: 'YouTube', status: 'beta', statusLabel: 'Bêta en préparation',
+    id: 'youtube', name: 'YouTube', status: 'available', statusLabel: 'Disponible',
     title: 'Tirage au sort YouTube : commentaires de vidéo | TirageSimple',
     description: 'Préparez un tirage au sort YouTube à partir des commentaires d’une vidéo ou d’un Short, avec filtres et participants uniques.',
     intro: 'Importez les commentaires d’une vidéo YouTube pour tirer des gagnants selon des règles transparentes.',

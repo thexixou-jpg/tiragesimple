@@ -7,4 +7,4 @@ export const mainNavigation = [
   { href: '/#tous-les-outils', label: 'Tous les outils' },
 ];
 
-export const categoryOrder: ToolCategory[] = ['roues', 'tirages', 'groupes', 'hasard', 'listes'];
+export const categoryOrder: ToolCategory[] = ['roues', 'tirages', 'reseaux', 'groupes', 'hasard', 'listes'];
