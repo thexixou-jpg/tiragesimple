@@ -4,7 +4,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import AdSlot from './AdSlot.astro';
 import FAQ, { type FAQItem } from './FAQ.astro';
 import RelatedTools from './RelatedTools.astro';
-import ToolIcon from './ToolIcon.astro';
 
 interface Props {
   slug: string;
@@ -18,6 +17,13 @@ const { slug, description, intro, faq = [] } = Astro.props;
 const tool = getTool(slug);
 const pageTitle = Astro.props.title ?? `${tool.title} gratuite | TirageSimple`;
 const url = new URL(`/${slug}`, Astro.site ?? Astro.url.origin).toString();
+const visualByCategory = {
+  roues: '/images/roulette-hero-premium.webp',
+  tirages: '/images/draw-hero-premium.webp',
+  groupes: '/images/teams-hero-premium.webp',
+  hasard: '/images/roulette-hero-premium.webp',
+  listes: '/images/draw-hero-premium.webp',
+} as const;
 const structuredData = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -62,7 +68,7 @@ const structuredData = {
         <span class="tool-hero-art__glow"></span>
         <span class="tool-hero-art__ring tool-hero-art__ring--one"></span>
         <span class="tool-hero-art__ring tool-hero-art__ring--two"></span>
-        <span class="tool-hero-art__icon"><ToolIcon name={tool.slug} /></span>
+        <img class="tool-hero-art__image" src={visualByCategory[tool.category]} width="960" height="960" alt="" decoding="async" />
         <span class="tool-hero-art__label">Prêt à lancer</span>
       </div>
     </div>
