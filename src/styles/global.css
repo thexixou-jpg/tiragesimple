@@ -528,8 +528,6 @@ h1, h2, h3 { line-height: 1.12; letter-spacing: -0.045em; }
   text-decoration: none;
   transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
-.tool-card::before { position: absolute; z-index: 0; width: 7rem; height: 7rem; top: -2.7rem; right: -2.4rem; border: 1px solid color-mix(in srgb, var(--card-accent, var(--color-primary)) 24%, transparent); border-radius: 50%; background: radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--card-accent, var(--color-primary)) 22%, transparent), transparent 64%); content: ''; }
-.tool-card > * { position: relative; z-index: 1; }
 .tool-card[data-category='roues'] { --card-accent: #7c5cff; }
 .tool-card[data-category='tirages'] { --card-accent: #db4a88; }
 .tool-card[data-category='groupes'] { --card-accent: #08a58b; }
