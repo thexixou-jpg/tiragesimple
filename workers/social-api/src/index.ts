@@ -34,6 +34,7 @@ async function publicDraw(env: Env, publicId: string): Promise<Record<string, un
     FROM contest_draws d JOIN contest_imports i ON i.id = d.import_id JOIN social_publications p ON p.id = i.publication_id
     WHERE d.public_id = ? AND d.public_visibility = 1 AND d.expires_at > ?`).bind(publicId, new Date().toISOString()).first<Record<string, string>>();
   if (!draw) return null;
+  const { excludedUsers, ...publicRules } = JSON.parse(draw.rules_snapshot_json) as ContestRules;
   const winners = await env.DB.prepare(`SELECT w.rank, w.kind, cp.username, cp.display_name
     FROM contest_winners w JOIN contest_draws d ON d.id = w.draw_id JOIN contest_participants cp ON cp.id = w.participant_id
     WHERE d.public_id = ? ORDER BY w.kind, w.rank`).bind(publicId).all<Record<string, string | number | null>>();
@@ -43,7 +44,7 @@ async function publicDraw(env: Env, publicId: string): Promise<Record<string, un
       createdAt: draw.created_at,
       platform: draw.provider,
       publication: { url: draw.canonical_url, title: draw.title },
-      rules: JSON.parse(draw.rules_snapshot_json),
+      rules: { ...publicRules, excludedAccountCount: excludedUsers.length },
       participantSnapshotHash: draw.participant_snapshot_hash,
       randomCommitmentHash: draw.random_commitment_hash,
       verificationSeed: draw.verification_seed,

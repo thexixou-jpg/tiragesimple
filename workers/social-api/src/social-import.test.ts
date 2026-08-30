@@ -79,6 +79,10 @@ describe('official social connectors', () => {
     expect(draw.winners).toHaveLength(1); expect(draw.alternates).toHaveLength(1);
     expect(draw.winners[0].providerUserId).not.toBe(draw.alternates[0].providerUserId);
     expect(draw.publicUrl).toContain('https://example.test/tirage/');
+    const publicResponse = await worker.fetch(new Request(`https://example.test/v1/draws/${draw.publicId}`), env);
+    const publicPayload = await publicResponse.json() as { draw: { rules: Record<string, unknown> } };
+    expect(publicPayload.draw.rules).not.toHaveProperty('excludedUsers');
+    expect(publicPayload.draw.rules).toHaveProperty('excludedAccountCount', 0);
   });
   it('fails a partial import rather than drawing from it', async () => {
     const { env, jobs } = fixture();

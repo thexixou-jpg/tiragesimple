@@ -52,6 +52,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
     if (!eligibleUrl(url)) { say(`Utilisez un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : 'YouTube vers une vidéo ou un Short'}.`); return; }
+    resetDraw();
     const current = ++revision;
     analyzedUrl = ''; importButton.disabled = true; publication.hidden = true;
     preview.dataset.state = 'loading'; say('Chargement de l’aperçu…');
@@ -108,7 +109,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     window.clearTimeout(previewTimer);
     if (eligibleUrl(input.value.trim())) previewTimer = window.setTimeout(() => { void analyze(); }, 700);
   });
-  form.addEventListener('change', event => { if (event.target !== input && !busy) { revision++; resetDraw(); say('Règles modifiées : importez à nouveau pour les appliquer.'); } });
+  form.addEventListener('change', event => { if (event.target !== input && !busy) { if (importId) revision++; resetDraw(); say('Règles modifiées : importez à nouveau pour les appliquer.'); } });
   importButton.addEventListener('click', async () => {
     if (busy || !ready || analyzedUrl !== input.value.trim() || !form.reportValidity()) return;
     const rules = readRules(); // Read before disabling form controls.
