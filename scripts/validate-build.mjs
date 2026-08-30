@@ -40,7 +40,7 @@ for (const file of pages) {
   if (!isNoindex && page !== 'index.html' && !legalPages.has(page) && wordCount < 280) {
     failures.push(`${page}: contenu indexable trop court (${wordCount} mots)`);
   }
-  const hasAdsenseScript = html.includes('data-adsense-script');
+  const hasAdsenseScript = html.includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1857504175964365');
   if (advertisingPages.has(page) !== hasAdsenseScript) {
     failures.push(`${page}: chargement AdSense non conforme à la liste des pages éditoriales autorisées`);
   }

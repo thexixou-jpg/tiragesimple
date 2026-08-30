@@ -35,7 +35,7 @@ const { title, description, canonicalPath = Astro.url.pathname, noindex = false,
       })();
     </script>
     <SeoHead {title} {description} {canonicalPath} {noindex} {ogType} {publishedTime} {modifiedTime} />
-    {allowAdvertising && <script is:inline async data-adsense-script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1857504175964365" crossorigin="anonymous"></script>}
+    {allowAdvertising && <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1857504175964365" crossorigin="anonymous"></script>}
   </head>
   <body>
     <a class="skip-link" href="#main-content">Aller au contenu</a>
