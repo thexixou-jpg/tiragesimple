@@ -2,13 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SocialProviderIcon from '../components/SocialProviderIcon.astro';
 import { socialProviders } from '../data/social-contests';
+const availableProviders = socialProviders.filter((provider) => provider.status === 'available');
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: 'Tirage au sort réseaux sociaux',
   url: 'https://tiragesimple.fr/tirage-au-sort-reseaux-sociaux/',
   inLanguage: 'fr-FR',
-  mainEntity: { '@type': 'ItemList', itemListElement: socialProviders.map((provider, position) => ({ '@type': 'ListItem', position: position + 1, name: `Tirage au sort ${provider.name}`, url: `https://tiragesimple.fr/tirage-au-sort-${provider.id}/` })) },
+  mainEntity: { '@type': 'ItemList', itemListElement: availableProviders.map((provider, position) => ({ '@type': 'ListItem', position: position + 1, name: `Tirage au sort ${provider.name}`, url: `https://tiragesimple.fr/tirage-au-sort-${provider.id}/` })) },
 };
 ---
 
@@ -26,18 +27,35 @@ const structuredData = {
   </header>
   <div class="container tool-page">
     <section class="social-provider-grid" aria-label="Plateformes disponibles">
-      {socialProviders.map((provider) => (
+      {socialProviders.map((provider) => provider.status === 'available' ? (
         <a class="social-provider-card" href={`/tirage-au-sort-${provider.id}`}>
           <span class="social-provider-card__top"><SocialProviderIcon provider={provider.id} /><span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span></span>
           <h2>{provider.name}</h2>
           <p>{provider.description}</p>
           <span class="tool-link">Voir les capacités <span aria-hidden="true">→</span></span>
         </a>
+      ) : (
+        <article class="social-provider-card social-provider-card--inactive">
+          <span class="social-provider-card__top"><SocialProviderIcon provider={provider.id} /><span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span></span>
+          <h2>{provider.name}</h2>
+          <p>{provider.description}</p>
+          <span class="tool-link">Connecteur non proposé</span>
+        </article>
       ))}
     </section>
     <article class="tool-content prose">
       <h2>Des tirages basés sur les règles réellement vérifiables</h2>
       <p>Un commentaire, une réponse, un mot-clé ou une mention ne sont proposés comme condition que si l’API de la plateforme permet de les récupérer. TirageSimple ne demandera jamais de mot de passe, cookie ou jeton collé manuellement.</p>
+      <h2>Quelle plateforme fonctionne aujourd’hui ?</h2>
+      <p>Le connecteur YouTube est opérationnel pour les commentaires de vidéos et de Shorts publics. Il utilise l’API officielle, identifie les participants par leur chaîne et permet un filtre textuel. Les likes, abonnements et publications Communauté ne sont pas annoncés comme vérifiés.</p>
+      <h2>Pourquoi Instagram et Facebook restent limités</h2>
+      <p>Les API Meta réservent l’accès utile aux comptes professionnels et aux Pages autorisées, avec OAuth, permissions et examen de l’application. Une publication d’un profil personnel ou d’un compte qui n’a pas accordé l’accès ne peut pas être transformée proprement en concours automatique. Ces cartes décrivent l’état du projet mais ne renvoient plus vers un faux outil.</p>
+      <h2>Pourquoi X et TikTok ne sont pas proposés</h2>
+      <p>L’accès nécessaire sur X dépend d’offres API payantes et de quotas qui ne permettent pas encore de garantir un service viable. L’API TikTok standard ne fournit pas les commentaires pour ce cas d’usage. TirageSimple préfère afficher « non pris en charge » plutôt que récupérer des données par scraping ou demander un cookie de compte.</p>
+      <h2>Alternative lorsqu’un connecteur manque</h2>
+      <p>Si la plateforme permet à l’organisateur d’exporter légalement sa propre liste, celle-ci peut être nettoyée puis utilisée dans le <a href="/tirage-au-sort">tirage au sort classique</a>. Cette solution ne prouve pas automatiquement l’origine ni l’éligibilité des entrées : l’organisateur doit donc contrôler la liste et expliquer sa méthode.</p>
+      <h2>Avant de lancer un concours social</h2>
+      <p>Annoncez les dates, les territoires concernés, les critères réellement contrôlables, le nombre de gagnants et la méthode de contact. N’imposez pas une action que l’outil ne pourra pas vérifier. Pour YouTube, notre <a href="/guides/concours-youtube-commentaires">guide dédié</a> détaille les doublons, mots obligatoires et limites de l’import.</p>
     </article>
   </div>
 </BaseLayout>

@@ -4,9 +4,12 @@ interface Props {
   description: string;
   canonicalPath: string;
   noindex?: boolean;
+  ogType?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
-const { title, description, canonicalPath, noindex = false } = Astro.props;
+const { title, description, canonicalPath, noindex = false, ogType = 'website', publishedTime, modifiedTime } = Astro.props;
 const canonical = new URL(canonicalPath, Astro.site ?? Astro.url.origin);
 const socialImage = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
 ---
@@ -18,7 +21,7 @@ const socialImage = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
 <link rel="canonical" href={canonical} />
 <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'} />
 <meta name="googlebot" content={noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'} />
-<meta property="og:type" content="website" />
+<meta property="og:type" content={ogType} />
 <meta property="og:locale" content="fr_FR" />
 <meta property="og:site_name" content="TirageSimple" />
 <meta property="og:title" content={title} />
@@ -29,6 +32,9 @@ const socialImage = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="TirageSimple — outils de tirage au sort gratuits" />
+{ogType === 'article' && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{ogType === 'article' && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+{ogType === 'article' && <meta property="article:author" content="Bertrand Da Silva" />}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />

@@ -4,5 +4,11 @@ const faq = [{ question: 'La liste originale est-elle modifiée ?', answer: 'Non
 ---
 <ToolLayout slug="melanger-liste" title="Mélanger une liste aléatoirement en ligne | TirageSimple" description="Mélangez gratuitement une liste de noms ou d’éléments et copiez le nouvel ordre en un clic." intro="Collez votre liste et réorganisez-la instantanément au hasard." {faq}>
   <SimpleListTool slot="tool" mode="shuffle" />
-  <div slot="content"><h2>Comment mélanger une liste ?</h2><p>Ajoutez un élément par ligne, lancez le mélange puis copiez le résultat ou remplacez la liste de départ.</p><h2>Un mélange sans modifier vos données</h2><p>L’algorithme crée une nouvelle liste et ne modifie jamais l’original tant que vous ne le demandez pas.</p></div>
+  <div slot="content">
+    <h2>Comment mélanger une liste ?</h2><p>Ajoutez un élément par ligne, contrôlez le compteur, puis lancez le mélange. Le résultat apparaît séparément : vous pouvez le copier, recommencer ou remplacer volontairement la liste de départ.</p>
+    <h2>Un mélange sans modifier l’original</h2><p>L’algorithme travaille sur une copie. Votre ordre initial reste donc disponible tant que vous n’utilisez pas l’action de remplacement. Cette séparation est utile pour comparer deux répartitions ou revenir à la version reçue.</p>
+    <h2>Que deviennent les doublons ?</h2><p>Deux lignes identiques restent deux éléments distincts. Elles peuvent donc se retrouver à deux positions différentes après le mélange. Si les doublons sont des erreurs de saisie, supprimez-les avant l’opération ; s’ils représentent deux objets ou deux chances réelles, conservez-les.</p>
+    <h2>Un vrai mélange, pas un simple décalage</h2><p>La liste est mélangée avec Fisher–Yates et le moteur Web Crypto : chaque position est échangée avec une position choisie dans la partie restante. L’outil ne trie pas les éléments et n’essaie pas de séparer les noms similaires.</p>
+    <h2>Quand utiliser l’ordre numéroté ?</h2><p>Pour un paquet de questions, une playlist de travail ou des cartes, le mélange brut suffit. Si chaque ligne doit recevoir explicitement une position de passage, utilisez plutôt le <a href="/ordre-aleatoire">générateur d’ordre aléatoire</a>, qui ajoute une numérotation prête à copier.</p>
+  </div>
 </ToolLayout>

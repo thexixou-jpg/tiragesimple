@@ -24,13 +24,23 @@ const structuredData = {
     </div>
   </header>
   <section class="section">
-    <div class="container guide-grid">
-      {guides.map((guide) => <article class="guide-card">
-        <div><span>{guide.category}</span><small>{guide.readingTime}</small></div>
-        <h2><a href={`/guides/${guide.slug}`}>{guide.title}</a></h2>
-        <p>{guide.description}</p>
-        <a class="text-link" href={`/guides/${guide.slug}`}>Lire le guide →</a>
-      </article>)}
+    <div class="container">
+      <div class="guide-grid">
+        {guides.map((guide) => <article class="guide-card">
+          <div><span>{guide.category}</span><small>{guide.readingTime}</small></div>
+          <h2><a href={`/guides/${guide.slug}`}>{guide.title}</a></h2>
+          <p>{guide.description}</p>
+          <a class="text-link" href={`/guides/${guide.slug}`}>Lire le guide →</a>
+        </article>)}
+      </div>
+      <article class="guide-hub-content prose">
+        <h2>Choisir le bon guide</h2>
+        <p>Commencez par le résultat que vous devez pouvoir expliquer. Pour un gagnant ou plusieurs lots, le guide sur la transparence couvre la liste, les doublons, la remise et la preuve du résultat. Pour répartir des personnes, le guide des équipes distingue équilibre des effectifs et équilibre des niveaux. Pour une vidéo, le guide YouTube précise les données réellement accessibles par l’API.</p>
+        <h2>Une règle claire compte plus qu’une animation</h2>
+        <p>Une roue spectaculaire ne corrige pas une liste incomplète. Avant chaque usage, fixez les critères, contrôlez le nombre d’entrées et choisissez ce que devient un résultat déjà sélectionné. Les guides expliquent ces décisions sans présenter le hasard comme une certification juridique.</p>
+        <h2>Des contenus reliés aux outils réels</h2>
+        <p>Chaque recommandation correspond à une option disponible sur TirageSimple ou à une limite explicitement documentée. Les pages sont mises à jour lorsque le moteur, les API ou les règles de confidentialité changent. Pour comprendre l’implémentation générale, consultez la page <a href="/a-propos">À propos et méthode</a>.</p>
+      </article>
     </div>
   </section>
 </BaseLayout>

@@ -16,6 +16,7 @@ interface Props {
 
 const { slug, description, intro, faq = [], showAd = false } = Astro.props;
 const tool = getTool(slug);
+const advertisingEligible = new Set(['roue-aleatoire', 'tirage-au-sort', 'generateur-equipes']).has(slug);
 const pageTitle = Astro.props.title ?? `${tool.title} gratuite | TirageSimple`;
 const url = new URL(`/${slug}`, Astro.site ?? Astro.url.origin).toString();
 const visualByCategory = {
@@ -40,6 +41,9 @@ const structuredData = {
       browserRequirements: 'JavaScript requis',
       isAccessibleForFree: true,
       inLanguage: 'fr-FR',
+      dateModified: '2026-08-30',
+      author: { '@type': 'Person', name: 'Bertrand Da Silva', url: new URL('/a-propos', Astro.site ?? Astro.url.origin).toString() },
+      publisher: { '@type': 'Organization', name: 'TirageSimple', url: new URL('/', Astro.site ?? Astro.url.origin).toString() },
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
       featureList: ['Sans inscription', 'Fonctionnement dans le navigateur', 'Résultat immédiat'],
     },
@@ -54,7 +58,7 @@ const structuredData = {
 };
 ---
 
-<BaseLayout title={pageTitle} {description} canonicalPath={`/${slug}`}>
+<BaseLayout title={pageTitle} {description} canonicalPath={`/${slug}`} allowAdvertising={advertisingEligible}>
   <header class="tool-hero">
     <div class="container tool-heading tool-heading--visual">
       <div>
@@ -81,6 +85,7 @@ const structuredData = {
     {showAd && <AdSlot />}
     <article class="tool-content prose">
       <slot name="content" />
+      <footer class="content-review-note"><span>Contenu vérifié le 30 août 2026 par Bertrand Da Silva.</span><a href="/a-propos">Méthode et engagements →</a></footer>
     </article>
     {faq.length > 0 && <FAQ items={faq} />}
     <RelatedTools tools={getRelatedTools(slug)} />

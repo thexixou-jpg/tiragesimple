@@ -4,5 +4,11 @@ const faq = [{ question: 'Pile et face ont-ils la même probabilité ?', answer:
 ---
 <ToolLayout slug="pile-ou-face" title="Pile ou face en ligne gratuit | TirageSimple" description="Lancez une pièce virtuelle et obtenez pile ou face instantanément. Gratuit, rapide et sans inscription." intro="Lancez une pièce virtuelle et laissez le hasard trancher entre pile et face." {faq}>
   <QuickRandomTool slot="tool" mode="coin" />
-  <div slot="content"><h2>Comment jouer à pile ou face ?</h2><p>Appuyez sur le bouton pour lancer la pièce. Le résultat et les derniers lancers restent visibles.</p><h2>Une décision simple</h2><p>Les deux faces sont choisies avec la même probabilité grâce au moteur aléatoire commun.</p></div>
+  <div slot="content">
+    <h2>Comment jouer à pile ou face ?</h2><p>Attribuez une option à pile et l’autre à face avant de lancer, puis appuyez sur le bouton. Le résultat et un court historique de la session restent visibles pour éviter d’oublier les derniers lancers.</p>
+    <h2>Une chance sur deux à chaque lancer</h2><p>Le moteur choisit entre deux valeurs avec la même probabilité. Chaque lancer est indépendant : cinq résultats « pile » consécutifs ne rendent pas « face » plus probable au lancer suivant. L’historique décrit le passé, il ne prédit pas la suite.</p>
+    <h2>Pourquoi une série n’est pas une anomalie</h2><p>Sur un petit nombre d’essais, l’équilibre exact est rare. Dix lancers peuvent produire sept piles et trois faces sans que l’outil soit biaisé. Les proportions se rapprochent généralement de la moitié sur de très grandes séries, sans obligation d’alternance.</p>
+    <h2>Départager deux options comparables</h2><p>Pile ou face convient pour choisir le premier joueur, répartir un côté de terrain ou trancher entre deux activités de même importance. Pour plus de deux possibilités, utilisez la <a href="/roue-aleatoire">roue aléatoire</a>. Pour une décision sensible ou irréversible, ne remplacez pas l’analyse par un résultat aléatoire.</p>
+    <h2>Différence avec une pièce physique</h2><p>Une pièce réelle peut être influencée par sa forme, la surface ou la manière de la lancer. Ici, l’animation illustre un choix numérique produit par Web Crypto ; elle ne simule pas la trajectoire physique d’une pièce.</p>
+  </div>
 </ToolLayout>

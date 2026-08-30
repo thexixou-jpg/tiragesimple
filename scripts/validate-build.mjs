@@ -13,9 +13,40 @@ function htmlFiles(directory) {
 const failures = [];
 const pages = htmlFiles(dist);
 const uniqueValues = new Map();
+const advertisingPages = new Set([
+  'index.html',
+  'a-propos/index.html',
+  'roue-aleatoire/index.html',
+  'tirage-au-sort/index.html',
+  'generateur-equipes/index.html',
+  'tirage-au-sort-youtube/index.html',
+  'guides/concours-youtube-commentaires/index.html',
+  'guides/creer-equipes-aleatoires/index.html',
+  'guides/tirage-au-sort-transparent/index.html',
+]);
+const legalPages = new Set(['mentions-legales/index.html', 'confidentialite/index.html', 'cookies/index.html']);
 for (const file of pages) {
   const html = readFileSync(file, 'utf8');
   const page = relative(dist, file).replaceAll('\\', '/');
+  const isNoindex = /<meta name="robots" content="noindex/u.test(html);
+  const mainText = (html.match(/<main[\s\S]*?<\/main>/u)?.[0] ?? '')
+    .replace(/<script[\s\S]*?<\/script>/gu, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gu, ' ')
+    .replace(/<[^>]+>/gu, ' ')
+    .replace(/&[^;]+;/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim();
+  const wordCount = mainText ? mainText.split(' ').length : 0;
+  if (!isNoindex && page !== 'index.html' && !legalPages.has(page) && wordCount < 280) {
+    failures.push(`${page}: contenu indexable trop court (${wordCount} mots)`);
+  }
+  const hasAdsenseScript = html.includes('data-adsense-script');
+  if (advertisingPages.has(page) !== hasAdsenseScript) {
+    failures.push(`${page}: chargement AdSense non conforme à la liste des pages éditoriales autorisées`);
+  }
+  if (page.startsWith('guides/') && page !== 'guides/index.html' && !html.includes('<meta property="og:type" content="article"')) {
+    failures.push(`${page}: métadonnée OpenGraph Article manquante`);
+  }
   const required = [
     ['title', /<title>[^<]+<\/title>/u],
     ['description', /<meta name="description" content="[^"]+"/u],
@@ -65,6 +96,15 @@ for (const file of pages) {
 
 for (const asset of ['robots.txt', 'sitemap-index.xml', 'og.jpg', '404.html']) {
   if (!existsSync(join(dist, asset))) failures.push(`Fichier absent : ${asset}`);
+}
+
+const headersPath = join(dist, '_headers');
+if (!existsSync(headersPath)) failures.push('Fichier absent : _headers');
+else {
+  const headers = readFileSync(headersPath, 'utf8');
+  if (!headers.includes("frame-ancestors 'none'")) failures.push('_headers : protection frame-ancestors absente');
+  if (!headers.includes("object-src 'none'")) failures.push('_headers : protection object-src absente');
+  if (!headers.includes("script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:")) failures.push('_headers : CSP incompatible avec le script AdSense');
 }
 
 const sitemapPath = join(dist, 'sitemap-0.xml');

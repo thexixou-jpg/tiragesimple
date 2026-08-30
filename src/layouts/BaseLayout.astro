@@ -9,9 +9,13 @@ interface Props {
   description: string;
   canonicalPath?: string;
   noindex?: boolean;
+  allowAdvertising?: boolean;
+  ogType?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
-const { title, description, canonicalPath = Astro.url.pathname, noindex = false } = Astro.props;
+const { title, description, canonicalPath = Astro.url.pathname, noindex = false, allowAdvertising = false, ogType = 'website', publishedTime, modifiedTime } = Astro.props;
 ---
 
 <!doctype html>
@@ -30,8 +34,8 @@ const { title, description, canonicalPath = Astro.url.pathname, noindex = false 
         } catch { /* Keep the default light theme when storage is unavailable. */ }
       })();
     </script>
-    <SeoHead {title} {description} {canonicalPath} {noindex} />
-    <script is:inline async data-adsense-script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1857504175964365" crossorigin="anonymous"></script>
+    <SeoHead {title} {description} {canonicalPath} {noindex} {ogType} {publishedTime} {modifiedTime} />
+    {allowAdvertising && <script is:inline async data-adsense-script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1857504175964365" crossorigin="anonymous"></script>}
   </head>
   <body>
     <a class="skip-link" href="#main-content">Aller au contenu</a>

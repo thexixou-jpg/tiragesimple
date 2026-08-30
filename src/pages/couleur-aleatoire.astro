@@ -4,5 +4,10 @@ const faq = [{ question: 'Quels formats sont affichés ?', answer: 'Chaque coule
 ---
 <ToolLayout slug="couleur-aleatoire" title="Générateur de couleur aléatoire – HEX, RGB, HSL | TirageSimple" description="Générez une couleur aléatoire et copiez instantanément ses codes HEX, RGB et HSL." intro="Découvrez une nouvelle couleur et récupérez ses codes HEX, RGB et HSL." {faq}>
   <ColorTool slot="tool" />
-  <div slot="content"><h2>Comment générer une couleur ?</h2><p>Un clic produit trois composantes aléatoires et affiche immédiatement la couleur dans les principaux formats web.</p><h2>HEX, RGB et HSL</h2><p>Copiez le format adapté à votre outil de design ou à votre feuille de style.</p></div>
+  <div slot="content">
+    <h2>Comment générer une couleur ?</h2><p>Un clic produit indépendamment trois composantes rouge, verte et bleue comprises entre 0 et 255. L’aperçu et les trois notations sont ensuite calculés depuis cette même couleur : changer de format ne change donc pas le rendu.</p>
+    <h2>Quelle différence entre HEX, RGB et HSL ?</h2><p>HEX est la notation compacte la plus courante dans les feuilles de style, par exemple <code>#6757E8</code>. RGB expose directement les intensités rouge, verte et bleue. HSL décrit une teinte, une saturation et une luminosité ; il est souvent plus pratique pour créer ensuite une variante plus claire, plus sombre ou moins saturée.</p>
+    <h2>Utiliser une couleur aléatoire dans un projet</h2><p>L’outil peut servir de point de départ pour une affiche, un prototype, une palette d’atelier ou un exercice de design. Vérifiez toujours le contraste avant d’utiliser la couleur pour du texte : une couleur visuellement intéressante n’est pas automatiquement lisible sur fond clair ou sombre.</p>
+    <h2>Une inspiration, pas une palette complète</h2><p>Chaque clic choisit une couleur sans tenir compte des couleurs précédentes, d’une charte existante ou des règles d’accessibilité. Pour construire une palette cohérente, partez du résultat qui vous plaît puis ajustez sa luminosité et sa saturation dans votre logiciel de création. Les codes peuvent être copiés séparément sans transmettre votre choix à un serveur.</p>
+  </div>
 </ToolLayout>

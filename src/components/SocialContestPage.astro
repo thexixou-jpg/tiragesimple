@@ -24,7 +24,7 @@ const capabilityLabels = [
 ] as const;
 ---
 
-<BaseLayout title={provider.title} description={provider.description} canonicalPath={`/tirage-au-sort-${provider.id}`} noindex={!isIndexable}>
+<BaseLayout title={provider.title} description={provider.description} canonicalPath={`/tirage-au-sort-${provider.id}`} noindex={!isIndexable} allowAdvertising={providerId === 'youtube'}>
   <header class="tool-hero">
     <div class="container tool-heading">
       <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux">Tirages réseaux sociaux</a>

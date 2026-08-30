@@ -4,5 +4,10 @@ const faq = [{ question: 'Quelles lettres sont utilisées ?', answer: 'Par défa
 ---
 <ToolLayout slug="lettre-aleatoire" title="Générateur de lettre aléatoire A à Z | TirageSimple" description="Tirez une ou plusieurs lettres aléatoires de A à Z, avec option lettres accentuées et sans doublons." intro="Générez des lettres au hasard, avec ou sans accents et répétitions." {faq}>
   <LetterTool slot="tool" />
-  <div slot="content"><h2>Comment tirer une lettre aléatoire ?</h2><p>Choisissez la quantité, les accents et l’autorisation des doublons, puis générez votre résultat.</p><h2>Jeux de lettres et apprentissage</h2><p>L’outil convient aux exercices, jeux de vocabulaire et choix de catégories.</p></div>
+  <div slot="content">
+    <h2>Comment tirer une lettre aléatoire ?</h2><p>Choisissez la quantité, décidez si les lettres accentuées françaises rejoignent l’alphabet et indiquez si les répétitions sont autorisées. Le résultat est généré dans le navigateur et peut être relancé immédiatement.</p>
+    <h2>Avec ou sans doublons</h2><p>Avec doublons, chaque tirage est indépendant : une même lettre peut apparaître plusieurs fois. Sans doublons, chaque caractère sélectionné est retiré de l’ensemble disponible. La quantité maximale dépend alors de l’alphabet choisi, car il est impossible de produire davantage de lettres uniques qu’il n’en contient.</p>
+    <h2>Pourquoi les accents sont optionnels</h2><p>De nombreux jeux utilisent uniquement A à Z pour rester compatibles avec un plateau ou un dictionnaire simplifié. Les accents deviennent utiles pour travailler le français écrit, distinguer des sons ou créer des contraintes plus variées. Activez-les seulement si les règles de votre activité les considèrent comme des caractères distincts.</p>
+    <h2>Jeux de lettres et apprentissage</h2><p>Une lettre peut lancer une recherche de vocabulaire, déterminer une catégorie du petit bac, créer une initiale fictive ou servir d’exercice de prononciation. Pour obtenir un ordre complet de mots plutôt qu’un ensemble de caractères, utilisez <a href="/melanger-liste">le mélangeur de liste</a>. L’outil ne vérifie pas qu’un mot existe : l’animateur reste responsable de la règle du jeu.</p>
+  </div>
 </ToolLayout>

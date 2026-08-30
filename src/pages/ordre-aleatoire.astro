@@ -4,5 +4,11 @@ const faq = [{ question: 'L’ordre est-il numéroté ?', answer: 'Oui. Chaque �
 ---
 <ToolLayout slug="ordre-aleatoire" title="Générateur d’ordre aléatoire en ligne | TirageSimple" description="Générez un ordre aléatoire numéroté à partir d’une liste de noms ou d’éléments." intro="Créez un ordre de passage impartial, numéroté et prêt à copier." {faq}>
   <SimpleListTool slot="tool" mode="order" />
-  <div slot="content"><h2>Créer un ordre de passage</h2><p>Collez les participants puis générez une liste numérotée. Un nouveau clic suffit pour remélanger.</p><h2>Pour les présentations et les tours</h2><p>Utilisez cet outil en classe, en réunion, pendant un tournoi ou pour répartir un ordre de parole.</p></div>
+  <div slot="content">
+    <h2>Créer un ordre de passage</h2><p>Collez les participants, un par ligne, puis générez une liste numérotée de 1 à N. Le nombre attribué correspond à la position dans le résultat, pas à une valeur choisie séparément.</p>
+    <h2>Fixer la règle avant le premier mélange</h2><p>Si l’ordre doit être impartial, annoncez qu’une seule génération sera conservée. Relancer jusqu’à obtenir une séquence préférée contredit le principe du hasard. Prévoyez seulement les motifs légitimes de recommencement, par exemple un absent oublié ou une ligne saisie deux fois.</p>
+    <h2>Gérer les doublons et les homonymes</h2><p>Deux lignes identiques sont considérées comme deux entrées. Pour deux personnes portant le même prénom, ajoutez une initiale ou un repère neutre afin de distinguer leur place. Si le doublon est accidentel, corrigez la liste avant la génération.</p>
+    <h2>Présentations, tournois et tours de parole</h2><p>L’ordre numéroté convient aux exposés, passages à l’oral, tirages de couloirs, tours de jeu ou priorités de présentation. Pour simplement réorganiser des éléments sans numéro, le <a href="/melanger-liste">mélangeur de liste</a> est plus direct. Pour retirer chaque personne au fur et à mesure, choisissez le <a href="/tirage-sans-remise">tirage sans remise</a>.</p>
+    <h2>Confidentialité de la liste</h2><p>La génération se déroule localement dans le navigateur. Utilisez néanmoins des prénoms ou identifiants suffisants et évitez d’inscrire des informations sensibles dans un ordre destiné à être copié ou projeté publiquement.</p>
+  </div>
 </ToolLayout>
