@@ -18,7 +18,7 @@ const { slug, description, intro, faq = [], showAd = false } = Astro.props;
 const tool = getTool(slug);
 const advertisingEligible = new Set(['roue-aleatoire', 'tirage-au-sort', 'generateur-equipes']).has(slug);
 const pageTitle = Astro.props.title ?? `${tool.title} gratuite | TirageSimple`;
-const url = new URL(`/${slug}`, Astro.site ?? Astro.url.origin).toString();
+const url = new URL(`/${slug}/`, Astro.site ?? Astro.url.origin).toString();
 const visualByCategory = {
   roues: '/images/roulette-hero-premium.webp',
   tirages: '/images/draw-hero-premium.webp',

@@ -2,7 +2,7 @@
 import QuickRandomTool from '../components/QuickRandomTool.astro'; import ToolLayout from '../components/ToolLayout.astro';
 const faq = [{ question: 'Pile et face ont-ils la même probabilité ?', answer: 'Oui. Chaque lancer choisit équitablement entre les deux résultats.' }, { question: 'Puis-je revoir les derniers lancers ?', answer: 'Oui. Un court historique de la session est affiché sous la pièce.' }];
 ---
-<ToolLayout slug="pile-ou-face" title="Pile ou face en ligne gratuit | TirageSimple" description="Lancez une pièce virtuelle et obtenez pile ou face instantanément. Gratuit, rapide et sans inscription." intro="Lancez une pièce virtuelle et laissez le hasard trancher entre pile et face." {faq}>
+<ToolLayout slug="pile-ou-face" title="Pile ou face en ligne gratuit | TirageSimple" description="Utilisez ce générateur pile ou face en ligne pour lancer une pièce virtuelle gratuitement. Résultat instantané, équitable et sans inscription." intro="Lancez une pièce virtuelle gratuite et laissez le hasard trancher immédiatement entre pile et face." {faq}>
   <QuickRandomTool slot="tool" mode="coin" />
   <div slot="content">
     <h2>Comment jouer à pile ou face ?</h2><p>Attribuez une option à pile et l’autre à face avant de lancer, puis appuyez sur le bouton. Le résultat et un court historique de la session restent visibles pour éviter d’oublier les derniers lancers.</p>

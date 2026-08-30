@@ -20,7 +20,9 @@ export const categoryLabels: Record<ToolCategory, string> = {
 };
 
 export const tools: ToolDefinition[] = [
-  { slug: 'roue-aleatoire', title: 'Roue aléatoire', shortTitle: 'Roue aléatoire', description: 'Ajoutez vos choix et laissez la roue désigner un gagnant.', category: 'roues', icon: '◉', related: ['tirage-au-sort', 'tirage-sans-remise', 'roue-de-la-chance'], popular: true },
+  { slug: 'roue-aleatoire', title: 'Roue aléatoire', shortTitle: 'Roue aléatoire', description: 'Ajoutez vos choix et laissez la roue désigner un gagnant.', category: 'roues', icon: '◉', related: ['roue-des-prenoms', 'roue-alphabet', 'tirage-au-sort'], popular: true },
+  { slug: 'roue-des-prenoms', title: 'Roue des prénoms', shortTitle: 'Roue des prénoms', description: 'Tirez un prénom au hasard avec une roue prête à personnaliser.', category: 'roues', icon: 'Aa', related: ['roue-aleatoire', 'tirage-nom', 'roue-alphabet'] },
+  { slug: 'roue-alphabet', title: 'Roue de l’alphabet', shortTitle: 'Roue alphabet', description: 'Faites tourner une roue contenant les 26 lettres de A à Z.', category: 'roues', icon: 'AZ', related: ['lettre-aleatoire', 'roue-aleatoire', 'roue-des-prenoms'] },
   { slug: 'tirage-au-sort', title: 'Tirage au sort', shortTitle: 'Tirage au sort', description: 'Tirez un ou plusieurs gagnants dans une liste.', category: 'tirages', icon: '✦', related: ['roue-aleatoire', 'tirage-nom', 'tirage-sans-remise'], popular: true },
   { slug: 'tirage-sans-remise', title: 'Tirage sans remise', shortTitle: 'Sans remise', description: 'Tirez chaque élément une seule fois, jusqu’à épuisement.', category: 'tirages', icon: '↻', related: ['tirage-au-sort', 'ordre-aleatoire', 'roue-aleatoire'] },
   { slug: 'generateur-equipes', title: 'Générateur d’équipes', shortTitle: 'Équipes', description: 'Créez rapidement des équipes aléatoires et équilibrées.', category: 'groupes', icon: '◆', related: ['generateur-groupes', 'melanger-liste', 'ordre-aleatoire'], popular: true },

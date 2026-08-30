@@ -20,6 +20,12 @@ interface HistoryState { wheel?: HistoryEntry[]; chance?: HistoryEntry[]; }
 const STANDARD_COLORS = ['#6757e8', '#198cff', '#8b5cf6', '#0ea5a4', '#ec4899', '#f59e0b', '#4f46e5', '#06b6d4'];
 const CHANCE_COLORS = ['#f43f5e', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#84cc16'];
 const FULL_TURN = Math.PI * 2;
+const WHEEL_PRESETS = {
+  firstnames: ['Alice', 'Benoît', 'Chloé', 'David', 'Emma', 'Farid'],
+  alphabet: Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)),
+  yesno: ['Oui', 'Non'],
+  numbers: Array.from({ length: 10 }, (_, index) => String(index + 1)),
+} as const;
 
 function initWheel(root: HTMLElement): void {
   if (root.dataset.initialized === 'true') return;
@@ -37,6 +43,7 @@ function initWheel(root: HTMLElement): void {
   const shareButton = root.querySelector<HTMLButtonElement>('[data-share-button]');
   const shareResultButton = root.querySelector<HTMLButtonElement>('[data-share-result="wheel"]');
   const sizeButtons = root.querySelectorAll<HTMLButtonElement>('[data-wheel-size]');
+  const presetButtons = root.querySelectorAll<HTMLButtonElement>('[data-wheel-preset]');
   const status = root.querySelector<HTMLElement>('[data-wheel-status]');
   const resultCard = root.querySelector<HTMLElement>('[data-result-card]');
   const resultValue = root.querySelector<HTMLElement>('[data-result-value]');
@@ -45,7 +52,10 @@ function initWheel(root: HTMLElement): void {
   const confetti = root.querySelector<HTMLElement>('[data-confetti]');
   if (!canvas || !stage || !input || !spinButton || !status || !resultCard || !resultValue || !historyList) return;
 
-  const storageKey = variant === 'chance' ? `${STORAGE_KEYS.wheel}:chance` : STORAGE_KEYS.wheel;
+  const storageScope = root.dataset.storageScope?.trim();
+  const storageKey = variant === 'chance'
+    ? `${STORAGE_KEYS.wheel}:chance`
+    : storageScope ? `${STORAGE_KEYS.wheel}:${storageScope}` : STORAGE_KEYS.wheel;
   const saved = loadLocal<WheelState | null>(storageKey, null);
   const shared = readSharedConfig<SharedWheelConfig>();
   const initial = shared ?? saved;
@@ -268,6 +278,14 @@ function initWheel(root: HTMLElement): void {
     if (size !== 'compact' && size !== 'standard' && size !== 'large') return;
     updateDisplaySize(size);
     saveState();
+  }));
+  presetButtons.forEach((button) => button.addEventListener('click', () => {
+    const preset = button.dataset.wheelPreset as keyof typeof WHEEL_PRESETS | undefined;
+    if (!preset || !WHEEL_PRESETS[preset]) return;
+    input.value = serializeList([...WHEEL_PRESETS[preset]]);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+    trackEvent('wheel_preset_selected', { preset });
   }));
   shareButton?.addEventListener('click', async () => {
     try {

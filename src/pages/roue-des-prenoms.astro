@@ -1,0 +1,34 @@
+---
+import ToolLayout from '../components/ToolLayout.astro';
+import WheelTool from '../components/WheelTool.astro';
+
+const faq = [
+  { question: 'Puis-je ajouter mes propres prénoms ?', answer: 'Oui. Remplacez la liste proposée, collez un prénom par ligne et la roue se met à jour immédiatement.' },
+  { question: 'Comment éviter qu’un prénom apparaisse deux fois ?', answer: 'Activez la suppression des doublons. Les occurrences strictement identiques ne conserveront alors qu’un seul segment.' },
+  { question: 'Puis-je retirer le prénom déjà tiré ?', answer: 'Oui. Après le résultat, utilisez « Retirer et recommencer » pour effectuer le prochain tour sans le gagnant précédent.' },
+  { question: 'La liste de prénoms est-elle enregistrée en ligne ?', answer: 'Non. Elle reste dans votre navigateur. Un lien ne contient la configuration que si vous choisissez volontairement de partager la roue.' },
+];
+---
+
+<ToolLayout
+  slug="roue-des-prenoms"
+  title="Roue des prénoms gratuite en ligne | TirageSimple"
+  description="Ajoutez vos prénoms et faites tourner une roue des noms gratuite. Tirez une personne au hasard, retirez le gagnant et partagez la roue."
+  intro="Personnalisez la liste puis faites tourner la roue pour tirer un prénom au hasard."
+  {faq}
+>
+  <WheelTool slot="tool" inputLabel="Prénoms" storageScope="firstnames" />
+  <div slot="content">
+    <h2>Comment utiliser la roue des prénoms ?</h2>
+    <ol><li>Remplacez les exemples par vos prénoms, un par ligne.</li><li>Choisissez de conserver ou supprimer les doublons.</li><li>Faites tourner la roue et récupérez le prénom tiré.</li></ol>
+    <p>La roue convient à une classe, une équipe, une famille ou un concours fondé sur une liste préparée à l’avance. Elle transforme chaque prénom en segment visible et met à jour l’aperçu au fur et à mesure de votre saisie.</p>
+    <h2>Tirer un élève, un joueur ou un gagnant</h2>
+    <p>Pour choisir un élève qui passe au tableau, déterminer le premier joueur ou répartir une tâche, ajoutez seulement les personnes réellement éligibles. Le tirage utilise le générateur Web Crypto du navigateur ; l’animation illustre le résultat sans le modifier.</p>
+    <h2>Une ou plusieurs chances par personne</h2>
+    <p>Deux lignes identiques créent normalement deux segments et donc deux chances. Activez la déduplication si votre règle impose une chance par prénom. Si plusieurs personnes portent le même prénom, ajoutez une initiale ou un repère distinctif afin de ne pas les fusionner par erreur.</p>
+    <h2>Continuer sans le prénom gagnant</h2>
+    <p>Le bouton « Retirer et recommencer » enlève la première occurrence du résultat avant le tour suivant. Cette option est pratique pour créer un ordre de passage ou désigner plusieurs personnes différentes. Pour sélectionner plusieurs gagnants d’un seul coup, préférez le <a href="/tirage-au-sort">tirage au sort parmi une liste</a>.</p>
+    <h2>Partager une roue déjà préparée</h2>
+    <p>Vous pouvez copier un lien contenant les prénoms et l’option de doublons. Vérifiez toutefois que la liste ne contient pas de coordonnées, d’informations sensibles ou de noms qui ne doivent pas être rendus publics. Pour des choix autres que des personnes, utilisez la <a href="/roue-aleatoire">roue aléatoire générale</a>.</p>
+  </div>
+</ToolLayout>

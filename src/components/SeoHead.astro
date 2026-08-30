@@ -11,6 +11,9 @@ interface Props {
 
 const { title, description, canonicalPath, noindex = false, ogType = 'website', publishedTime, modifiedTime } = Astro.props;
 const canonical = new URL(canonicalPath, Astro.site ?? Astro.url.origin);
+if (canonical.pathname !== '/' && !canonical.pathname.endsWith('/') && !/\.[^/]+$/u.test(canonical.pathname)) {
+  canonical.pathname = `${canonical.pathname}/`;
+}
 const socialImage = new URL('/og.jpg', Astro.site ?? Astro.url.origin);
 ---
 

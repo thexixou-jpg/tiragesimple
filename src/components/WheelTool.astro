@@ -6,19 +6,31 @@ import ResultCard from './ResultCard.astro';
 import ResultShareButton from './ResultShareButton.astro';
 import ShareButton from './ShareButton.astro';
 
-interface Props { variant?: 'standard' | 'chance'; }
-const { variant = 'standard' } = Astro.props;
+interface Props {
+  variant?: 'standard' | 'chance';
+  defaultItems?: string;
+  inputLabel?: string;
+  storageScope?: string;
+}
+const { variant = 'standard', defaultItems, inputLabel, storageScope = '' } = Astro.props;
 const inputId = variant === 'chance' ? 'chance-items' : 'wheel-participants';
-const defaults = variant === 'chance'
+const defaults = defaultItems ?? (variant === 'chance'
   ? 'Super lot\nSurprise\nBonus\nRejouez\nCadeau\nPetit lot'
-  : 'Alice\nBenoît\nChloé\nDavid\nEmma\nFarid';
+  : 'Alice\nBenoît\nChloé\nDavid\nEmma\nFarid');
 ---
 
-<div class:list={['wheel-tool', { 'wheel-chance': variant === 'chance' }]} data-wheel data-variant={variant}>
+<div class:list={['wheel-tool', { 'wheel-chance': variant === 'chance' }]} data-wheel data-variant={variant} data-storage-scope={storageScope}>
   <div class="tool-columns wheel-columns">
     <div class="wheel-controls">
       <div class="tool-panel-intro"><span class="field-kicker">Configuration</span><p>Préparez votre tirage</p></div>
-      <ListEditor id={inputId} label={variant === 'chance' ? 'Choix de la roue' : 'Participants'} value={defaults} minimum={1} />
+      <ListEditor id={inputId} label={inputLabel ?? (variant === 'chance' ? 'Choix de la roue' : 'Participants')} value={defaults} minimum={1} />
+      {variant === 'standard' && <div class="wheel-presets" aria-label="Listes prêtes à utiliser">
+        <span>Listes rapides</span>
+        <button type="button" data-wheel-preset="firstnames">Prénoms</button>
+        <button type="button" data-wheel-preset="alphabet">Alphabet A–Z</button>
+        <button type="button" data-wheel-preset="yesno">Oui / Non</button>
+        <button type="button" data-wheel-preset="numbers">1 à 10</button>
+      </div>}
       <div class="wheel-options">
         <button class="text-button sound-toggle" type="button" data-sound-toggle aria-pressed="true">
           <span aria-hidden="true" data-sound-icon>♪</span> Son activé

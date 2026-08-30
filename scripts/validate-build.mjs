@@ -79,6 +79,10 @@ for (const file of pages) {
     description: html.match(/<meta name="description" content="([^"]+)"/u)?.[1],
     canonical: html.match(/<link rel="canonical" href="([^"]+)"/u)?.[1],
   };
+  if (page !== '404.html' && uniqueFields.canonical) {
+    const canonicalPath = new URL(uniqueFields.canonical).pathname;
+    if (canonicalPath !== '/' && !canonicalPath.endsWith('/')) failures.push(`${page}: canonical sans slash final`);
+  }
   for (const [field, value] of Object.entries(uniqueFields)) {
     if (!value) continue;
     const key = `${field}:${value}`;
@@ -113,6 +117,8 @@ else {
   const sitemapXml = readFileSync(sitemapPath, 'utf8');
   for (const requiredUrl of [
     'https://tiragesimple.fr/tirage-au-sort-youtube/',
+    'https://tiragesimple.fr/roue-des-prenoms/',
+    'https://tiragesimple.fr/roue-alphabet/',
     'https://tiragesimple.fr/a-propos/',
     'https://tiragesimple.fr/guides/tirage-au-sort-transparent/',
   ]) if (!sitemapXml.includes(requiredUrl)) failures.push(`Sitemap : URL attendue absente ${requiredUrl}`);

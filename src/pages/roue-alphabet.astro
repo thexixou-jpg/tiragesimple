@@ -1,0 +1,35 @@
+---
+import ToolLayout from '../components/ToolLayout.astro';
+import WheelTool from '../components/WheelTool.astro';
+
+const alphabet = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).join('\n');
+const faq = [
+  { question: 'La roue contient-elle toutes les lettres de A à Z ?', answer: 'Oui. Les 26 lettres de l’alphabet latin sont chargées par défaut et restent modifiables.' },
+  { question: 'Puis-je enlever certaines lettres ?', answer: 'Oui. Supprimez simplement les lignes correspondantes avant de faire tourner la roue.' },
+  { question: 'Puis-je ajouter les lettres accentuées ?', answer: 'Oui. Ajoutez É, È, À, Ç ou toute autre lettre comme une nouvelle ligne si votre activité en a besoin.' },
+  { question: 'Une lettre déjà tirée peut-elle être retirée ?', answer: 'Oui. Choisissez « Retirer et recommencer » après le résultat pour poursuivre sans cette lettre.' },
+];
+---
+
+<ToolLayout
+  slug="roue-alphabet"
+  title="Roue alphabet : tirer une lettre A à Z | TirageSimple"
+  description="Faites tourner une roue de l’alphabet gratuite avec les 26 lettres de A à Z. Modifiez la liste, tirez une lettre et continuez sans remise."
+  intro="Faites tourner les 26 lettres de l’alphabet ou adaptez la liste à votre jeu."
+  {faq}
+>
+  <WheelTool slot="tool" defaultItems={alphabet} inputLabel="Lettres de la roue" storageScope="alphabet" />
+  <div slot="content">
+    <h2>Une roue aléatoire avec les lettres de A à Z</h2>
+    <p>Les 26 lettres sont prêtes dès l’ouverture de la page. Appuyez sur « Tourner la roue » pour tirer une lettre, ou modifiez la liste avant de commencer. Chaque ligne correspond à un segment et dispose de la même probabilité lorsque toutes les lettres apparaissent une seule fois.</p>
+    <h2>Comment adapter l’alphabet ?</h2>
+    <ol><li>Conservez uniquement les lettres autorisées pour votre activité.</li><li>Ajoutez si nécessaire les caractères accentués ou des digrammes.</li><li>Lancez la roue puis retirez le résultat pour jouer sans remise.</li></ol>
+    <p>Pour un jeu de vocabulaire, vous pouvez écarter les lettres trop rares. Pour un exercice de lecture, gardez au contraire l’alphabet complet ou répétez certaines lettres si vous souhaitez leur donner davantage de poids.</p>
+    <h2>Jeux, classe et activités créatives</h2>
+    <p>La roue peut servir à trouver l’initiale d’un mot, choisir une catégorie, lancer un défi de dessin ou faire travailler la prononciation. L’enseignant peut projeter la roue en plein écran, tandis que la taille compacte facilite son utilisation sur un ordinateur plus petit.</p>
+    <h2>Tirage avec ou sans remise</h2>
+    <p>« Rejouer » conserve toutes les lettres et réalise un nouveau tirage indépendant. « Retirer et recommencer » enlève la lettre obtenue avant le tour suivant. Le second mode permet de parcourir progressivement l’alphabet sans répéter un résultat déjà sorti.</p>
+    <h2>Différence avec le générateur de lettre</h2>
+    <p>La roue rend les possibilités visibles et convient mieux à une animation collective. Le <a href="/lettre-aleatoire">générateur de lettre aléatoire</a> affiche un résultat plus sobre et peut inclure des accents via ses options. Pour tirer des prénoms plutôt que des caractères, ouvrez la <a href="/roue-des-prenoms">roue des prénoms</a>.</p>
+  </div>
+</ToolLayout>
