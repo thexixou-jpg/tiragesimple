@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlueskyContestTool from '../components/BlueskyContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider = getSocialProvider('bluesky');
+const schema = { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Tirage au sort Bluesky',
+  url: 'https://tiragesimple.fr/tirage-au-sort-bluesky/', applicationCategory: 'UtilitiesApplication', operatingSystem: 'Web',
+  inLanguage: 'fr-FR', description: provider.description, offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' } };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-bluesky/">
+  <header class="tool-hero"><div class="container tool-heading">
+    <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a>
+    <div class="social-tool-identity"><SocialProviderIcon provider="bluesky" /><p class="social-status social-status-available">Likes et reposts · API officielle</p></div>
+    <h1>Tirage au sort Bluesky</h1><p>{provider.intro}</p>
+  </div></header>
+  <div class="container tool-page tool-page--youtube">
+    <BlueskyContestTool />
+    <article class="tool-content prose">
+      <h2>Comment choisir un gagnant sur Bluesky ?</h2>
+      <p>Copiez le lien de votre publication depuis Bluesky, puis collez-le dans le formulaire. L’aperçu vous permet de vérifier le texte et l’auteur avant d’importer les participations. Choisissez ensuite une condition : avoir aimé le post ou l’avoir reposté. Les deux listes ne sont pas combinées dans cet outil.</p>
+      <p>Indiquez le nombre de gagnants et de suppléants, puis excluez si nécessaire le compte organisateur et certains identifiants complets. Une fois l’import terminé, contrôlez le nombre de comptes éligibles avant de lancer le tirage. Si vous changez une règle, un nouvel import est nécessaire afin que le résultat corresponde réellement à vos critères.</p>
+      <h2>Une personne change de pseudo : a-t-elle deux chances ?</h2>
+      <p>Non : la déduplication utilise le DID, l’identifiant du compte Bluesky, et non son nom affiché. Plusieurs entrées portant le même identifiant n’ajoutent pas de chances. Les gagnants et les suppléants sont également distincts : un compte ne peut pas occuper plusieurs places dans un même tirage.</p>
+      <h2>Ce que l’outil vérifie, et ce qu’il ne vérifie pas</h2>
+      <p>Le critère choisi est contrôlé à partir des likes ou reposts que l’API publique Bluesky renvoie au moment de l’import. L’outil ne vérifie ni l’abonnement à votre compte, ni l’âge, ni le pays, ni l’identité réelle des participants. Les réponses et les citations ne sont pas des critères proposés ici. N’annoncez pas ces conditions comme automatiquement validées.</p>
+      <p>La publication et ses interactions peuvent évoluer pendant la collecte : un like retiré ou un repost supprimé peut modifier la liste accessible. Il ne s’agit pas d’une archive historique à une date de clôture passée. Précisez cette méthode dans votre règlement et effectuez l’import au moment prévu. Une limite ou une erreur d’API bloque le tirage plutôt que de sélectionner silencieusement dans une liste partielle.</p>
+      <h2>Gratuit, sans connexion et avec des limites explicites</h2>
+      <p>Aucun mot de passe Bluesky, cookie de compte ou clé API personnelle n’est demandé. L’import utilise les API officielles publiques. Le service limite les imports à 10 par heure pour une session, 10 000 comptes et 100 000 interactions analysées par import, ainsi qu’un budget quotidien de requêtes partagé. Si ces limites sont atteintes, l’outil indique le blocage ; elles ne déclenchent aucun paiement automatique.</p>
+      <h2>Un résultat partageable, pas une certification</h2>
+      <p>Le tirage utilise une source aléatoire cryptographique. Vous pouvez copier le résultat ou choisir explicitement de créer un lien public. Celui-ci présente les gagnants et les informations du tirage, sans publier toute la liste des participants. Un hash et une référence technique ne constituent pas une certification indépendante. Les données temporaires et les liens expirent selon la durée de conservation du service, actuellement 30 jours.</p>
+      <h2>Questions fréquentes</h2>
+      <h3>Puis-je tirer au sort parmi les commentaires ?</h3>
+      <p>Pas sur cet outil Bluesky : seuls les likes et les reposts sont disponibles. Pour les commentaires de vidéos et de Shorts, utilisez le <a href="/tirage-au-sort-youtube/">tirage au sort YouTube</a>, qui propose aussi l’import des réponses.</p>
+      <h3>Pourquoi mon total diffère-t-il du compteur du post ?</h3>
+      <p>Les exclusions, les suppressions et le délai d’indexation de la plateforme peuvent expliquer une différence. Le total retenu est celui des comptes effectivement récupérés et éligibles, pas une garantie que le compteur affiché sur Bluesky est figé.</p>
+      <p>Consultez aussi notre <a href="/guides/tirage-au-sort-transparent/">guide du tirage transparent</a> et la <a href="/confidentialite/">politique de confidentialité</a> pour préparer votre concours.</p>
+    </article>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

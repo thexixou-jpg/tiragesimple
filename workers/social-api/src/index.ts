@@ -1,8 +1,10 @@
 import { normalizeRules } from './contest-rules';
 import { providerStatus } from './providers';
-import { getOwnedImport, ownerSession, purgeExpiredData } from './storage';
+import { getOwnedImport, ownerSession, purgeExpiredData, reserveProviderRequest, setImportStatus } from './storage';
 import type { ContestRules, Env, SocialImportJob } from './types';
-import { createYouTubeDraw, processYouTubeImport, queueYouTubeImport } from './youtube-import';
+import { createYouTubeDraw } from './youtube-import';
+import { processSocialImport, queueSocialImport } from './social-import';
+import { getBlueskyPublication } from './bluesky';
 import { getYouTubePublication } from './youtube';
 
 function allowOrigin(request: Request, env: Env): string {
@@ -80,25 +82,28 @@ export default {
         ? new Response(publicDrawPage(result), { headers: { 'content-type': 'text/html; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } })
         : new Response('Résultat introuvable ou expiré.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } });
     }
-    if (request.method === 'POST' && pathname === '/v1/youtube/publication') {
+    const providerMatch = pathname.match(/^\/v1\/(youtube|bluesky)\/(publication|imports)$/u);
+    if (request.method === 'POST' && providerMatch) {
       try {
-        const input = await request.json() as { url?: string };
-        if (!input.url) return json({ error: 'A YouTube URL is required' }, 400, origin);
-        return json({ publication: await getYouTubePublication(input.url, env) }, 200, origin);
-      } catch (error) {
-        return json({ error: error instanceof Error ? error.message : 'Unable to load the YouTube publication' }, backendUnavailable(error) ? 503 : 400, origin);
-      }
-    }
-    if (request.method === 'POST' && pathname === '/v1/youtube/imports') {
-      try {
+        if (request.headers.get('Origin') && request.headers.get('Origin') !== origin) return json({ error: 'Origine non autorisée.' }, 403, origin);
         const input = await request.json() as { url?: string; rules?: Partial<ContestRules> };
-        if (!input.url) return json({ error: 'A YouTube URL is required' }, 400, origin);
+        if (typeof input.url !== 'string' || input.url.length > 2048) return json({ error: 'Une URL valide est nécessaire.' }, 400, origin);
+        const provider = providerMatch[1];
+        await reserveProviderRequest(env, provider);
+        if (provider === 'bluesky') await reserveProviderRequest(env, provider); // handle resolution + post lookup
+        const publication = provider === 'youtube' ? await getYouTubePublication(input.url, env) : await getBlueskyPublication(input.url, env);
+        if (providerMatch[2] === 'publication') return json({ publication }, 200, origin);
+        const rules = normalizeRules(input.rules ?? {});
+        if (provider === 'bluesky') {
+          if (!['likes', 'reposts'].includes(input.rules?.interaction ?? '')) throw new Error('Choisissez les likes ou les reposts.');
+          if (rules.requiredKeyword || rules.minimumMentions || rules.includeReplies || rules.duplicateEntries) throw new Error('Ces règles ne sont pas prises en charge pour Bluesky.');
+          rules.uniqueParticipants = true;
+        }
         const session = await ownerSession(request, env);
-        const publication = await getYouTubePublication(input.url, env);
-        const imported = await queueYouTubeImport(env, session.id, publication, normalizeRules(input.rules ?? {}), null);
+        const imported = await queueSocialImport(env, session.id, publication, rules);
         return json({ import: imported }, 202, origin, session.setCookie);
       } catch (error) {
-        return json({ error: error instanceof Error ? error.message : 'Unable to start the YouTube import' }, backendUnavailable(error) ? 503 : 400, origin);
+        return json({ error: error instanceof Error ? error.message : 'Impossible de contacter la plateforme.' }, backendUnavailable(error) ? 503 : 400, origin);
       }
     }
     const importMatch = pathname.match(/^\/v1\/imports\/([\w-]+)$/u);
@@ -133,8 +138,15 @@ export default {
   },
   async queue(batch: MessageBatch<SocialImportJob>, env: Env): Promise<void> {
     for (const message of batch.messages) {
-      if (message.body.provider === 'youtube') await processYouTubeImport(message.body, env);
-      message.ack();
+      try {
+        await processSocialImport(message.body, env);
+        message.ack();
+      } catch {
+        if (message.attempts >= 4) {
+          await setImportStatus(env, message.body.importId, 'failed', { errorMessage: 'Import interrompu après plusieurs tentatives. Aucun tirage partiel ne sera effectué.' });
+          message.ack();
+        } else message.retry({ delaySeconds: Math.min(300, 15 * 2 ** message.attempts) });
+      }
     }
   },
   async scheduled(_controller, env): Promise<void> {

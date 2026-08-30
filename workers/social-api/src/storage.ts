@@ -1,4 +1,4 @@
-import type { ContestRules, Env, Participant, SocialPublication } from './types';
+import type { ContestRules, Env, Participant, SocialImportJob, SocialPublication } from './types';
 
 const SESSION_COOKIE = 'ts_social_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
@@ -101,7 +101,7 @@ export async function getImport(env: Env, importId: string): Promise<ContestImpo
 
 export async function getOwnedImport(env: Env, importId: string, sessionId: string): Promise<ContestImportRecord | null> {
   assertDatabase(env);
-  return env.DB.prepare('SELECT id, owner_session_id, provider, publication_id, status, progress_current, progress_total, participant_count, error_code, error_message, expires_at FROM contest_imports WHERE id = ? AND owner_session_id = ?').bind(importId, sessionId).first<ContestImportRecord>();
+  return env.DB.prepare('SELECT id, owner_session_id, provider, publication_id, status, progress_current, progress_total, participant_count, error_code, error_message, expires_at FROM contest_imports WHERE id = ? AND owner_session_id = ? AND expires_at > ?').bind(importId, sessionId, new Date().toISOString()).first<ContestImportRecord>();
 }
 
 export async function getImportContext(env: Env, importId: string): Promise<{ import: ContestImportRecord; publication: StoredPublication; rules: ContestRules } | null> {
@@ -173,9 +173,65 @@ export async function purgeExpiredData(env: Env): Promise<void> {
     env.DB.prepare('DELETE FROM contest_winners WHERE draw_id IN (SELECT id FROM contest_draws WHERE expires_at <= ?)').bind(now),
     env.DB.prepare('DELETE FROM contest_draws WHERE expires_at <= ?').bind(now),
     env.DB.prepare('DELETE FROM contest_rules WHERE import_id IN (SELECT id FROM contest_imports WHERE expires_at <= ?)').bind(now),
+    env.DB.prepare('DELETE FROM contest_import_pages WHERE import_id IN (SELECT id FROM contest_imports WHERE expires_at <= ?)').bind(now),
     env.DB.prepare('DELETE FROM contest_participants WHERE import_id IN (SELECT id FROM contest_imports WHERE expires_at <= ?)').bind(now),
     env.DB.prepare('DELETE FROM contest_imports WHERE expires_at <= ?').bind(now),
     env.DB.prepare('DELETE FROM social_accounts WHERE deleted_at IS NOT NULL AND deleted_at <= ?').bind(now),
     env.DB.prepare('DELETE FROM social_publications WHERE id NOT IN (SELECT publication_id FROM contest_imports)'),
+  ]);
+}
+
+export async function reserveProviderRequest(env: Env, provider: string): Promise<void> {
+  assertDatabase(env);
+  // A shared server budget also bounds abuse. No paid quota expansion.
+  const limit = provider === 'youtube' ? 6000 : 10000;
+  const row = await env.DB.prepare(`INSERT INTO provider_usage (provider, usage_date, requests_count) VALUES (?, ?, 1)
+    ON CONFLICT(provider, usage_date) DO UPDATE SET requests_count = requests_count + 1 WHERE requests_count < ? RETURNING requests_count`)
+    .bind(provider, new Date().toISOString().slice(0, 10), limit).first();
+  if (!row) throw new Error('Le quota quotidien du service est atteint. Réessayez demain.');
+}
+
+export async function checkImportAllowance(env: Env, sessionId: string): Promise<void> {
+  assertDatabase(env);
+  const row = await env.DB.prepare(`SELECT COUNT(*) AS count FROM contest_imports WHERE owner_session_id = ? AND created_at >= ?`)
+    .bind(sessionId, new Date(Date.now() - 3600000).toISOString()).first<{ count: number }>();
+  if ((row?.count ?? 0) >= 10) throw new Error('Limite de 10 imports par heure atteinte pour cette session.');
+}
+
+export async function getImportPage(env: Env, importId: string, key: string): Promise<{ next_job_json: string | null } | null> {
+  assertDatabase(env);
+  return env.DB.prepare('SELECT next_job_json FROM contest_import_pages WHERE import_id = ? AND page_key = ?').bind(importId, key).first();
+}
+
+export async function importPageCount(env: Env, importId: string): Promise<number> {
+  assertDatabase(env);
+  const row = await env.DB.prepare('SELECT COUNT(*) AS count FROM contest_import_pages WHERE import_id = ?').bind(importId).first<{ count: number }>();
+  return row?.count ?? 0;
+}
+
+/** D1 batches are transactions. Only the batch that inserted this checkpoint
+ * may change participants/progress. Replayed deliveries just reuse next_job. */
+export async function commitImportPage(env: Env, importId: string, key: string, participants: Participant[], duplicateEntries: boolean, analyzed: number, nextJob: SocialImportJob | undefined, maximum: number): Promise<void> {
+  assertDatabase(env);
+  const token = crypto.randomUUID();
+  const now = new Date().toISOString();
+  const guard = 'EXISTS (SELECT 1 FROM contest_import_pages WHERE import_id = ? AND page_key = ? AND batch_token = ?)';
+  await env.DB.batch([
+    env.DB.prepare('INSERT OR IGNORE INTO contest_import_pages (import_id, page_key, batch_token, next_job_json) VALUES (?, ?, ?, ?)')
+      .bind(importId, key, token, nextJob ? JSON.stringify(nextJob) : null),
+    env.DB.prepare(`INSERT INTO contest_participants (id, import_id, provider_user_id, username, display_name, entries_count, eligible, reason_json, created_at)
+      SELECT json_extract(value, '$.id'), ?, json_extract(value, '$.providerUserId'), json_extract(value, '$.username'), json_extract(value, '$.displayName'),
+      json_extract(value, '$.entriesCount'), json_extract(value, '$.eligible'), json_extract(value, '$.reasons'), ? FROM json_each(?) WHERE ${guard}
+      ON CONFLICT(import_id, provider_user_id) DO UPDATE SET
+      username = COALESCE(excluded.username, contest_participants.username), display_name = COALESCE(excluded.display_name, contest_participants.display_name),
+      entries_count = CASE WHEN ? = 1 THEN contest_participants.entries_count + excluded.entries_count ELSE MAX(contest_participants.entries_count, excluded.entries_count) END,
+      eligible = MAX(contest_participants.eligible, excluded.eligible), reason_json = CASE WHEN excluded.eligible = 1 THEN '[]' ELSE contest_participants.reason_json END`)
+      .bind(importId, now, JSON.stringify(participants.map(p => ({ ...p, id: crypto.randomUUID(), eligible: p.eligible ? 1 : 0 }))), importId, key, token, duplicateEntries ? 1 : 0),
+    env.DB.prepare(`UPDATE contest_imports SET status = ?, progress_current = progress_current + ?,
+      participant_count = (SELECT COUNT(*) FROM contest_participants WHERE import_id = ? AND eligible = 1), updated_at = ?
+      WHERE id = ? AND ${guard}`).bind(nextJob ? 'queued' : 'ready', analyzed, importId, now, importId, importId, key, token),
+    env.DB.prepare(`UPDATE contest_imports SET status = 'failed', error_code = 'participant_limit', error_message = ?
+      WHERE id = ? AND ((SELECT COUNT(*) FROM contest_participants WHERE import_id = ?) > ? OR progress_current > 100000)`)
+      .bind(`Import trop volumineux : limite de ${maximum} comptes ou 100 000 interactions. Aucun tirage partiel n’est proposé.`, importId, importId, maximum),
   ]);
 }

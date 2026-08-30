@@ -1,6 +1,6 @@
 # Activation du tirage YouTube — guide opérateur
 
-Ce guide active uniquement le connecteur YouTube. Instagram, Facebook, X et TikTok restent volontairement désactivés ou limités.
+Ce guide configure YouTube et Bluesky. Instagram, Facebook, X et TikTok restent volontairement désactivés ou limités. Bluesky nécessite seulement `BLUESKY_ENABLED=true` et la base/Queue existantes, sans secret supplémentaire.
 
 ## 1. Google Cloud : clé YouTube
 
@@ -85,4 +85,4 @@ Redéploie Pages pour injecter cette variable dans l’interface statique.
 - La clé Google est utilisée uniquement par le Worker.
 - Les données de concours sont supprimées après la durée configurée.
 - Les résultats partagés le sont uniquement après une action explicite de l’organisateur.
-- Les réponses YouTube ne sont pas encore activées, car l’API peut renvoyer une liste incomplète dans `commentThreads.list`.
+- Les réponses YouTube utilisent une pagination dédiée `comments.list`. Appliquer `0002_import_pages.sql` avant cette version. Le connecteur ne termine pas un import si la pagination échoue ou si les limites sont dépassées.

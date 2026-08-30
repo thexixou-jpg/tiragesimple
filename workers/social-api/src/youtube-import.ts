@@ -1,58 +1,6 @@
-import { createParticipants, sha256, verifiableDraw } from './contest-rules';
-import { getProviderCapabilities } from './providers';
-import { createImport, getImportContext, incrementProviderUsage, listEligibleParticipants, participantCount, saveParticipants, savePublication, setImportStatus } from './storage';
-import type { ContestRules, Env, Participant, SocialImportJob, SocialPublication } from './types';
-import { getYouTubeCommentPage } from './youtube';
-
-function maximumParticipants(env: Env): number {
-  const configured = Number.parseInt(env.MAX_PARTICIPANTS ?? '10000', 10);
-  return Math.max(100, Math.min(100_000, Number.isFinite(configured) ? configured : 10_000));
-}
-
-export async function queueYouTubeImport(env: Env, ownerSessionId: string, publication: SocialPublication, rules: ContestRules, commentsTotal: number | null): Promise<{ id: string; status: string }> {
-  if (!env.SOCIAL_IMPORT_QUEUE) throw new Error('The social import queue is not configured');
-  const storedPublication = await savePublication(env, publication);
-  const stored = await createImport(env, ownerSessionId, storedPublication, rules, getProviderCapabilities('youtube'), commentsTotal);
-  await env.SOCIAL_IMPORT_QUEUE.send({ provider: 'youtube', importId: stored.id });
-  return { id: stored.id, status: stored.status };
-}
-
-/** Processes one official YouTube API page. Queues keep big imports off the request path. */
-export async function processYouTubeImport(job: SocialImportJob, env: Env): Promise<void> {
-  const context = await getImportContext(env, job.importId);
-  if (!context || context.import.status === 'ready' || context.import.status === 'failed') return;
-  if (context.rules.includeReplies) {
-    // commentThreads.list embeds only a subset of replies. We must not present that as a complete reply import.
-    await setImportStatus(env, job.importId, 'failed', { errorCode: 'replies_not_ready', errorMessage: 'L’import complet des réponses YouTube n’est pas encore activé.' });
-    return;
-  }
-  try {
-    await setImportStatus(env, job.importId, 'running');
-    const page = await getYouTubeCommentPage(context.publication.providerPublicationId, job.pageToken, false, env);
-    await incrementProviderUsage(env, 'youtube');
-    const comments = context.rules.excludePublicationAuthor && context.publication.authorProviderId
-      ? page.comments.filter((comment) => comment.providerUserId !== context.publication.authorProviderId)
-      : page.comments;
-    const participants = createParticipants(comments, context.rules, getProviderCapabilities('youtube'));
-    if (await participantCount(env, job.importId) + participants.length > maximumParticipants(env)) {
-      await setImportStatus(env, job.importId, 'failed', { errorCode: 'participant_limit', errorMessage: `La limite de ${maximumParticipants(env)} participants a été atteinte.` });
-      return;
-    }
-    if (participants.length) await saveParticipants(env, job.importId, participants, context.rules.duplicateEntries);
-    if (page.nextPageToken && env.SOCIAL_IMPORT_QUEUE) {
-      await setImportStatus(env, job.importId, 'queued', { progressIncrement: comments.length });
-      await env.SOCIAL_IMPORT_QUEUE.send({ provider: 'youtube', importId: job.importId, pageToken: page.nextPageToken });
-      return;
-    }
-    const eligible = await listEligibleParticipants(env, job.importId);
-    await setImportStatus(env, job.importId, 'ready', { progressIncrement: comments.length, participantCount: eligible.length });
-  } catch (error) {
-    await setImportStatus(env, job.importId, 'failed', {
-      errorCode: 'youtube_import_failed',
-      errorMessage: error instanceof Error ? error.message : 'Impossible de récupérer les commentaires YouTube.',
-    });
-  }
-}
+import { sha256, verifiableDraw } from './contest-rules';
+import { getImportContext, listEligibleParticipants } from './storage';
+import type { Env, Participant } from './types';
 
 export interface DrawResult {
   publicId: string;
@@ -92,8 +40,12 @@ export async function createYouTubeDraw(env: Env, importId: string, publicVisibi
   await env.DB.batch([
     env.DB.prepare('INSERT INTO contest_draws (id, public_id, import_id, rules_snapshot_json, participant_snapshot_hash, random_commitment_hash, verification_seed, result_hash, public_visibility, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .bind(id, publicId, importId, JSON.stringify(context.rules), participantSnapshotHash, drawn.commitmentHash, drawn.verificationSeed, resultHash, publicVisibility ? 1 : 0, now, expiresAt),
-    ...drawn.winners.map((winner, index) => env.DB!.prepare('INSERT INTO contest_winners (id, draw_id, participant_id, rank, kind, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(crypto.randomUUID(), id, selected.get(winner.providerUserId)!.id, index + 1, 'winner', now)),
-    ...drawn.alternates.map((alternate, index) => env.DB!.prepare('INSERT INTO contest_winners (id, draw_id, participant_id, rank, kind, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(crypto.randomUUID(), id, selected.get(alternate.providerUserId)!.id, index + 1, 'alternate', now)),
+    env.DB.prepare(`INSERT INTO contest_winners (id, draw_id, participant_id, rank, kind, created_at)
+      SELECT json_extract(value, '$.id'), ?, json_extract(value, '$.participantId'), json_extract(value, '$.rank'), json_extract(value, '$.kind'), ? FROM json_each(?)`)
+      .bind(id, now, JSON.stringify([
+        ...drawn.winners.map((winner, index) => ({ id: crypto.randomUUID(), participantId: selected.get(winner.providerUserId)!.id, rank: index + 1, kind: 'winner' })),
+        ...drawn.alternates.map((winner, index) => ({ id: crypto.randomUUID(), participantId: selected.get(winner.providerUserId)!.id, rank: index + 1, kind: 'alternate' })),
+      ])),
   ]);
   const publicUrl = publicVisibility && env.PUBLIC_SITE_URL ? new URL(`/tirage/${publicId}`, env.PUBLIC_SITE_URL).toString() : undefined;
   return { publicId, publicUrl, participantSnapshotHash, randomCommitmentHash: drawn.commitmentHash, resultHash, verificationSeed: drawn.verificationSeed, winners: drawn.winners.map((winner) => selected.get(winner.providerUserId)!), alternates: drawn.alternates.map((alternate) => selected.get(alternate.providerUserId)!) };

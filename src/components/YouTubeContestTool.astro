@@ -2,7 +2,7 @@
 const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
 ---
 
-<section class="tool-shell social-youtube-tool" data-youtube-contest data-api-url={apiUrl} aria-labelledby="youtube-import-title">
+<section class="tool-shell social-youtube-tool" data-social-contest data-provider="youtube" data-api-url={apiUrl} aria-labelledby="youtube-import-title">
   <div class="tool-panel-intro">
     <div class="youtube-tool-intro-copy">
       <p class="eyebrow"><span aria-hidden="true">▶</span> Import officiel YouTube</p>
@@ -43,7 +43,7 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
     <fieldset class="youtube-rules"><legend><span>03</span> Règles d’éligibilité</legend><p>Seuls les critères affichés sont réellement vérifiés pendant l’import.</p><div class="social-rule-grid">
         <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par chaîne.</small></span></label>
         <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>La chaîne de la vidéo ne participe pas.</small></span></label>
-        <label class="option-card is-unavailable" title="Les réponses ne sont pas encore importées intégralement par le MVP."><input type="checkbox" disabled /><span><strong>Inclure les réponses</strong><small>Indisponible pour éviter un import incomplet.</small></span></label>
+        <label class="option-card"><input name="includeReplies" type="checkbox" /><span><strong>Inclure les réponses</strong><small>Import de toutes les pages de réponses accessibles. Peut prendre plus de temps.</small></span></label>
       </div></fieldset>
     <div class="actions">
       <button class="button button-secondary" type="submit" data-analyze>Analyser la vidéo</button>
@@ -60,146 +60,5 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
 </section>
 
 <script>
-  const root = document.querySelector('[data-youtube-contest]');
-  if (root instanceof HTMLElement) {
-    const apiUrl = root.dataset.apiUrl?.replace(/\/$/u, '') ?? '';
-    const form = root.querySelector('[data-contest-form]');
-    const feedback = root.querySelector('[data-feedback]');
-    const publication = root.querySelector('[data-publication]');
-    const preview = root.querySelector('[data-preview]');
-    const urlInput = root.querySelector('[data-video-url]');
-    const importButton = root.querySelector('[data-import]');
-    const drawPanel = root.querySelector('[data-draw]');
-    const progress = root.querySelector('[data-progress]');
-    const result = root.querySelector('[data-result]');
-    let importId = '';
-    const setFeedback = (message: string) => { if (feedback) feedback.textContent = message; };
-    const showError = (error: unknown) => setFeedback(error instanceof Error ? error.message : 'Une erreur est survenue.');
-    const request = async (path: string, init: RequestInit = {}) => {
-      if (!apiUrl) throw new Error('Le connecteur YouTube n’est pas encore activé.');
-      const response = await fetch(`${apiUrl}${path}`, { credentials: 'include', headers: { 'content-type': 'application/json', ...(init.headers ?? {}) }, ...init });
-      const payload = await response.json() as { error?: string } & Record<string, unknown>;
-      if (!response.ok) throw new Error(payload.error ?? 'Le service YouTube est indisponible.');
-      return payload;
-    };
-    if (apiUrl) setFeedback('Prêt à analyser une vidéo ou un Short YouTube.');
-    const rules = () => {
-      if (!(form instanceof HTMLFormElement)) return {};
-      const data = new FormData(form);
-      const duplicateEntries = data.get('duplicateEntries') === 'on';
-      return { winnerCount: Number(data.get('winnerCount')), alternateCount: Number(data.get('alternateCount')), requiredKeyword: String(data.get('requiredKeyword') ?? '').trim() || undefined, uniqueParticipants: !duplicateEntries, duplicateEntries, includeReplies: false, excludePublicationAuthor: data.get('excludePublicationAuthor') === 'on' };
-    };
-    const videoUrl = () => form instanceof HTMLFormElement ? String(new FormData(form).get('url') ?? '').trim() : '';
-    const isYouTubeUrl = (value: string) => /(?:youtu\.be\/|(?:www\.)?youtube\.com\/(?:watch\?|shorts\/))/iu.test(value);
-    let previewTimer: number | undefined;
-    let analysisRequest = 0;
-    let analyzedUrl = '';
-    const setPreviewState = (state: 'idle' | 'loading' | 'ready' | 'error') => {
-      if (preview instanceof HTMLElement) preview.dataset.state = state;
-    };
-    const resetPreview = () => {
-      if (publication instanceof HTMLElement) publication.hidden = true;
-      if (importButton instanceof HTMLButtonElement) importButton.disabled = true;
-      setPreviewState('idle');
-    };
-    const analyzeVideo = async (manual = false) => {
-      const url = videoUrl();
-      if (!url) {
-        if (manual) setFeedback('Ajoutez l’URL d’une vidéo YouTube.');
-        return;
-      }
-      if (!manual && !isYouTubeUrl(url)) return;
-      if (!manual && url === analyzedUrl) return;
-
-      const requestId = ++analysisRequest;
-      setPreviewState('loading');
-      setFeedback(manual ? 'Analyse de la vidéo…' : 'Chargement de l’aperçu…');
-      try {
-        const payload = await request('/v1/youtube/publication', { method: 'POST', body: JSON.stringify({ url }) }) as { publication: { title?: string; authorName?: string; publishedAt?: string; thumbnailUrl?: string } };
-        if (requestId !== analysisRequest) return;
-        const data = payload.publication;
-        const image = root.querySelector('[data-thumbnail]');
-        const title = root.querySelector('[data-publication-title]');
-        const meta = root.querySelector('[data-publication-meta]');
-        const videoTitle = data.title ?? 'Vidéo YouTube';
-        if (image instanceof HTMLImageElement) {
-          image.src = data.thumbnailUrl ?? '';
-          image.alt = data.thumbnailUrl ? `Miniature : ${videoTitle}` : '';
-          image.hidden = !data.thumbnailUrl;
-        }
-        if (title) title.textContent = videoTitle;
-        if (meta) meta.textContent = [data.authorName, data.publishedAt ? new Intl.DateTimeFormat('fr-FR').format(new Date(data.publishedAt)) : ''].filter(Boolean).join(' · ');
-        if (publication instanceof HTMLElement) publication.hidden = false;
-        if (importButton instanceof HTMLButtonElement) importButton.disabled = false;
-        analyzedUrl = url;
-        setPreviewState('ready');
-        setFeedback('Aperçu prêt. Ajustez les règles puis importez les commentaires.');
-      } catch (error) {
-        if (requestId !== analysisRequest) return;
-        setPreviewState('error');
-        if (manual) showError(error);
-        else setFeedback('Impossible de charger l’aperçu. Vérifiez le lien YouTube.');
-      }
-    };
-    const updateProgress = async () => {
-      if (!importId) return;
-      try {
-        const payload = await request(`/v1/imports/${importId}`) as { import: { status: string; progress_current: number; progress_total: number | null; participant_count: number; error_message: string | null } };
-        const imported = payload.import;
-        if (imported.status === 'failed') { setFeedback(imported.error_message ?? 'L’import a échoué.'); return; }
-        if (imported.status === 'ready') {
-          setFeedback('Import terminé. Vous pouvez lancer le tirage.');
-          if (drawPanel instanceof HTMLElement) drawPanel.hidden = false;
-          if (progress) progress.textContent = `${imported.participant_count} participant${imported.participant_count > 1 ? 's' : ''} unique${imported.participant_count > 1 ? 's' : ''} éligible${imported.participant_count > 1 ? 's' : ''}.`;
-          return;
-        }
-        if (progress) progress.textContent = `${imported.progress_current}${imported.progress_total ? ` / ${imported.progress_total}` : ''} commentaires analysés…`;
-        window.setTimeout(updateProgress, 1600);
-      } catch (error) { showError(error); }
-    };
-    form?.addEventListener('submit', (event) => {
-      event.preventDefault();
-      void analyzeVideo(true);
-    });
-    urlInput?.addEventListener('input', () => {
-      analyzedUrl = '';
-      resetPreview();
-      window.clearTimeout(previewTimer);
-      if (!(urlInput instanceof HTMLInputElement) || !isYouTubeUrl(urlInput.value.trim())) return;
-      previewTimer = window.setTimeout(() => { void analyzeVideo(); }, 650);
-    });
-    importButton?.addEventListener('click', async () => {
-      setFeedback('Import des commentaires lancé…');
-      try {
-        const payload = await request('/v1/youtube/imports', { method: 'POST', body: JSON.stringify({ url: videoUrl(), rules: rules() }) }) as { import: { id: string } };
-        importId = payload.import.id;
-        if (drawPanel instanceof HTMLElement) drawPanel.hidden = false;
-        updateProgress();
-      } catch (error) { showError(error); }
-    });
-    root.querySelector('[data-draw-button]')?.addEventListener('click', async () => {
-      if (!importId) return;
-      setFeedback('Tirage sécurisé en cours…');
-      try {
-        const visibility = root.querySelector('[data-public-visibility]');
-        const payload = await request(`/v1/imports/${importId}/draw`, { method: 'POST', body: JSON.stringify({ publicVisibility: visibility instanceof HTMLInputElement && visibility.checked }) }) as { draw: { publicId: string; publicUrl?: string; winners: Array<{ displayName?: string; username?: string }>; alternates: Array<{ displayName?: string; username?: string }> } };
-        const winnerNames = payload.draw.winners.map((winner) => winner.displayName ?? winner.username ?? 'Participant').join(', ');
-        const alternateNames = payload.draw.alternates.map((alternate) => alternate.displayName ?? alternate.username ?? 'Participant').join(', ');
-        if (result instanceof HTMLElement) {
-          result.hidden = false;
-          result.replaceChildren();
-          const heading = document.createElement('p'); heading.className = 'result-label'; heading.textContent = 'Gagnant(s)';
-          const names = document.createElement('p'); names.className = 'result-value'; names.textContent = winnerNames;
-          result.append(heading, names);
-          if (alternateNames) { const alternates = document.createElement('p'); alternates.textContent = `Suppléant(s) : ${alternateNames}`; result.append(alternates); }
-          if (visibility instanceof HTMLInputElement && visibility.checked) {
-            const proof = document.createElement('a'); proof.className = 'field-hint'; proof.href = payload.draw.publicUrl ?? '#'; proof.textContent = payload.draw.publicUrl ? 'Ouvrir le résultat partageable' : `Référence partageable : ${payload.draw.publicId}`;
-            if (payload.draw.publicUrl) { proof.target = '_blank'; proof.rel = 'noopener'; }
-            result.append(proof);
-          }
-        }
-        setFeedback('Tirage terminé.');
-      } catch (error) { showError(error); }
-    });
-  }
+  import '../scripts/social-contest';
 </script>

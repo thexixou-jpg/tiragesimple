@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'bluesky' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -24,6 +24,15 @@ export interface SocialProviderDefinition {
 }
 
 export const socialProviders: SocialProviderDefinition[] = [
+  {
+    id: 'bluesky', name: 'Bluesky', status: 'available', statusLabel: 'Disponible',
+    title: 'Tirage au sort Bluesky : likes ou reposts | TirageSimple',
+    description: 'Tirez des gagnants parmi les likes ou reposts d’un post Bluesky public. Import officiel, comptes uniques, exclusions et résultat partageable.',
+    intro: 'Transformez les likes ou les reposts de votre publication Bluesky en un tirage transparent, sans connecter de compte.',
+    connection: 'API publique Bluesky, sans mot de passe ni connexion.',
+    limitations: ['Likes ou reposts, sans combiner les deux.', 'Les commentaires, citations et abonnements ne sont pas vérifiés.', 'Un import incomplet ou trop volumineux ne permet pas de lancer un tirage.'],
+    capabilities: { comments: false, likes: true, reposts: true, mentions: false, followers: false, replies: false },
+  },
   {
     id: 'youtube', name: 'YouTube', status: 'available', statusLabel: 'Disponible',
     title: 'Tirage au sort YouTube : commentaires de vidéo | TirageSimple',

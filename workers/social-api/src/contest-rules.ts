@@ -3,23 +3,32 @@ import type { ContestRules, Participant, ProviderCapabilities, SocialComment } f
 const mentionPattern = /(?:^|\s)@[\p{L}\p{N}._-]+/gu;
 
 export function normalizeRules(input: Partial<ContestRules>): ContestRules {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Règles de tirage invalides.');
+  const count = (value: unknown, fallback: number, minimum: number) => {
+    if (value === undefined) return fallback;
+    if (typeof value !== 'number' || !Number.isInteger(value) || value < minimum || value > 100) throw new Error('Le nombre de gagnants ou suppléants est invalide.');
+    return value;
+  };
+  if (input.excludedUsers !== undefined && (!Array.isArray(input.excludedUsers) || input.excludedUsers.length > 100 || input.excludedUsers.some(v => typeof v !== 'string' || v.length > 300))) throw new Error('La liste des exclusions est invalide.');
+  if (input.requiredKeyword !== undefined && (typeof input.requiredKeyword !== 'string' || input.requiredKeyword.length > 120)) throw new Error('Le filtre textuel est invalide.');
   return {
-    winnerCount: Math.max(1, Math.min(100, Math.trunc(input.winnerCount ?? 1))),
-    alternateCount: Math.max(0, Math.min(100, Math.trunc(input.alternateCount ?? 0))),
+    winnerCount: count(input.winnerCount, 1, 1),
+    alternateCount: count(input.alternateCount, 0, 0),
     uniqueParticipants: input.uniqueParticipants ?? true,
     duplicateEntries: input.duplicateEntries ?? false,
-    excludedUsers: (input.excludedUsers ?? []).map((item) => item.trim().toLowerCase()).filter(Boolean),
+    excludedUsers: (input.excludedUsers ?? []).map((item) => item.trim().replace(/^@/u, '').toLowerCase()).filter(Boolean),
     requiredKeyword: input.requiredKeyword?.trim().toLocaleLowerCase('fr-FR') || undefined,
     minimumMentions: input.minimumMentions && input.minimumMentions > 0 ? Math.min(20, Math.trunc(input.minimumMentions)) : undefined,
     includeReplies: input.includeReplies ?? false,
     excludePublicationAuthor: input.excludePublicationAuthor ?? true,
+    interaction: input.interaction === 'reposts' ? 'reposts' : 'likes',
   };
 }
 
 function commentIsEligible(comment: SocialComment, rules: ContestRules, capabilities: ProviderCapabilities): string[] {
   const reasons: string[] = [];
   const username = comment.username?.toLowerCase();
-  if (username && rules.excludedUsers.includes(username)) reasons.push('excluded_user');
+  if (rules.excludedUsers.includes(comment.providerUserId.toLowerCase()) || (username && rules.excludedUsers.includes(username))) reasons.push('excluded_user');
   if (!rules.includeReplies && comment.isReply) reasons.push('reply_excluded');
   if (rules.requiredKeyword && !comment.text.toLocaleLowerCase('fr-FR').includes(rules.requiredKeyword)) reasons.push('missing_keyword');
   if (rules.minimumMentions && capabilities.mentions) {
@@ -42,7 +51,11 @@ export function createParticipants(comments: SocialComment[], rules: ContestRule
       });
       continue;
     }
-    if (!reasons.length && !rules.uniqueParticipants && rules.duplicateEntries) existing.entriesCount += 1;
+    if (!reasons.length) {
+      existing.entriesCount = !rules.uniqueParticipants && rules.duplicateEntries ? existing.entriesCount + 1 : 1;
+      existing.eligible = true;
+      existing.reasons = [];
+    }
   }
   return [...participants.values()];
 }

@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'bluesky' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -10,6 +10,7 @@ export interface ContestRules {
   minimumMentions?: number;
   includeReplies: boolean;
   excludePublicationAuthor: boolean;
+  interaction?: 'likes' | 'reposts';
 }
 
 export interface ProviderCapabilities {
@@ -53,6 +54,7 @@ export interface Participant {
 
 export interface Env {
   YOUTUBE_ENABLED?: string;
+  BLUESKY_ENABLED?: string;
   YOUTUBE_API_KEY?: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_SITE_URL?: string;
@@ -67,4 +69,7 @@ export interface SocialImportJob {
   provider: ProviderId;
   importId: string;
   pageToken?: string;
+  phase?: 'replies';
+  parentIds?: string[];
+  nextThreadToken?: string;
 }

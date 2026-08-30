@@ -16,7 +16,7 @@ const guide = getGuide('concours-youtube-commentaires');
 
   <h2>Une chance par chaîne ou par commentaire</h2>
   <p>Le mode par défaut identifie les participants avec l’identifiant stable de leur chaîne. Dix commentaires d’une même chaîne produisent donc une seule participation. Ce choix limite le spam et correspond à la règle « une personne, une chance », même si l’outil ne peut pas prouver qu’une personne ne possède qu’une seule chaîne.</p>
-  <p>Activez « Chaque commentaire compte » uniquement si plusieurs messages doivent augmenter les chances. Précisez alors si les réponses sont incluses et si un plafond existe. Actuellement, TirageSimple n’importe pas les réponses afin d’éviter une liste partielle présentée comme complète.</p>
+  <p>Activez « Chaque commentaire compte » uniquement si plusieurs messages doivent augmenter les chances. L’option « Inclure les réponses » récupère séparément toutes les pages de réponses accessibles par l’API officielle. Elle peut allonger l’import et consommer davantage de quota. Si l’import échoue ou atteint une limite, aucun tirage partiel n’est proposé. Les messages peuvent évoluer pendant la collecte : ce n’est pas une archive à une date passée.</p>
 
   <h2>Utiliser un mot obligatoire sans exclure par erreur</h2>
   <p>Le filtre recherche le mot ou l’expression dans le contenu du commentaire. Préférez une formulation courte, sans orthographe difficile. Si vous exigez « mon film préféré », un commentaire contenant une variante ou une faute pourrait être écarté. Testez le filtre sur quelques exemples avant la clôture.</p>
