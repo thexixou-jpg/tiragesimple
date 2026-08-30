@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'À propos de TirageSimple',
+  url: 'https://tiragesimple.fr/a-propos',
+  description: 'La mission, la méthode aléatoire, les limites et les engagements de TirageSimple.',
+  inLanguage: 'fr-FR',
+  mainEntity: { '@type': 'Person', name: 'Bertrand Da Silva' },
+};
+---
+
+<BaseLayout
+  title="À propos de TirageSimple : méthode et engagements"
+  description="Découvrez qui édite TirageSimple, comment fonctionnent ses tirages aléatoires et quels engagements guident la confidentialité et la transparence."
+  canonicalPath="/a-propos"
+>
+  <header class="guide-hero">
+    <div class="container guide-hero__inner">
+      <p class="eyebrow">Derrière les outils</p>
+      <h1>À propos de TirageSimple</h1>
+      <p class="guide-lead">Un projet indépendant conçu pour prendre une décision aléatoire sans compte, sans interface compliquée et sans cacher les limites de la méthode.</p>
+      <div class="guide-meta"><span>Édité par Bertrand Da Silva</span><span>Projet français indépendant</span></div>
+    </div>
+  </header>
+  <div class="container guide-layout about-layout">
+    <article class="guide-content prose">
+      <h2>Pourquoi ce site existe</h2>
+      <p>Choisir un nom, former des équipes ou départager plusieurs idées ne devrait pas demander une inscription ni un tableur complexe. TirageSimple rassemble des outils ciblés qui s’ouvrent rapidement, expliquent leurs options et donnent un résultat immédiatement exploitable.</p>
+      <p>Le site est développé et édité par Bertrand Da Silva. Il est pensé d’abord pour des usages concrets : classe, animation, association, jeu entre amis, atelier professionnel ou concours en ligne. Les retours servent à améliorer la lisibilité, l’accessibilité et les cas où une règle peut être mal comprise.</p>
+
+      <h2>Comment le hasard est produit</h2>
+      <p>Les outils classiques s’appuient sur l’API Web Crypto du navigateur plutôt que sur <code>Math.random()</code>. Le moteur central choisit des entiers par rejet des valeurs qui créeraient un biais, puis utilise ces entiers pour sélectionner ou mélanger les éléments. Les tirages multiples reposent sur un mélange de type Fisher–Yates.</p>
+      <p>L’animation d’une roue ne décide pas du gagnant : le résultat est choisi par le moteur, puis l’animation se termine sur le segment correspondant. Cela évite que la durée d’affichage, les performances de l’appareil ou un arrêt visuel changent le résultat.</p>
+
+      <h2>Ce que « transparent » signifie ici</h2>
+      <p>La transparence consiste à décrire les règles appliquées, le traitement des doublons, le mode avec ou sans remise et les limites techniques. TirageSimple ne revendique ni certification officielle, ni contrôle par un tiers. Pour une opération réglementée ou un enjeu important, l’organisateur reste responsable du règlement et des éventuelles obligations juridiques.</p>
+
+      <h2>Des données locales autant que possible</h2>
+      <p>Pour la roue, les listes, les nombres, les dés et les équipes, les données saisies sont traitées dans le navigateur. Aucun compte n’est nécessaire. Certaines préférences et l’historique peuvent être conservés localement sur l’appareil afin de retrouver l’état de l’outil.</p>
+      <p>Le tirage YouTube est différent : il doit interroger l’API officielle de la plateforme via un service backend. Seules les données nécessaires à l’import et au tirage sont utilisées, avec une conservation temporaire configurable. La <a href="/confidentialite">page de confidentialité</a> détaille cette distinction.</p>
+
+      <h2>Pas de fonctionnalité sociale simulée</h2>
+      <p>Les réseaux sociaux limitent l’accès aux commentaires, likes, abonnements ou repartages. Une page n’est déclarée disponible que lorsque l’API officielle et les autorisations permettent réellement le cas d’usage. TirageSimple n’utilise pas de mot de passe demandé à l’utilisateur, de cookie récupéré manuellement ou de scraping clandestin pour donner l’illusion d’un connecteur.</p>
+
+      <h2>Contenu et amélioration continue</h2>
+      <p>Les guides sont rédigés pour expliquer des décisions réelles : quand supprimer les doublons, comment traiter une liste impaire ou quelles conditions YouTube sont vérifiables. Ils ne sont pas générés comme des variantes de mots-clés. Chaque page doit apporter une réponse propre et rester cohérente avec le fonctionnement du code.</p>
+      <p>Une erreur, une formulation ambiguë ou un cas non couvert peut être signalé à <a href="mailto:contact@xixou.io">contact@xixou.io</a>. Les corrections techniques et éditoriales sont déployées progressivement, avec une priorité donnée à la fiabilité plutôt qu’au nombre d’outils affichés.</p>
+    </article>
+    <aside class="guide-method-card">
+      <p class="eyebrow">Nos engagements</p>
+      <ul class="about-principles">
+        <li><strong>Clarté</strong><span>Les options et limites sont expliquées.</span></li>
+        <li><strong>Confidentialité</strong><span>Le traitement local est privilégié.</span></li>
+        <li><strong>Honnêteté</strong><span>Aucune certification n’est inventée.</span></li>
+        <li><strong>Sobriété</strong><span>Pas de compte imposé pour un simple tirage.</span></li>
+      </ul>
+      <a class="text-link" href="/guides">Consulter les guides →</a>
+    </aside>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

@@ -7,6 +7,7 @@ import YouTubeContestTool from './YouTubeContestTool.astro';
 interface Props { provider: SocialProviderId; }
 const { provider: providerId } = Astro.props;
 const provider = getSocialProvider(providerId);
+const isIndexable = providerId === 'youtube';
 const statusClass = `social-status social-status-${provider.status}`;
 const pageUrl = new URL(`/tirage-au-sort-${provider.id}`, Astro.site ?? Astro.url.origin).toString();
 const structuredData = {
@@ -23,7 +24,7 @@ const capabilityLabels = [
 ] as const;
 ---
 
-<BaseLayout title={provider.title} description={provider.description} canonicalPath={`/tirage-au-sort-${provider.id}`}>
+<BaseLayout title={provider.title} description={provider.description} canonicalPath={`/tirage-au-sort-${provider.id}`} noindex={!isIndexable}>
   <header class="tool-hero">
     <div class="container tool-heading">
       <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux">Tirages réseaux sociaux</a>
@@ -45,6 +46,14 @@ const capabilityLabels = [
       <aside class="youtube-limit-note"><strong>Ce qui est réellement vérifié</strong><p>Les commentaires publics, leur auteur, leur contenu et le mot obligatoire éventuel. Les likes individuels, les abonnements à une chaîne et les publications Communauté YouTube ne sont pas vérifiables ici.</p></aside>
       <h2>Un gagnant par chaîne, sauf si vous choisissez autrement</h2>
       <p>Par défaut, plusieurs commentaires publiés par une même chaîne ne créent qu’une seule participation. Vous pouvez activer « Chaque commentaire compte » si votre règlement prévoit plusieurs chances.</p>
+      <h2>Préparer le règlement avant l’import</h2>
+      <p>Fixez la date de clôture, le nombre de gagnants, les suppléants et la règle sur les commentaires multiples avant d’analyser la vidéo. Si un mot est obligatoire, reprenez exactement la même expression dans l’annonce du concours et dans le filtre.</p>
+      <h2>Comprendre l’écart entre commentaires et participants</h2>
+      <p>Une chaîne peut publier plusieurs messages. L’import affiche donc séparément le volume de commentaires analysés et le nombre de chaînes uniques retenues. Le second total correspond aux chances disponibles lorsque la déduplication est active.</p>
+      <h2>API officielle, quotas et contenus accessibles</h2>
+      <p>Le connecteur accepte les vidéos et Shorts publics dont les commentaires sont ouverts. Il n’utilise pas de scraping pour contourner YouTube. Une vidéo privée, supprimée, une publication Communauté ou un quota d’API atteint ne peut pas être traité comme un import complet.</p>
+      <h2>Partager sans surexposer les participants</h2>
+      <p>Un compte rendu utile mentionne la vidéo, les critères, la date et le nombre de participants valides. Il n’est pas nécessaire de republier tous les commentaires. Pour préparer chaque étape, consultez le <a href="/guides/concours-youtube-commentaires">guide du concours YouTube par commentaires</a>.</p>
     </article> : <article class="tool-content prose">
       <h2>Critères vérifiables</h2>
       <ul class="capability-list">
@@ -57,4 +66,4 @@ const capabilityLabels = [
     </article>}
   </div>
 </BaseLayout>
-<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
+{isIndexable && <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />}

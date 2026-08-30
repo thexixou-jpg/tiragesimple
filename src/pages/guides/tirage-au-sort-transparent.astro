@@ -1,0 +1,40 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getGuide } from '../../data/guides';
+const guide = getGuide('tirage-au-sort-transparent');
+---
+
+<GuideLayout {...guide}>
+  <p class="guide-summary"><strong>En bref :</strong> écrivez les conditions avant d’importer les noms, décidez comment traiter les doublons, figez la liste, puis conservez le résultat et les paramètres appliqués. L’aléatoire ne peut être équitable que si la liste de départ l’est aussi.</p>
+
+  <h2>1. Écrire la règle avant de lancer l’outil</h2>
+  <p>La première source de contestation n’est généralement pas l’algorithme, mais une condition découverte après le résultat. Indiquez avant la clôture qui peut participer, la date limite, le nombre de gagnants, la présence de suppléants et le traitement des participations multiples. Pour un concours public, précisez également comment un gagnant sera contacté et pendant combien de temps il pourra répondre.</p>
+  <p>Une règle courte mais précise vaut mieux qu’une longue formule ambiguë. Par exemple : « une participation par personne, trois gagnants distincts, tirage sans remise parmi les inscriptions reçues avant vendredi 18 h ». Cette phrase suffit à déterminer les options de l’outil.</p>
+
+  <h2>2. Nettoyer la liste sans modifier les chances en silence</h2>
+  <p>Supprimer les lignes vides est neutre. Supprimer les doublons ne l’est pas toujours : si chaque inscription valide constitue une chance, deux lignes identiques doivent peut-être rester. À l’inverse, si le règlement limite la participation à une personne, conservez une seule occurrence. Faites ce choix avant de connaître le gagnant.</p>
+  <div class="guide-callout"><strong>Bon contrôle</strong><p>Comparez le nombre de lignes importées au nombre de participants attendus. Vérifiez aussi les espaces, variantes de casse et identifiants incomplets : « Léa », « lea » et « Léa » peuvent représenter la même personne sans être des chaînes strictement identiques.</p></div>
+
+  <h2>3. Choisir avec ou sans remise</h2>
+  <p>Un tirage <strong>sans remise</strong> retire chaque gagnant du groupe disponible. C’est le mode adapté pour désigner plusieurs personnes distinctes. Un tirage <strong>avec remise</strong> remet le nom dans la liste après chaque sélection : la même personne peut alors gagner plusieurs fois. Ce second mode n’est pertinent que si votre règlement l’autorise explicitement.</p>
+  <p>Pour trente participants et trois lots identiques, le sans-remise est généralement le choix le plus lisible. Pour trois tours indépendants d’un jeu où chaque tour recommence de zéro, le avec-remise peut se justifier.</p>
+
+  <h2>4. Ce que garantit le moteur aléatoire</h2>
+  <p>Les outils TirageSimple utilisent Web Crypto dans le navigateur. Pour choisir un entier, le moteur écarte les valeurs qui créeraient un biais de modulo, puis sélectionne dans l’intervalle restant. Pour plusieurs gagnants, la liste est mélangée avec une variante de Fisher–Yates avant de prendre les premiers éléments.</p>
+  <p>Cela fournit un hasard technique robuste pour un outil web courant. Ce n’est toutefois ni un constat d’huissier, ni une certification externe, ni une garantie juridique. Un jeu réglementé, un lot de grande valeur ou une procédure officielle peut demander des obligations supplémentaires.</p>
+
+  <h2>5. Conserver une preuve utile, sans exposer la liste</h2>
+  <p>Notez la date, le nombre d’entrées valides, les options actives et le résultat. Une capture ou un lien de partage aide à expliquer le déroulement, mais évitez de publier l’intégralité des coordonnées des participants. Un prénom, un pseudonyme public ou un identifiant partiellement masqué suffit souvent.</p>
+  <p>La transparence consiste à montrer la méthode et les règles, pas à divulguer inutilement des données personnelles. Les outils classiques de TirageSimple traitent les listes localement dans le navigateur. Consultez la <a href="/confidentialite">politique de confidentialité</a> pour distinguer ces outils du connecteur YouTube, qui interroge une API officielle.</p>
+
+  <h2>Checklist avant le résultat</h2>
+  <ul class="guide-checklist">
+    <li>Les critères et l’heure de clôture sont annoncés.</li>
+    <li>La règle sur les doublons est décidée.</li>
+    <li>Le nombre de gagnants et de suppléants est fixé.</li>
+    <li>La liste a été contrôlée avant le tirage.</li>
+    <li>Le mode avec ou sans remise correspond au règlement.</li>
+    <li>Le compte rendu ne révèle pas de données inutiles.</li>
+  </ul>
+  <p><a class="button button-primary" href="/tirage-au-sort">Préparer un tirage au sort</a></p>
+</GuideLayout>

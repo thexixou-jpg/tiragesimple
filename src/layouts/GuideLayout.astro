@@ -1,0 +1,50 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  category: string;
+  readingTime: string;
+}
+
+const { title, description, slug, category, readingTime } = Astro.props;
+const canonicalPath = `/guides/${slug}`;
+const url = new URL(canonicalPath, Astro.site ?? Astro.url.origin).toString();
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  url,
+  mainEntityOfPage: url,
+  datePublished: '2026-08-30',
+  dateModified: '2026-08-30',
+  inLanguage: 'fr-FR',
+  author: { '@type': 'Person', name: 'Bertrand Da Silva', url: new URL('/a-propos', Astro.site ?? Astro.url.origin).toString() },
+  publisher: { '@type': 'Organization', name: 'TirageSimple', url: new URL('/', Astro.site ?? Astro.url.origin).toString() },
+};
+---
+
+<BaseLayout title={`${title} | TirageSimple`} {description} {canonicalPath}>
+  <header class="guide-hero">
+    <div class="container guide-hero__inner">
+      <a class="breadcrumb" href="/guides">Guides pratiques</a>
+      <p class="eyebrow">{category}</p>
+      <h1>{title}</h1>
+      <p class="guide-lead">{description}</p>
+      <div class="guide-meta"><span>Par Bertrand Da Silva</span><span>Mis à jour le 30 août 2026</span><span>{readingTime} de lecture</span></div>
+    </div>
+  </header>
+  <div class="container guide-layout">
+    <article class="guide-content prose"><slot /></article>
+    <aside class="guide-method-card">
+      <p class="eyebrow">Principe TirageSimple</p>
+      <h2>Des règles avant le hasard</h2>
+      <p>Un tirage est crédible lorsque les critères sont annoncés, la liste est contrôlée et les limites sont expliquées.</p>
+      <a class="text-link" href="/a-propos">Découvrir notre méthode →</a>
+    </aside>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

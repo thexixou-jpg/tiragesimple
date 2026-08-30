@@ -1,0 +1,39 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getGuide } from '../../data/guides';
+const guide = getGuide('concours-youtube-commentaires');
+---
+
+<GuideLayout {...guide}>
+  <p class="guide-summary"><strong>En bref :</strong> TirageSimple importe les commentaires publics d’une vidéo ou d’un Short par l’API officielle YouTube. Il peut filtrer le texte et dédupliquer les chaînes, mais ne vérifie pas les abonnements ni les likes individuels.</p>
+
+  <h2>Définir une condition que l’outil peut vérifier</h2>
+  <p>Une bonne règle repose sur une donnée effectivement accessible. Vous pouvez demander un commentaire sous une vidéo publique, imposer un mot ou une expression et limiter chaque chaîne à une participation. Vous pouvez également autoriser chaque commentaire à compter si cette règle est annoncée dès le départ.</p>
+  <p>En revanche, n’écrivez pas que le tirage vérifiera automatiquement un abonnement ou un like : l’import utilisé ici ne permet pas de contrôler ces actions utilisateur par utilisateur. Vous pouvez encourager ces gestes, mais ils ne doivent pas être présentés comme un filtre technique appliqué par TirageSimple.</p>
+
+  <h2>Vidéo, Short ou publication Communauté</h2>
+  <p>Le connecteur accepte une URL de vidéo YouTube ou de Short public dont les commentaires sont actifs. Les publications textuelles ou illustrées de l’onglet Communauté ne sont pas prises en charge. Une vidéo privée, supprimée ou dont les commentaires sont désactivés ne peut pas fournir de liste exploitable.</p>
+
+  <h2>Une chance par chaîne ou par commentaire</h2>
+  <p>Le mode par défaut identifie les participants avec l’identifiant stable de leur chaîne. Dix commentaires d’une même chaîne produisent donc une seule participation. Ce choix limite le spam et correspond à la règle « une personne, une chance », même si l’outil ne peut pas prouver qu’une personne ne possède qu’une seule chaîne.</p>
+  <p>Activez « Chaque commentaire compte » uniquement si plusieurs messages doivent augmenter les chances. Précisez alors si les réponses sont incluses et si un plafond existe. Actuellement, TirageSimple n’importe pas les réponses afin d’éviter une liste partielle présentée comme complète.</p>
+
+  <h2>Utiliser un mot obligatoire sans exclure par erreur</h2>
+  <p>Le filtre recherche le mot ou l’expression dans le contenu du commentaire. Préférez une formulation courte, sans orthographe difficile. Si vous exigez « mon film préféré », un commentaire contenant une variante ou une faute pourrait être écarté. Testez le filtre sur quelques exemples avant la clôture.</p>
+  <div class="guide-callout"><strong>Conseil de règlement</strong><p>Écrivez exactement la même expression dans la publication et dans le champ du filtre. Indiquez si les majuscules, accents ou variantes sont acceptés.</p></div>
+
+  <h2>Contrôler l’import avant le tirage</h2>
+  <p>L’aperçu confirme le titre, la chaîne et la date de la vidéo. Après l’import, comparez le nombre de commentaires analysés et le nombre de participants uniques. Un écart important peut être normal lorsque plusieurs messages proviennent des mêmes chaînes ou que le mot obligatoire élimine des entrées.</p>
+  <p>Les API appliquent des quotas et une pagination. Pour de gros volumes, l’import prend plus de temps et peut être limité par la configuration du service. Un message d’erreur doit être traité avant le tirage ; ne complétez pas silencieusement la liste avec une méthode de scraping.</p>
+
+  <h2>Publier un résultat respectueux des participants</h2>
+  <p>Conservez le lien de la vidéo, les critères, les nombres analysés et la date. Affichez le pseudonyme public nécessaire pour retrouver le gagnant, mais ne republiez pas la totalité des commentaires. Le résultat n’est pas une certification externe : il documente le fonctionnement de l’outil et les choix de l’organisateur.</p>
+  <ul class="guide-checklist">
+    <li>La vidéo ou le Short est public et les commentaires sont actifs.</li>
+    <li>La date de clôture et le nombre de gagnants sont annoncés.</li>
+    <li>La règle sur les commentaires multiples est explicite.</li>
+    <li>Les critères non vérifiables ne sont pas présentés comme contrôlés.</li>
+    <li>Le nombre de participants uniques est vérifié avant le tirage.</li>
+  </ul>
+  <p><a class="button button-primary" href="/tirage-au-sort-youtube">Ouvrir le tirage YouTube</a></p>
+</GuideLayout>

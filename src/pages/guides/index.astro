@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { guides } from '../../data/guides';
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Guides pratiques TirageSimple',
+  url: 'https://tiragesimple.fr/guides',
+  inLanguage: 'fr-FR',
+  hasPart: guides.map((guide) => ({ '@type': 'Article', name: guide.title, url: `https://tiragesimple.fr/guides/${guide.slug}` })),
+};
+---
+
+<BaseLayout
+  title="Guides pratiques du tirage au sort | TirageSimple"
+  description="Des guides concrets pour organiser un tirage transparent, créer des équipes aléatoires et réussir un concours YouTube par commentaires."
+  canonicalPath="/guides"
+>
+  <header class="guide-hero guide-hero--hub">
+    <div class="container guide-hero__inner">
+      <p class="eyebrow">Règles, méthode et exemples</p>
+      <h1>Guides pratiques</h1>
+      <p class="guide-lead">Le hasard ne remplace pas une règle claire. Ces ressources expliquent comment préparer les données, choisir les bonnes options et présenter un résultat compréhensible.</p>
+    </div>
+  </header>
+  <section class="section">
+    <div class="container guide-grid">
+      {guides.map((guide) => <article class="guide-card">
+        <div><span>{guide.category}</span><small>{guide.readingTime}</small></div>
+        <h2><a href={`/guides/${guide.slug}`}>{guide.title}</a></h2>
+        <p>{guide.description}</p>
+        <a class="text-link" href={`/guides/${guide.slug}`}>Lire le guide →</a>
+      </article>)}
+    </div>
+  </section>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

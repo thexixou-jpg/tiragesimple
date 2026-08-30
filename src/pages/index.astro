@@ -3,6 +3,7 @@ import ToolGrid from '../components/ToolGrid.astro';
 import { categoryOrder } from '../data/navigation';
 import { categoryLabels, tools } from '../data/tools';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { guides } from '../data/guides';
 const popularTools = tools.filter((tool) => tool.popular);
 const websiteSchema = {
   '@context': 'https://schema.org',
@@ -105,6 +106,23 @@ const websiteSchema = {
           <li><span>03</span><div><strong>Gardez ou partagez</strong><small>Votre résultat reste visible et prêt à être copié.</small></div></li>
         </ol>
       </div>
+    </div>
+  </section>
+  <section class="section guide-home-section" aria-labelledby="guide-home-title">
+    <div class="container">
+      <div class="section-heading section-heading--split"><div>
+        <p class="eyebrow">Au-delà du bouton</p>
+        <h2 id="guide-home-title">Des règles claires pour un résultat crédible.</h2>
+      </div><p>Préparez la liste, choisissez les bonnes options et comprenez précisément ce que l’outil peut vérifier.</p></div>
+      <div class="guide-grid guide-grid--home">
+        {guides.map((guide) => <article class="guide-card">
+          <div><span>{guide.category}</span><small>{guide.readingTime}</small></div>
+          <h3><a href={`/guides/${guide.slug}`}>{guide.title}</a></h3>
+          <p>{guide.description}</p>
+          <a class="text-link" href={`/guides/${guide.slug}`}>Lire le guide →</a>
+        </article>)}
+      </div>
+      <p class="guide-home-more"><a class="button button-secondary" href="/guides">Voir tous les guides</a><a class="text-link" href="/a-propos">Comment fonctionne TirageSimple ? →</a></p>
     </div>
   </section>
   <section class="section" id="tous-les-outils" aria-labelledby="all-tools-title">

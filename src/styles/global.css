@@ -877,6 +877,41 @@ ul.generated-list { list-style: none; }
 .workflow-steps strong { font-size: .98rem; }
 .workflow-steps small { color: var(--color-text-muted); font-size: .84rem; }
 
+.guide-hero { position: relative; overflow: hidden; padding: clamp(4rem, 9vw, 7.5rem) 0 clamp(3rem, 7vw, 5.5rem); border-bottom: 1px solid var(--color-border); background: radial-gradient(circle at 78% 22%, color-mix(in srgb, var(--color-primary) 17%, transparent), transparent 28%), linear-gradient(145deg, color-mix(in srgb, var(--color-primary-soft) 55%, var(--color-bg)), var(--color-bg)); }
+.guide-hero::after { position: absolute; width: 22rem; height: 22rem; right: -8rem; bottom: -15rem; border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent); border-radius: 50%; content: ''; }
+.guide-hero__inner { position: relative; z-index: 1; max-width: 58rem; margin-inline: auto; }
+.guide-hero h1 { max-width: 19ch; margin: var(--space-3) 0 var(--space-4); font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: -.055em; line-height: .98; }
+.guide-hero--hub h1 { max-width: none; }
+.guide-lead { max-width: 48rem; margin: 0; color: var(--color-text-muted); font-size: clamp(1.05rem, 2vw, 1.3rem); line-height: 1.7; }
+.guide-meta { display: flex; margin-top: var(--space-5); flex-wrap: wrap; gap: .55rem 1.2rem; color: var(--color-text-muted); font-size: .82rem; font-weight: 700; }
+.guide-meta span + span::before { margin-right: 1.2rem; color: var(--color-primary); content: '•'; }
+.guide-layout { display: grid; padding-top: clamp(3rem, 7vw, 6rem); padding-bottom: clamp(4rem, 9vw, 8rem); align-items: start; grid-template-columns: minmax(0, 1fr) 18rem; gap: clamp(2rem, 6vw, 6rem); }
+.guide-content { max-width: 49rem; margin: 0; }
+.guide-content > p:first-child { margin-top: 0; }
+.guide-content h2 { margin-top: clamp(2.4rem, 6vw, 4rem); }
+.guide-summary { padding: 1.2rem 1.35rem; border: 1px solid color-mix(in srgb, var(--color-primary) 34%, var(--color-border)); border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-primary-soft) 55%, var(--color-surface)); font-size: 1.04rem; }
+.guide-callout { margin: var(--space-6) 0; padding: 1.2rem 1.35rem; border-left: .24rem solid var(--color-primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--color-surface); box-shadow: var(--shadow-sm); }
+.guide-callout p { margin: .4rem 0 0; }
+.guide-checklist { display: grid; padding: 0 !important; gap: .7rem; list-style: none; }
+.guide-checklist li { position: relative; padding: .8rem 1rem .8rem 2.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); }
+.guide-checklist li::before { position: absolute; left: .9rem; color: var(--color-success); content: '✓'; font-weight: 900; }
+.guide-method-card { position: sticky; top: 6.5rem; padding: 1.35rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-surface) 94%, transparent); box-shadow: var(--shadow-sm); }
+.guide-method-card h2 { margin: .6rem 0 .7rem; font-size: 1.35rem; }
+.guide-method-card > p:not(.eyebrow) { color: var(--color-text-muted); font-size: .9rem; }
+.guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.guide-card { position: relative; display: flex; min-height: 19rem; padding: clamp(1.15rem, 2.5vw, 1.65rem); flex-direction: column; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: linear-gradient(145deg, var(--color-surface), color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface))); box-shadow: var(--shadow-sm); }
+.guide-card > div { display: flex; align-items: center; justify-content: space-between; color: var(--color-primary); font-size: .74rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+.guide-card small { color: var(--color-text-muted); }
+.guide-card h2, .guide-card h3 { margin: 2.2rem 0 .8rem; font-size: clamp(1.3rem, 2.2vw, 1.65rem); line-height: 1.12; }
+.guide-card h2 a, .guide-card h3 a { color: inherit; text-decoration: none; }
+.guide-card p { margin: 0 0 1.2rem; color: var(--color-text-muted); font-size: .9rem; }
+.guide-card .text-link { margin-top: auto; }
+.guide-card:hover { border-color: color-mix(in srgb, var(--color-primary) 46%, var(--color-border)); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.guide-home-section { background: color-mix(in srgb, var(--color-surface) 55%, var(--color-bg)); }
+.guide-home-more { display: flex; margin: var(--space-6) 0 0; align-items: center; flex-wrap: wrap; gap: 1.25rem; }
+.about-principles { display: grid; margin: 1rem 0 1.4rem; padding: 0; gap: .85rem; list-style: none; }
+.about-principles li { display: grid; gap: .15rem; }
+.about-principles span { color: var(--color-text-muted); font-size: .82rem; }
 .legal-content { max-width: 48rem; padding-top: var(--space-7); padding-bottom: var(--space-8); }
 .legal-content h2:first-child { margin-top: 0; }
 .not-found { padding-top: clamp(5rem, 12vw, 9rem); padding-bottom: clamp(6rem, 14vw, 11rem); text-align: center; }
@@ -947,12 +982,20 @@ ul.generated-list { list-style: none; }
   .footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-4); }
   .footer-links nav:last-child { grid-column: 1 / -1; }
   .footer-bottom { align-items: flex-start; flex-direction: column; gap: .25rem; }
+  .guide-layout { grid-template-columns: 1fr; }
+  .guide-method-card { position: static; }
+  .guide-grid { grid-template-columns: 1fr; }
+  .guide-card { min-height: 0; }
+  .guide-meta { display: grid; gap: .35rem; }
+  .guide-meta span + span::before { display: none; }
 }
 
 @media (min-width: 761px) and (max-width: 980px) {
   .tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .use-case-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .use-case-card:last-child { grid-column: 1 / -1; }
+  .guide-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .guide-grid .guide-card:last-child { grid-column: 1 / -1; }
   .hero-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
   .hero-visual { min-height: 24rem; }
 }

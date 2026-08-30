@@ -1,0 +1,37 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getGuide } from '../../data/guides';
+const guide = getGuide('creer-equipes-aleatoires');
+---
+
+<GuideLayout {...guide}>
+  <p class="guide-summary"><strong>En bref :</strong> une répartition aléatoire équilibre les effectifs, pas automatiquement les niveaux. Choisissez d’abord votre objectif, puis décidez si vous avez besoin d’un nombre d’équipes ou d’une taille maximale.</p>
+
+  <h2>Nombre d’équipes ou taille par équipe ?</h2>
+  <p>Choisissez le <strong>nombre d’équipes</strong> lorsque le terrain, les ateliers ou le matériel imposent un nombre de postes. Avec vingt-deux joueurs et quatre terrains, demandez quatre équipes : deux auront six personnes et deux en auront cinq.</p>
+  <p>Choisissez plutôt la <strong>taille par équipe</strong> lorsque l’activité impose un maximum, par exemple des groupes de trois pour un exercice. L’outil calcule alors le nombre de groupes nécessaire et répartit le reste sans créer un groupe isolé lorsque c’est évitable.</p>
+
+  <h2>Ce que signifie « équilibré » dans l’outil</h2>
+  <p>TirageSimple mélange la liste avec Web Crypto puis répartit les personnes de façon à limiter l’écart d’effectif à une personne. Le mot équilibré concerne donc le <strong>nombre de membres</strong>. L’outil ne connaît ni le niveau sportif, ni l’expérience, ni les affinités, sauf si vous préparez vous-même des groupes ou des catégories en amont.</p>
+  <div class="guide-callout"><strong>Exemple concret</strong><p>Avec dix-sept participants et quatre équipes, la répartition donnera des groupes de 5, 4, 4 et 4. Il est mathématiquement impossible d’obtenir quatre groupes de taille identique.</p></div>
+
+  <h2>Quand l’aléatoire pur est le bon choix</h2>
+  <p>Il convient aux ateliers courts, jeux, prises de parole et séances où le but est d’éviter les préférences personnelles. En classe, il peut renouveler les collaborations. Dans une soirée, il évite qu’une même composition revienne systématiquement. Pour une activité compétitive où de fortes différences de niveau nuiraient au jeu, une répartition stratifiée est préférable.</p>
+
+  <h2>Une méthode simple pour équilibrer aussi les niveaux</h2>
+  <p>Classez les participants dans quelques catégories larges — par exemple débutants, intermédiaires et avancés — puis effectuez un petit tirage pour chaque catégorie et distribuez-les tour à tour entre les équipes. N’utilisez que des critères utiles à l’activité et évitez les catégories sensibles.</p>
+  <p>Cette méthode demande une décision humaine préalable : l’outil ne prétend pas évaluer les personnes. Si la composition doit rester parfaitement neutre, gardez l’aléatoire pur et annoncez-le avant la répartition.</p>
+
+  <h2>Préparer une liste propre</h2>
+  <ul>
+    <li>Utilisez un libellé distinct pour chaque participant.</li>
+    <li>Retirez les absents avant de générer les équipes.</li>
+    <li>Décidez si deux homonymes doivent recevoir une initiale ou un numéro.</li>
+    <li>Ne saisissez pas d’information personnelle qui ne sert pas à l’activité.</li>
+    <li>Copiez le résultat avant de fermer la page si vous devez le conserver.</li>
+  </ul>
+
+  <h2>Faut-il relancer une répartition ?</h2>
+  <p>Relancer uniquement parce qu’une équipe ne plaît pas fragilise la neutralité annoncée. Fixez avant le premier clic les seuls motifs de nouvelle répartition : absence tardive, contrainte de sécurité ou erreur dans la liste. Si vous devez changer manuellement une personne, expliquez la raison au groupe.</p>
+  <p><a class="button button-primary" href="/generateur-equipes">Créer mes équipes</a></p>
+</GuideLayout>

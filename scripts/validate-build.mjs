@@ -33,9 +33,12 @@ for (const file of pages) {
     failures.push(`${page}: données structurées WebSite manquantes`);
   }
   const isSocialInformationPage = page === 'tirage-au-sort-reseaux-sociaux/index.html' || page.startsWith('tirage-au-sort-instagram/') || page.startsWith('tirage-au-sort-youtube/') || page.startsWith('tirage-au-sort-x/') || page.startsWith('tirage-au-sort-tiktok/') || page.startsWith('tirage-au-sort-facebook/');
+  const acceptedStructuredTypes = new Set(['WebApplication', 'Article', 'AboutPage', 'CollectionPage']);
+  const hasAcceptedStructuredData = schemas.some((schema) => acceptedStructuredTypes.has(schema['@type'])
+    || schema['@graph']?.some((item) => acceptedStructuredTypes.has(item['@type'])));
   if (page !== 'index.html' && page !== '404.html' && page !== 'mentions-legales/index.html' && page !== 'confidentialite/index.html' && page !== 'cookies/index.html' && !isSocialInformationPage
-    && !schemas.some((schema) => schema['@graph']?.some((item) => item['@type'] === 'WebApplication'))) {
-    failures.push(`${page}: données structurées WebApplication manquantes`);
+    && !hasAcceptedStructuredData) {
+    failures.push(`${page}: données structurées de contenu manquantes`);
   }
   const h1Count = [...html.matchAll(/<h1(?:\s[^>]*)?>/gu)].length;
   if (h1Count !== 1) failures.push(`${page}: ${h1Count} H1 trouvés`);
@@ -62,6 +65,23 @@ for (const file of pages) {
 
 for (const asset of ['robots.txt', 'sitemap-index.xml', 'og.jpg', '404.html']) {
   if (!existsSync(join(dist, asset))) failures.push(`Fichier absent : ${asset}`);
+}
+
+const sitemapPath = join(dist, 'sitemap-0.xml');
+if (!existsSync(sitemapPath)) failures.push('Fichier absent : sitemap-0.xml');
+else {
+  const sitemapXml = readFileSync(sitemapPath, 'utf8');
+  for (const requiredUrl of [
+    'https://tiragesimple.fr/tirage-au-sort-youtube/',
+    'https://tiragesimple.fr/a-propos/',
+    'https://tiragesimple.fr/guides/tirage-au-sort-transparent/',
+  ]) if (!sitemapXml.includes(requiredUrl)) failures.push(`Sitemap : URL attendue absente ${requiredUrl}`);
+  for (const excludedUrl of [
+    'https://tiragesimple.fr/tirage-au-sort-instagram/',
+    'https://tiragesimple.fr/tirage-au-sort-facebook/',
+    'https://tiragesimple.fr/tirage-au-sort-x/',
+    'https://tiragesimple.fr/tirage-au-sort-tiktok/',
+  ]) if (sitemapXml.includes(excludedUrl)) failures.push(`Sitemap : URL non opérationnelle présente ${excludedUrl}`);
 }
 
 if (failures.length > 0) {

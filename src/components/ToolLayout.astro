@@ -11,9 +11,10 @@ interface Props {
   description: string;
   intro: string;
   faq?: FAQItem[];
+  showAd?: boolean;
 }
 
-const { slug, description, intro, faq = [] } = Astro.props;
+const { slug, description, intro, faq = [], showAd = false } = Astro.props;
 const tool = getTool(slug);
 const pageTitle = Astro.props.title ?? `${tool.title} gratuite | TirageSimple`;
 const url = new URL(`/${slug}`, Astro.site ?? Astro.url.origin).toString();
@@ -77,7 +78,7 @@ const structuredData = {
     <section class="tool-shell" aria-label={`Outil ${tool.title}`}>
       <slot name="tool" />
     </section>
-    <AdSlot />
+    {showAd && <AdSlot />}
     <article class="tool-content prose">
       <slot name="content" />
     </article>
