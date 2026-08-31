@@ -43,12 +43,12 @@ export const socialProviders: SocialProviderDefinition[] = [
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {
-    id: 'mastodon', name: 'Mastodon', status: 'available', statusLabel: 'Disponible sur 5 instances',
+    id: 'mastodon', name: 'Mastodon', status: 'available', statusLabel: 'Disponible sur 13 instances',
     title: 'Tirage au sort Mastodon : favoris ou boosts | TirageSimple',
     description: 'Tirez un gagnant parmi les favoris ou boosts d’un post Mastodon public, sans OAuth, sur les instances prises en charge.',
     intro: 'Importez les favoris ou les boosts d’un post Mastodon public et effectuez un tirage transparent sans connecter votre compte.',
     connection: 'API REST publique Mastodon, sans mot de passe ni connexion.',
-    limitations: ['Instances prises en charge : mastodon.social, mastodon.online, mastodon.world, mstdn.social et piaille.fr.', 'Favoris ou boosts, sans combiner les deux.', 'Les réponses, abonnements et interactions privées ne sont pas vérifiés.'],
+    limitations: ['13 instances vérifiées, dont mastodon.social, piaille.fr, Framapiaf, Mamot et Mastodon.art.', 'Favoris ou boosts, sans combiner les deux.', 'Les réponses, abonnements et interactions privées ne sont pas vérifiés.'],
     capabilities: { comments: false, likes: true, reposts: true, mentions: false, followers: false, replies: false },
   },
   {

@@ -2,7 +2,7 @@
 YOUTUBE_ENABLED=false
 BLUESKY_ENABLED=false
 MASTODON_ENABLED=false
-MASTODON_ALLOWED_HOSTS=mastodon.social,mastodon.online,mastodon.world,mstdn.social,piaille.fr
+MASTODON_ALLOWED_HOSTS=mastodon.social,mastodon.online,mastodon.world,mstdn.social,piaille.fr,framapiaf.org,mamot.fr,mastodon.art,fosstodon.org,infosec.exchange,hachyderm.io,techhub.social,toot.community
 YOUTUBE_API_KEY=
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=

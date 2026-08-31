@@ -1,7 +1,11 @@
 import type { ContestRules, Env, Participant, SocialPublication } from './types';
 import { ProviderRequestError } from './provider-http';
 
-const defaultHosts = ['mastodon.social', 'mastodon.online', 'mastodon.world', 'mstdn.social', 'piaille.fr'];
+const defaultHosts = [
+  'mastodon.social', 'mastodon.online', 'mastodon.world', 'mstdn.social', 'piaille.fr',
+  'framapiaf.org', 'mamot.fr', 'mastodon.art', 'fosstodon.org', 'infosec.exchange',
+  'hachyderm.io', 'techhub.social', 'toot.community',
+];
 
 interface MastodonAccount { id: string; acct: string; display_name?: string; uri?: string; url?: string }
 interface MastodonStatus {

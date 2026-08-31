@@ -1,13 +1,13 @@
 ---
 const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
-const allowedHosts = 'mastodon.social,mastodon.online,mastodon.world,mstdn.social,piaille.fr';
+const allowedHosts = 'mastodon.social,mastodon.online,mastodon.world,mstdn.social,piaille.fr,framapiaf.org,mamot.fr,mastodon.art,fosstodon.org,infosec.exchange,hachyderm.io,techhub.social,toot.community';
 ---
 <section class="tool-shell mastodon-tool" data-social-contest data-provider="mastodon" data-api-url={apiUrl} data-allowed-hosts={allowedHosts} aria-labelledby="mastodon-import-title">
   <div class="tool-panel-intro"><div><p class="eyebrow">API REST officielle · Sans connexion</p><h2 id="mastodon-import-title">Votre post Mastodon. Un tirage vérifiable.</h2><p>Importez les comptes ayant ajouté un favori ou boosté un post public sur une instance prise en charge.</p></div></div>
   <form class="social-import-form" data-contest-form>
     <div class="youtube-form-section youtube-form-section--source">
       <div class="youtube-section-heading"><span>01</span><div><strong>Post du concours</strong><small>Le post doit être public ou non listé.</small></div></div>
-      <label class="field"><span>URL du post Mastodon</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://mastodon.social/@compte/…" required data-video-url /><small>Instances : mastodon.social, mastodon.online, mastodon.world, mstdn.social et piaille.fr.</small></label>
+      <label class="field"><span>URL du post Mastodon</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://mastodon.social/@compte/…" required data-video-url /><small>13 instances vérifiées, dont mastodon.social, piaille.fr, Framapiaf, Mamot et Mastodon.art.</small></label>
       <aside class="youtube-preview mastodon-preview" data-preview data-state="idle" aria-live="polite"><div class="youtube-preview__empty"><span aria-hidden="true">M</span><div><strong>Aperçu du post</strong><small>Le texte, l’auteur et la date apparaîtront ici.</small></div></div><div class="mastodon-post" data-publication hidden><p class="eyebrow">Post sélectionné</p><p data-publication-title></p><small data-publication-meta></small></div></aside>
     </div>
     <div class="youtube-form-section">
