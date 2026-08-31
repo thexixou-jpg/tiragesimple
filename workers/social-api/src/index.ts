@@ -6,6 +6,7 @@ import { createYouTubeDraw } from './youtube-import';
 import { processSocialImport, queueSocialImport } from './social-import';
 import { getBlueskyPublication } from './bluesky';
 import { getYouTubePublication } from './youtube';
+import { socialRulesSummary } from '../../../src/lib/social-rules-summary';
 
 function allowOrigin(request: Request, env: Env): string {
   const configured = env.ALLOWED_ORIGIN ?? 'https://tiragesimple.fr';
@@ -30,7 +31,7 @@ function backendUnavailable(error: unknown): boolean {
 async function publicDraw(env: Env, publicId: string): Promise<Record<string, unknown> | null> {
   if (!env.DB) return null;
   const draw = await env.DB.prepare(`SELECT d.public_id, d.participant_snapshot_hash, d.random_commitment_hash, d.verification_seed, d.result_hash, d.rules_snapshot_json, d.created_at,
-    p.provider, p.canonical_url, p.title
+    p.provider, p.canonical_url, p.title, i.participant_count, i.progress_current, d.expires_at
     FROM contest_draws d JOIN contest_imports i ON i.id = d.import_id JOIN social_publications p ON p.id = i.publication_id
     WHERE d.public_id = ? AND d.public_visibility = 1 AND d.expires_at > ?`).bind(publicId, new Date().toISOString()).first<Record<string, string>>();
   if (!draw) return null;
@@ -43,8 +44,12 @@ async function publicDraw(env: Env, publicId: string): Promise<Record<string, un
       id: draw.public_id,
       createdAt: draw.created_at,
       platform: draw.provider,
+      participantCount: Number(draw.participant_count),
+      analyzedCount: Number(draw.progress_current),
+      expiresAt: draw.expires_at,
       publication: { url: draw.canonical_url, title: draw.title },
       rules: { ...publicRules, excludedAccountCount: excludedUsers.length },
+      rulesSummary: socialRulesSummary(draw.provider, { ...publicRules, excludedAccountCount: excludedUsers.length }),
       participantSnapshotHash: draw.participant_snapshot_hash,
       randomCommitmentHash: draw.random_commitment_hash,
       verificationSeed: draw.verification_seed,
@@ -60,11 +65,24 @@ function escapeHtml(value: unknown): string {
 }
 
 function publicDrawPage(payload: Record<string, unknown>): string {
-  const draw = payload.draw as { id: string; createdAt: string; platform: string; publication: { url: string; title?: string }; winners: Array<{ rank: number; kind: string; username?: string; displayName?: string }>; notice: string };
-  const winnerRows = draw.winners.map((winner) => `<li><span>${winner.kind === 'winner' ? 'Gagnant' : 'Suppléant'} ${escapeHtml(winner.rank)}</span><strong>${escapeHtml(winner.displayName || winner.username || 'Participant')}</strong></li>`).join('');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Résultat ${escapeHtml(draw.id)} | TirageSimple</title><style>body{margin:0;background:#f7f8fc;color:#19182a;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(calc(100% - 2rem),44rem);margin:4rem auto}.card{padding:clamp(1.25rem,4vw,2rem);border:1px solid #e3e3ed;border-radius:22px;background:#fff;box-shadow:0 16px 48px rgb(37 31 86 / 10%)}.tag{display:inline-block;padding:.25rem .55rem;border-radius:999px;background:#efedff;color:#5141cf;font-size:.8rem;font-weight:800}h1{line-height:1.1;letter-spacing:-.04em}a{color:#5141cf}ul{margin:1.5rem 0;padding:0;list-style:none}li{display:flex;padding:1rem;justify-content:space-between;gap:1rem;border-radius:12px;background:#f7f8fc}li+li{margin-top:.5rem}li span{color:#656477;font-size:.85rem}small{color:#656477}</style></head><body><main class="wrap"><article class="card"><span class="tag">Résultat partagé</span><h1>Tirage ${escapeHtml(draw.id)}</h1><p>Plateforme : <strong>${escapeHtml(draw.platform)}</strong><br>Publié le ${escapeHtml(new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(draw.createdAt)))}</p><p><a href="${escapeHtml(draw.publication.url)}" rel="noopener noreferrer">${escapeHtml(draw.publication.title || 'Voir la publication')}</a></p><ul>${winnerRows}</ul><small>${escapeHtml(draw.notice)} Cette page n’est pas indexée par les moteurs de recherche.</small></article></main></body></html>`;
+  const draw = payload.draw as { id: string; createdAt: string; expiresAt: string; platform: string; participantCount: number; analyzedCount: number; rulesSummary: string[]; publication: { url: string; title?: string }; winners: Array<{ rank: number; kind: string; username?: string; displayName?: string }>; notice: string };
+  const date = (value: string) => escapeHtml(new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(new Date(value)));
+  const winnerRows = [...draw.winners].sort((a, b) => Number(a.kind !== 'winner') - Number(b.kind !== 'winner') || a.rank - b.rank)
+    .map((winner) => `<li><span>${winner.kind === 'winner' ? 'Gagnant' : 'Suppléant'} ${escapeHtml(winner.rank)}</span><strong>${escapeHtml(winner.displayName || winner.username || 'Participant')}</strong></li>`).join('');
+  const rules = draw.rulesSummary.map(line => `<li>${escapeHtml(line)}</li>`).join('');
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Résultat ${escapeHtml(draw.id)} | TirageSimple</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101220;color:#eff1ff;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(calc(100% - 2rem),52rem);margin:clamp(1rem,5vw,4rem) auto}.card{padding:clamp(1.25rem,4vw,2.5rem);border:1px solid #343953;border-radius:24px;background:#191d30}.tag{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:#2a294c;color:#c5baff;font-size:.8rem;font-weight:700}h1{font-size:clamp(1.5rem,5vw,2.4rem);line-height:1.2;letter-spacing:-.04em}h2{font-size:1.2rem;margin-top:2rem}a{color:#c1b3ff}a:focus-visible{outline:2px solid #fff;outline-offset:4px}p,h1,strong,li,a{overflow-wrap:anywhere}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}.stats div{padding:1rem;background:#101524;border-radius:14px}.stats strong{display:block;font-size:1.7rem}.stats span,small{color:#b7bed4}.winners{padding:0;list-style:none}.winners li{display:flex;flex-wrap:wrap;padding:1rem;justify-content:space-between;gap:.5rem 1rem;border-radius:12px;background:#242b44}.winners li+li{margin-top:.5rem}.winners span{color:#c4cbe0}.rules{padding-left:1.2rem;color:#d1d7eb}.rules li+li{margin-top:.45rem}footer{border-top:1px solid #343953;margin-top:2rem;padding-top:1rem}footer p{margin-bottom:0}@media(max-width:360px){.stats{grid-template-columns:1fr}}
+</style></head><body><main class="wrap"><article class="card">
+<a href="https://tiragesimple.fr/">TirageSimple</a><p><span class="tag">Résultat partagé · ${escapeHtml(draw.platform === 'youtube' ? 'YouTube' : 'Bluesky')}</span></p>
+<h1>Tirage ${escapeHtml(draw.id)}</h1><p>${date(draw.createdAt)} (heure de Paris)</p>
+<p><a href="${escapeHtml(draw.publication.url)}" rel="noopener noreferrer">${escapeHtml(draw.publication.title || 'Voir la publication')}</a></p>
+<div class="stats"><div><strong>${escapeHtml(draw.participantCount)}</strong><span>comptes éligibles</span></div><div><strong>${escapeHtml(draw.analyzedCount)}</strong><span>interactions analysées</span></div></div>
+<h2>Résultats du tirage</h2><ul class="winners">${winnerRows}</ul>
+<h2>Règles appliquées</h2><ul class="rules">${rules}</ul>
+<footer><small>${escapeHtml(draw.notice)} La liste complète des participants n’est pas publique ; cette page seule ne permet donc pas de rejouer le tirage. Cette page n’est pas indexée par les moteurs de recherche.</small><p><small>Résultat disponible jusqu’au ${date(draw.expiresAt)} (heure de Paris).</small></p></footer>
+</article></main></body></html>`;
 }
-
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const origin = allowOrigin(request, env);
@@ -95,6 +113,7 @@ export default {
         const publication = provider === 'youtube' ? await getYouTubePublication(input.url, env) : await getBlueskyPublication(input.url, env);
         if (providerMatch[2] === 'publication') return json({ publication }, 200, origin);
         const rules = normalizeRules(input.rules ?? {});
+        if (provider === 'youtube' && rules.excludedUsers.some(id => !/^UC[\w-]{22}$/u.test(id))) throw new Error('Utilisez les identifiants de chaîne UC… pour les exclusions YouTube, pas les noms affichés.');
         if (provider === 'bluesky') {
           if (!['likes', 'reposts'].includes(input.rules?.interaction ?? '')) throw new Error('Choisissez les likes ou les reposts.');
           if (rules.requiredKeyword || rules.minimumMentions || rules.includeReplies || rules.duplicateEntries) throw new Error('Ces règles ne sont pas prises en charge pour Bluesky.');
@@ -102,7 +121,7 @@ export default {
         }
         const session = await ownerSession(request, env);
         const imported = await queueSocialImport(env, session.id, publication, rules);
-        return json({ import: imported }, 202, origin, session.setCookie);
+        return json({ import: imported, rulesSummary: socialRulesSummary(provider, { ...rules, excludedAccountCount: rules.excludedUsers.length }), requestedCount: rules.winnerCount + rules.alternateCount }, 202, origin, session.setCookie);
       } catch (error) {
         return json({ error: error instanceof Error ? error.message : 'Impossible de contacter la plateforme.' }, backendUnavailable(error) ? 503 : 400, origin);
       }

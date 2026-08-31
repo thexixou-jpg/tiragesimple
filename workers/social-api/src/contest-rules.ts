@@ -16,7 +16,7 @@ export function normalizeRules(input: Partial<ContestRules>): ContestRules {
     alternateCount: count(input.alternateCount, 0, 0),
     uniqueParticipants: input.uniqueParticipants ?? true,
     duplicateEntries: input.duplicateEntries ?? false,
-    excludedUsers: (input.excludedUsers ?? []).map((item) => item.trim().replace(/^@/u, '').toLowerCase()).filter(Boolean),
+    excludedUsers: [...new Set((input.excludedUsers ?? []).map((item) => item.trim().replace(/^@/u, '')).filter(Boolean))],
     requiredKeyword: input.requiredKeyword?.trim().toLocaleLowerCase('fr-FR') || undefined,
     minimumMentions: input.minimumMentions && input.minimumMentions > 0 ? Math.min(20, Math.trunc(input.minimumMentions)) : undefined,
     includeReplies: input.includeReplies ?? false,
@@ -27,8 +27,8 @@ export function normalizeRules(input: Partial<ContestRules>): ContestRules {
 
 function commentIsEligible(comment: SocialComment, rules: ContestRules, capabilities: ProviderCapabilities): string[] {
   const reasons: string[] = [];
-  const username = comment.username?.toLowerCase();
-  if (rules.excludedUsers.includes(comment.providerUserId.toLowerCase()) || (username && rules.excludedUsers.includes(username))) reasons.push('excluded_user');
+  // Platform IDs are opaque, case-sensitive identifiers, not display names.
+  if (rules.excludedUsers.includes(comment.providerUserId) || (comment.username && rules.excludedUsers.includes(comment.username))) reasons.push('excluded_user');
   if (!rules.includeReplies && comment.isReply) reasons.push('reply_excluded');
   if (rules.requiredKeyword && !comment.text.toLocaleLowerCase('fr-FR').includes(rules.requiredKeyword)) reasons.push('missing_keyword');
   if (rules.minimumMentions && capabilities.mentions) {

@@ -44,7 +44,9 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
         <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par chaîne.</small></span></label>
         <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>La chaîne de la vidéo ne participe pas.</small></span></label>
         <label class="option-card"><input name="includeReplies" type="checkbox" /><span><strong>Inclure les réponses</strong><small>Import de toutes les pages de réponses accessibles. Peut prendre plus de temps.</small></span></label>
-      </div></fieldset>
+      </div>
+      <label class="field social-exclusions"><span>Chaînes à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="UC… , UC…" /><small>Identifiants de chaîne UC… séparés par une virgule (100 maximum). Utilisez l’identifiant présent dans une URL youtube.com/channel/UC…, pas le nom affiché ni le @pseudo.</small></label>
+    </fieldset>
     <div class="actions">
       <button class="button button-secondary" type="submit" data-analyze>Analyser la vidéo</button>
       <button class="button button-primary" type="button" data-import disabled>Importer les commentaires</button>
@@ -53,6 +55,7 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
   <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Le connecteur est en préparation.</div>
   <div class="social-draw-panel" data-draw hidden>
     <p data-progress></p>
+    <section class="social-rules-summary" aria-label="Règles appliquées"><h3>Votre liste, vos règles</h3><p>Règles figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section>
     <label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Rendre le résultat partageable</strong><small>Les gagnants et la preuve technique seront visibles à toute personne ayant le lien.</small></span></label>
     <button class="button button-primary" type="button" data-draw-button>Lancer le tirage</button>
     <div class="result-card" data-result hidden></div>

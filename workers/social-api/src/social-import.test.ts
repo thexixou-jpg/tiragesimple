@@ -71,7 +71,7 @@ describe('official social connectors', () => {
   it('deduplicates Bluesky DID across pages and excludes the post author', async () => {
     const { env, jobs } = fixture();
     vi.stubGlobal('fetch', vi.fn(async (url: URL) => response(url.searchParams.has('cursor') ? { repostedBy: [{ did: 'a', handle: 'renamed.bsky.social' }, { did: 'b', handle: 'b.bsky.social' }] } : { repostedBy: [{ did: 'a', handle: 'a.bsky.social' }, { did: 'owner', handle: 'owner.bsky.social' }], cursor: 'page2' })));
-    const imported = await queueSocialImport(env, 'session', { ...publication, provider: 'bluesky' }, normalizeRules({ interaction: 'reposts', alternateCount: 1 }));
+    const imported = await queueSocialImport(env, 'session', { ...publication, provider: 'bluesky', title: '<script>alert(1)</script>' }, normalizeRules({ interaction: 'reposts', alternateCount: 1, excludedUsers: ['private-exclusion.test'] }));
     while (jobs.length) await processSocialImport(jobs.shift()!, env);
     const participants = await listEligibleParticipants(env, imported.id);
     expect(participants.map(p => p.entriesCount)).toEqual([1, 1]);
@@ -82,7 +82,41 @@ describe('official social connectors', () => {
     const publicResponse = await worker.fetch(new Request(`https://example.test/v1/draws/${draw.publicId}`), env);
     const publicPayload = await publicResponse.json() as { draw: { rules: Record<string, unknown> } };
     expect(publicPayload.draw.rules).not.toHaveProperty('excludedUsers');
-    expect(publicPayload.draw.rules).toHaveProperty('excludedAccountCount', 0);
+    expect(publicPayload.draw.rules).toHaveProperty('excludedAccountCount', 1);
+    expect(publicPayload.draw).toMatchObject({ participantCount: 2, analyzedCount: 4 });
+    expect(JSON.stringify(publicPayload)).not.toContain('private-exclusion.test');
+    const page = await worker.fetch(new Request(draw.publicUrl!), env);
+    const html = await page.text();
+    expect(page.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(html).toContain('Participation via un repost');
+    expect(html).toContain('comptes éligibles');
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('private-exclusion.test');
+    expect(html.indexOf('Gagnant 1')).toBeLessThan(html.indexOf('Suppléant 1'));
+  });
+  it('rejects insufficient distinct accounts without saving a shortened draw', async () => {
+    const { env, jobs, sqlite } = fixture();
+    vi.stubGlobal('fetch', vi.fn(async () => response({ likes: [{ actor: { did: 'a', handle: 'a.test' } }] })));
+    const imported = await queueSocialImport(env, 'session', { ...publication, provider: 'bluesky' }, normalizeRules({ winnerCount: 1, alternateCount: 1 }));
+    while (jobs.length) await processSocialImport(jobs.shift()!, env);
+    await expect(createYouTubeDraw(env, imported.id, false)).rejects.toThrow('Participants insuffisants');
+    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM contest_draws').get()?.n).toBe(0);
+  });
+  it('never draws from an expired import even before scheduled cleanup', async () => {
+    const { env, jobs, sqlite } = fixture();
+    vi.stubGlobal('fetch', vi.fn(async () => response({ likes: [{ actor: { did: 'a', handle: 'a.test' } }] })));
+    const imported = await queueSocialImport(env, 'session', { ...publication, provider: 'bluesky' }, normalizeRules({}));
+    while (jobs.length) await processSocialImport(jobs.shift()!, env);
+    sqlite.prepare('UPDATE contest_imports SET expires_at = ? WHERE id = ?').run('2000-01-01', imported.id);
+    await expect(createYouTubeDraw(env, imported.id, false)).rejects.toThrow('expiré');
+  });
+  it('excludes YouTube channels by exact ID, independently of their display name', () => {
+    const rules = normalizeRules({ excludedUsers: ['UCabcdefghijklmnopqrstuv', 'UCabcdefghijklmnopqrstuv'] });
+    expect(rules.excludedUsers).toHaveLength(1);
+    const comment = { providerUserId: 'UCabcdefghijklmnopqrstuv', providerCommentId: '1', displayName: 'Même nom', text: '', isReply: false };
+    const participants = createParticipants([comment, { ...comment, providerUserId: 'UCAbcdefghijklmnopqrstuv', providerCommentId: '2' }], rules, getProviderCapabilities('youtube'));
+    expect(participants.map(p => p.eligible)).toEqual([false, true]);
   });
   it('fails a partial import rather than drawing from it', async () => {
     const { env, jobs } = fixture();

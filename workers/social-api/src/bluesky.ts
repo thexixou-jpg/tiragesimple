@@ -50,7 +50,7 @@ export async function getBlueskyParticipantsPage(uri: string, pageToken: string 
   if (!Array.isArray(actors)) throw new Error('Réponse Bluesky incomplète : le tirage est interrompu.');
   const participants: Participant[] = [...new Map(actors.map(actor => [actor.did, actor])).values()].flatMap(actor => {
     if (!actor.did) throw new Error('Identifiant de participant manquant : le tirage est interrompu.');
-    if (rules.excludedUsers.includes(actor.did.toLowerCase()) || rules.excludedUsers.includes(actor.handle.toLowerCase().replace(/^@/u, ''))) return [];
+    if (rules.excludedUsers.includes(actor.did) || rules.excludedUsers.some(value => value.toLowerCase() === actor.handle.toLowerCase().replace(/^@/u, ''))) return [];
     return [{ providerUserId: actor.did, username: actor.handle, displayName: actor.displayName, entriesCount: 1, eligible: true, reasons: [] }];
   });
   return { participants, nextPageToken: payload.cursor, totalResults: actors.length };

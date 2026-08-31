@@ -23,6 +23,7 @@ const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '')
   <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
   <div class="social-draw-panel" data-draw hidden>
     <p data-progress></p>
+    <section class="social-rules-summary" aria-label="Règles appliquées"><h3>Votre liste, vos règles</h3><p>Règles figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section>
     <label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>Seuls les gagnants, le post et les informations du tirage sont partagés. Le résultat expire avec l’import.</small></span></label>
     <button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button>
     <div class="result-card" data-result hidden></div>

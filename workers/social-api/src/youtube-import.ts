@@ -25,9 +25,12 @@ export async function createYouTubeDraw(env: Env, importId: string, publicVisibi
   if (!env.DB) throw new Error('The social contest database is not configured');
   const context = await getImportContext(env, importId);
   if (!context) throw new Error('Import not found');
+  if (context.import.expires_at <= new Date().toISOString()) throw new Error('Cet import a expiré. Importez à nouveau les participants.');
   if (context.import.status !== 'ready') throw new Error('The participant import is not ready');
   const participants = await listEligibleParticipants(env, importId);
   if (!participants.length) throw new Error('No eligible participant is available for this draw');
+  const required = context.rules.winnerCount + context.rules.alternateCount;
+  if (participants.length < required) throw new Error(`Participants insuffisants : ${participants.length} comptes éligibles pour ${required} gagnants et suppléants. Ajustez les règles puis réimportez.`);
   const snapshot = participants.map((participant) => ({ providerUserId: participant.providerUserId, entriesCount: participant.entriesCount }));
   const participantSnapshotHash = await sha256(JSON.stringify(snapshot));
   const drawn = await verifiableDraw(participants, context.rules);

@@ -15,8 +15,10 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   const drawPanel = root.querySelector<HTMLElement>('[data-draw]')!;
   const drawButton = root.querySelector<HTMLButtonElement>('[data-draw-button]')!;
   const progress = root.querySelector<HTMLElement>('[data-progress]')!;
+  const rulesSummary = root.querySelector<HTMLElement>('[data-rules-summary]')!;
   const result = root.querySelector<HTMLElement>('[data-result]')!;
   let ready = false, busy = false, analyzedUrl = '', importId = '', revision = 0;
+  let requestedCount = 1, appliedSummary: string[] = [];
   let previewTimer: number | undefined, pollTimer: number | undefined;
   const say = (message: string) => { feedback.textContent = message; };
   const errorText = (error: unknown) => error instanceof Error ? error.message : 'Une erreur est survenue.';
@@ -39,6 +41,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   const resetDraw = () => {
     window.clearTimeout(pollTimer); importId = ''; drawPanel.hidden = true; drawButton.disabled = true;
     result.hidden = true; result.replaceChildren();
+    rulesSummary.replaceChildren(); appliedSummary = [];
   };
   const eligibleUrl = (value: string) => {
     try {
@@ -96,8 +99,10 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       if (state.status === 'failed') { lock(false); say(state.error_message || 'Import interrompu. Aucun tirage partiel ne sera effectué.'); return; }
       if (state.status === 'ready') {
         lock(false);
-        drawButton.disabled = state.participant_count === 0;
-        say(state.participant_count ? 'Import terminé. Les règles affichées sont celles appliquées à cette liste.' : 'Aucun participant éligible avec ces règles.');
+        drawButton.disabled = state.participant_count < requestedCount;
+        say(state.participant_count < requestedCount
+          ? `Il faut ${requestedCount} comptes distincts pour vos gagnants et suppléants, mais seulement ${state.participant_count} sont éligibles. Réduisez les nombres ou ajustez les règles puis réimportez.`
+          : 'Import terminé. Vérifiez le récapitulatif avant de lancer le tirage.');
         return;
       }
       pollTimer = window.setTimeout(() => { void poll(id, current); }, 1800);
@@ -113,9 +118,12 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   importButton.addEventListener('click', async () => {
     if (busy || !ready || analyzedUrl !== input.value.trim() || !form.reportValidity()) return;
     const rules = readRules(); // Read before disabling form controls.
+    if (provider === 'youtube' && rules.excludedUsers.some(id => !/^UC[\w-]{22}$/u.test(id))) { say('Pour les exclusions YouTube, indiquez des identifiants de chaîne UC… (24 caractères), pas des pseudos ni des URL.'); return; }
     resetDraw(); const current = ++revision; lock(true); say('Import en cours. Les grands volumes peuvent prendre plusieurs minutes.');
     try {
-      const payload = await request<{ import: { id: string } }>(`/v1/${provider}/imports`, { url: analyzedUrl, rules });
+      const payload = await request<{ import: { id: string }; rulesSummary: string[]; requestedCount: number }>(`/v1/${provider}/imports`, { url: analyzedUrl, rules });
+      appliedSummary = payload.rulesSummary; requestedCount = payload.requestedCount;
+      rulesSummary.replaceChildren(...appliedSummary.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
       importId = payload.import.id; drawPanel.hidden = false; progress.textContent = 'Import en attente…';
       void poll(importId, current);
     } catch (error) { lock(false); say(errorText(error)); }
@@ -138,7 +146,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
         const link = document.createElement('a'); link.href = draw.publicUrl; link.textContent = 'Ouvrir le résultat partagé'; link.target = '_blank'; link.rel = 'noopener'; result.append(link);
       }
       const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button button-secondary'; copy.textContent = 'Copier le résultat';
-      const text = `Tirage ${draw.publicId}\n${analyzedUrl}\nGagnants : ${draw.winners.map(format).join(', ')}\nSuppléants : ${draw.alternates.map(format).join(', ') || 'aucun'}\n${progress.textContent}\n${draw.publicUrl || 'Résultat privé'}`;
+      const text = `Tirage ${draw.publicId}\n${analyzedUrl}\nGagnants : ${draw.winners.map(format).join(', ')}\nSuppléants : ${draw.alternates.map(format).join(', ') || 'aucun'}\n${progress.textContent}\nRègles appliquées :\n${appliedSummary.map(line => `- ${line}`).join('\n')}\n${draw.publicUrl || 'Résultat privé'}`;
       copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(text); copy.textContent = 'Résultat copié'; } catch { say('Copie indisponible : sélectionnez le résultat pour le copier.'); } });
       result.append(copy); say('Tirage terminé. Pour un nouveau tirage, lancez un nouvel import.');
     } catch (error) { say(errorText(error)); }
