@@ -200,6 +200,14 @@ button { cursor: pointer; }
 .social-rules-summary h3 { margin: 0 0 .4rem; font-size: 1.1rem; }
 .social-rules-summary p { margin: 0; color: var(--color-text-muted); font-size: .85rem; }
 .social-rules-summary ul { padding-left: 1.2rem; margin-bottom: 0; display: grid; gap: .4rem; font-size: .9rem; }
+.result-reference { font-size: .9rem; color: var(--color-text-muted); }
+.draw-proof { padding: .85rem 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); text-align: left; background: color-mix(in srgb, var(--color-bg) 72%, transparent); }
+.draw-proof summary { cursor: pointer; font-weight: 750; }
+.draw-proof > p { color: var(--color-text-muted); font-size: .82rem; }
+.draw-proof dl { margin-bottom: 0; }
+.draw-proof dt { margin-top: .7rem; color: var(--color-text-muted); font-size: .78rem; }
+.draw-proof dd { margin: .15rem 0 0; }
+.draw-proof code { display: block; padding: .55rem; border-radius: .5rem; background: var(--color-bg); font-size: .72rem; overflow-wrap: anywhere; word-break: break-all; user-select: all; }
 .social-draw-panel .option-card { display: flex; gap: .65rem; align-items: flex-start; }
 .youtube-information { padding-top: var(--space-5); }
 .youtube-information > .eyebrow { margin-bottom: 1rem; }

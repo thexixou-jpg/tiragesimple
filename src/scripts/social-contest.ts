@@ -1,7 +1,10 @@
 interface Publication { title?: string; authorName?: string; publishedAt?: string; thumbnailUrl?: string }
 interface ImportState { status: string; progress_current: number; participant_count: number; error_message?: string }
 interface Winner { displayName?: string; username?: string; providerUserId?: string }
-interface Draw { publicId: string; publicUrl?: string; winners: Winner[]; alternates: Winner[] }
+interface Draw {
+  publicId: string; publicUrl?: string; winners: Winner[]; alternates: Winner[];
+  participantSnapshotHash: string; randomCommitmentHash: string; resultHash: string; verificationSeed: string;
+}
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
   const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : 'youtube';
@@ -142,11 +145,23 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       const names = document.createElement('p'); names.className = 'result-value'; names.textContent = draw.winners.map(format).join(', ');
       result.append(title, names);
       if (draw.alternates.length) { const p = document.createElement('p'); p.textContent = `Suppléant(s) : ${draw.alternates.map(format).join(', ')}`; result.append(p); }
+      const reference = document.createElement('p'); reference.className = 'result-reference';
+      const referenceLabel = document.createElement('strong'); referenceLabel.textContent = 'Référence : ';
+      reference.append(referenceLabel, draw.publicId); result.append(reference);
+      const proof = document.createElement('details'); proof.className = 'draw-proof';
+      const proofTitle = document.createElement('summary'); proofTitle.textContent = 'Afficher les empreintes techniques';
+      const proofHelp = document.createElement('p'); proofHelp.textContent = 'Ces empreintes détectent une modification du jeu de données ou du résultat. Elles ne constituent pas une certification indépendante et la liste privée ne permet pas à un tiers de rejouer seul le tirage.';
+      const proofList = document.createElement('dl');
+      for (const [label, value] of [['Liste des participants', draw.participantSnapshotHash], ['Engagement aléatoire', draw.randomCommitmentHash], ['Graine révélée', draw.verificationSeed], ['Résultat', draw.resultHash]] as const) {
+        const term = document.createElement('dt'); term.textContent = label;
+        const description = document.createElement('dd'); const code = document.createElement('code'); code.textContent = value; description.append(code); proofList.append(term, description);
+      }
+      proof.append(proofTitle, proofHelp, proofList); result.append(proof);
       if (draw.publicUrl) {
         const link = document.createElement('a'); link.href = draw.publicUrl; link.textContent = 'Ouvrir le résultat partagé'; link.target = '_blank'; link.rel = 'noopener'; result.append(link);
       }
       const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button button-secondary'; copy.textContent = 'Copier le résultat';
-      const text = `Tirage ${draw.publicId}\n${analyzedUrl}\nGagnants : ${draw.winners.map(format).join(', ')}\nSuppléants : ${draw.alternates.map(format).join(', ') || 'aucun'}\n${progress.textContent}\nRègles appliquées :\n${appliedSummary.map(line => `- ${line}`).join('\n')}\n${draw.publicUrl || 'Résultat privé'}`;
+      const text = `Tirage ${draw.publicId}\n${analyzedUrl}\nGagnants : ${draw.winners.map(format).join(', ')}\nSuppléants : ${draw.alternates.map(format).join(', ') || 'aucun'}\n${progress.textContent}\nRègles appliquées :\n${appliedSummary.map(line => `- ${line}`).join('\n')}\nEmpreinte participants : ${draw.participantSnapshotHash}\nEngagement aléatoire : ${draw.randomCommitmentHash}\nGraine révélée : ${draw.verificationSeed}\nEmpreinte résultat : ${draw.resultHash}\n${draw.publicUrl || 'Résultat privé'}`;
       copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(text); copy.textContent = 'Résultat copié'; } catch { say('Copie indisponible : sélectionnez le résultat pour le copier.'); } });
       result.append(copy); say('Tirage terminé. Pour un nouveau tirage, lancez un nouvel import.');
     } catch (error) { say(errorText(error)); }

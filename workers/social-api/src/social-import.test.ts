@@ -90,6 +90,12 @@ describe('official social connectors', () => {
     expect(page.headers.get('x-robots-tag')).toBe('noindex, nofollow');
     expect(html).toContain('Participation via un repost');
     expect(html).toContain('comptes éligibles');
+    expect(html).toContain('Empreintes techniques du reçu');
+    expect(html).toContain(draw.participantSnapshotHash);
+    expect(html).toContain(draw.randomCommitmentHash);
+    expect(html).toContain(draw.verificationSeed);
+    expect(html).toContain(draw.resultHash);
+    expect(html).toContain(`/_tiragesimple/v1/draws/${draw.publicId}`);
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
     expect(html).not.toContain('<script>');
     expect(html).not.toContain('private-exclusion.test');
