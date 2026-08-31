@@ -4,6 +4,7 @@ interface Winner { displayName?: string; username?: string; providerUserId?: str
 interface Draw {
   publicId: string; publicUrl?: string; winners: Winner[]; alternates: Winner[];
   participantSnapshotHash: string; randomCommitmentHash: string; resultHash: string; verificationSeed: string;
+  receipt: Record<string, unknown>;
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
@@ -22,7 +23,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   const result = root.querySelector<HTMLElement>('[data-result]')!;
   let ready = false, busy = false, analyzedUrl = '', importId = '', revision = 0;
   let requestedCount = 1, appliedSummary: string[] = [];
-  let previewTimer: number | undefined, pollTimer: number | undefined;
+  let previewTimer: number | undefined, pollTimer: number | undefined, receiptObjectUrl = '';
   const say = (message: string) => { feedback.textContent = message; };
   const errorText = (error: unknown) => error instanceof Error ? error.message : 'Une erreur est survenue.';
   const request = async <T>(path: string, body?: unknown): Promise<T> => {
@@ -43,8 +44,13 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   };
   const resetDraw = () => {
     window.clearTimeout(pollTimer); importId = ''; drawPanel.hidden = true; drawButton.disabled = true;
+    if (receiptObjectUrl) URL.revokeObjectURL(receiptObjectUrl); receiptObjectUrl = '';
     result.hidden = true; result.replaceChildren();
     rulesSummary.replaceChildren(); appliedSummary = [];
+  };
+  const sha256Hex = async (value: string) => {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+    return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
   };
   const eligibleUrl = (value: string) => {
     try {
@@ -157,13 +163,23 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
         const description = document.createElement('dd'); const code = document.createElement('code'); code.textContent = value; description.append(code); proofList.append(term, description);
       }
       proof.append(proofTitle, proofHelp, proofList); result.append(proof);
+      const proofStatus = document.createElement('p'); proofStatus.className = 'proof-status';
+      try {
+        const commitment = await sha256Hex(draw.verificationSeed);
+        proofStatus.textContent = commitment === draw.randomCommitmentHash ? '✓ Engagement aléatoire cohérent, vérifié localement.' : '⚠ Engagement aléatoire incohérent : conservez le reçu et contactez-nous.';
+        proofStatus.dataset.state = commitment === draw.randomCommitmentHash ? 'valid' : 'invalid';
+      } catch { proofStatus.textContent = 'Vérification locale indisponible dans ce navigateur.'; proofStatus.dataset.state = 'unknown'; }
+      proof.append(proofStatus);
       if (draw.publicUrl) {
         const link = document.createElement('a'); link.href = draw.publicUrl; link.textContent = 'Ouvrir le résultat partagé'; link.target = '_blank'; link.rel = 'noopener'; result.append(link);
       }
       const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button button-secondary'; copy.textContent = 'Copier le résultat';
       const text = `Tirage ${draw.publicId}\n${analyzedUrl}\nGagnants : ${draw.winners.map(format).join(', ')}\nSuppléants : ${draw.alternates.map(format).join(', ') || 'aucun'}\n${progress.textContent}\nRègles appliquées :\n${appliedSummary.map(line => `- ${line}`).join('\n')}\nEmpreinte participants : ${draw.participantSnapshotHash}\nEngagement aléatoire : ${draw.randomCommitmentHash}\nGraine révélée : ${draw.verificationSeed}\nEmpreinte résultat : ${draw.resultHash}\n${draw.publicUrl || 'Résultat privé'}`;
       copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(text); copy.textContent = 'Résultat copié'; } catch { say('Copie indisponible : sélectionnez le résultat pour le copier.'); } });
-      result.append(copy); say('Tirage terminé. Pour un nouveau tirage, lancez un nouvel import.');
+      receiptObjectUrl = URL.createObjectURL(new Blob([JSON.stringify(draw.receipt, null, 2)], { type: 'application/json' }));
+      const download = document.createElement('a'); download.className = 'button button-secondary'; download.href = receiptObjectUrl; download.download = `${draw.publicId}.json`; download.textContent = 'Télécharger le reçu JSON';
+      const resultActions = document.createElement('div'); resultActions.className = 'result-actions'; resultActions.append(copy, download);
+      result.append(resultActions); say('Tirage terminé. Téléchargez le reçu si vous souhaitez le conserver après son expiration.');
     } catch (error) { say(errorText(error)); }
     finally { lock(false); visibility.disabled = false; }
   });

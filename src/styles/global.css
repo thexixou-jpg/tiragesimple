@@ -208,6 +208,9 @@ button { cursor: pointer; }
 .draw-proof dt { margin-top: .7rem; color: var(--color-text-muted); font-size: .78rem; }
 .draw-proof dd { margin: .15rem 0 0; }
 .draw-proof code { display: block; padding: .55rem; border-radius: .5rem; background: var(--color-bg); font-size: .72rem; overflow-wrap: anywhere; word-break: break-all; user-select: all; }
+.proof-status { margin-bottom: 0; padding: .65rem .75rem; border-radius: .6rem; font-size: .82rem; font-weight: 700; }
+.proof-status[data-state="valid"] { color: #7ce5bd; background: rgb(27 112 78 / 22%); }
+.proof-status[data-state="invalid"] { color: #ffb0b8; background: rgb(159 36 51 / 22%); }
 .social-draw-panel .option-card { display: flex; gap: .65rem; align-items: flex-start; }
 .youtube-information { padding-top: var(--space-5); }
 .youtube-information > .eyebrow { margin-bottom: 1rem; }

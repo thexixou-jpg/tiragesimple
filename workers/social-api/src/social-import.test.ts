@@ -79,6 +79,11 @@ describe('official social connectors', () => {
     expect(draw.winners).toHaveLength(1); expect(draw.alternates).toHaveLength(1);
     expect(draw.winners[0].providerUserId).not.toBe(draw.alternates[0].providerUserId);
     expect(draw.publicUrl).toContain('https://example.test/tirage/');
+    expect(draw.receipt).toMatchObject({ version: 1, id: draw.publicId, platform: 'bluesky', analyzedCount: 4, participantCount: 2 });
+    expect(draw.receipt.rulesSummary.join('\n')).toContain('Participation via un repost');
+    expect(draw.receipt.proof).toEqual({ participantSnapshotHash: draw.participantSnapshotHash, randomCommitmentHash: draw.randomCommitmentHash, verificationSeed: draw.verificationSeed, resultHash: draw.resultHash });
+    expect(JSON.stringify(draw.receipt)).not.toContain('private-exclusion.test');
+    expect(JSON.stringify(draw.receipt)).not.toContain('providerUserId');
     const publicResponse = await worker.fetch(new Request(`https://example.test/v1/draws/${draw.publicId}`), env);
     const publicPayload = await publicResponse.json() as { draw: { rules: Record<string, unknown> } };
     expect(publicPayload.draw.rules).not.toHaveProperty('excludedUsers');

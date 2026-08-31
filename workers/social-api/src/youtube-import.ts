@@ -1,6 +1,7 @@
 import { sha256, verifiableDraw } from './contest-rules';
 import { getImportContext, listEligibleParticipants } from './storage';
 import type { Env, Participant } from './types';
+import { socialRulesSummary } from '../../../src/lib/social-rules-summary';
 
 export interface DrawResult {
   publicId: string;
@@ -11,6 +12,21 @@ export interface DrawResult {
   verificationSeed: string;
   winners: Array<Participant & { id: string }>;
   alternates: Array<Participant & { id: string }>;
+  receipt: {
+    version: 1;
+    id: string;
+    createdAt: string;
+    expiresAt: string;
+    platform: string;
+    publication: { url: string; title?: string };
+    analyzedCount: number;
+    participantCount: number;
+    rulesSummary: string[];
+    winners: Array<{ displayName?: string; username?: string }>;
+    alternates: Array<{ displayName?: string; username?: string }>;
+    proof: { participantSnapshotHash: string; randomCommitmentHash: string; verificationSeed: string; resultHash: string };
+    notice: string;
+  };
 }
 
 function publicDrawId(): string {
@@ -51,5 +67,22 @@ export async function createYouTubeDraw(env: Env, importId: string, publicVisibi
       ])),
   ]);
   const publicUrl = publicVisibility && env.PUBLIC_SITE_URL ? new URL(`/tirage/${publicId}`, env.PUBLIC_SITE_URL).toString() : undefined;
-  return { publicId, publicUrl, participantSnapshotHash, randomCommitmentHash: drawn.commitmentHash, resultHash, verificationSeed: drawn.verificationSeed, winners: drawn.winners.map((winner) => selected.get(winner.providerUserId)!), alternates: drawn.alternates.map((alternate) => selected.get(alternate.providerUserId)!) };
+  const winners = drawn.winners.map((winner) => selected.get(winner.providerUserId)!);
+  const alternates = drawn.alternates.map((alternate) => selected.get(alternate.providerUserId)!);
+  const receipt = {
+    version: 1 as const,
+    id: publicId,
+    createdAt: now,
+    expiresAt,
+    platform: context.publication.provider,
+    publication: { url: context.publication.canonicalUrl, ...(context.publication.title ? { title: context.publication.title } : {}) },
+    analyzedCount: context.import.progress_current,
+    participantCount: context.import.participant_count,
+    rulesSummary: socialRulesSummary(context.publication.provider, { ...context.rules, excludedAccountCount: context.rules.excludedUsers.length }),
+    winners: winners.map(({ displayName, username }) => ({ displayName, username })),
+    alternates: alternates.map(({ displayName, username }) => ({ displayName, username })),
+    proof: { participantSnapshotHash, randomCommitmentHash: drawn.commitmentHash, verificationSeed: drawn.verificationSeed, resultHash },
+    notice: 'Reçu généré par TirageSimple. Il ne constitue pas une certification indépendante et ne contient pas la liste privée des participants.',
+  };
+  return { publicId, publicUrl, participantSnapshotHash, randomCommitmentHash: drawn.commitmentHash, resultHash, verificationSeed: drawn.verificationSeed, winners, alternates, receipt };
 }
