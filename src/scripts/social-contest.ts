@@ -8,7 +8,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -62,13 +62,17 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
         const path = decodeURIComponent(url.pathname);
         return hosts.includes(url.hostname.toLowerCase()) && [/^\/@[^/]+\/[A-Za-z0-9_-]+\/?$/u, /^\/users\/[^/]+\/statuses\/[A-Za-z0-9_-]+\/?$/u, /^\/web\/statuses\/[A-Za-z0-9_-]+\/?$/u].some(pattern => pattern.test(path));
       }
+      if (provider === 'lemmy') {
+        const hosts = (root.dataset.allowedHosts || '').split(',');
+        return hosts.includes(url.hostname.toLowerCase()) && /^\/post\/[1-9]\d{0,19}\/?$/u.test(url.pathname);
+      }
       return ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
     } catch { return false; }
   };
   const analyze = async () => {
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
-    if (!eligibleUrl(url)) { say(`Utilisez un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : 'YouTube vers une vidéo ou un Short'}.`); return; }
+    if (!eligibleUrl(url)) { say(`Utilisez un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : 'YouTube vers une vidéo ou un Short'}.`); return; }
     resetDraw();
     const current = ++revision;
     analyzedUrl = ''; importButton.disabled = true; publication.hidden = true;
@@ -95,21 +99,22 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   };
   const readRules = () => {
     const data = new FormData(form);
-    const duplicateEntries = provider === 'youtube' && data.get('duplicateEntries') === 'on';
+    const commentProvider = provider === 'youtube' || provider === 'lemmy';
+    const duplicateEntries = commentProvider && data.get('duplicateEntries') === 'on';
     return { winnerCount: Number(data.get('winnerCount')), alternateCount: Number(data.get('alternateCount')),
       uniqueParticipants: !duplicateEntries, duplicateEntries,
-      includeReplies: provider === 'youtube' && data.get('includeReplies') === 'on',
+      includeReplies: commentProvider && data.get('includeReplies') === 'on',
       excludePublicationAuthor: data.get('excludePublicationAuthor') === 'on',
-      requiredKeyword: provider === 'youtube' ? String(data.get('requiredKeyword') || '').trim() : undefined,
+      requiredKeyword: commentProvider ? String(data.get('requiredKeyword') || '').trim() : undefined,
       excludedUsers: String(data.get('excludedUsers') || '').split(/[\n,]/u).map(v => v.trim().replace(/^@/u, '')).filter(Boolean),
-      ...(provider !== 'youtube' ? { interaction: String(data.get('interaction')) } : {}),
+      ...(!commentProvider ? { interaction: String(data.get('interaction')) } : {}),
     };
   };
   const poll = async (id: string, current: number) => {
     try {
       const { import: state } = await request<{ import: ImportState }>(`/v1/imports/${id}`);
       if (current !== revision || id !== importId) return;
-      progress.textContent = `${state.progress_current} ${provider === 'youtube' ? 'commentaires et réponses analysés' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
+      progress.textContent = `${state.progress_current} ${provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
       if (state.status === 'failed') { lock(false); say(state.error_message || 'Import interrompu. Aucun tirage partiel ne sera effectué.'); return; }
       if (state.status === 'ready') {
         lock(false);

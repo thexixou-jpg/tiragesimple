@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LemmyContestTool from '../components/LemmyContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider = getSocialProvider('lemmy');
+const schema = { '@context':'https://schema.org', '@type':'WebApplication', name:'Tirage au sort Lemmy',
+  url:'https://tiragesimple.fr/tirage-au-sort-lemmy/', applicationCategory:'UtilitiesApplication', operatingSystem:'Web',
+  inLanguage:'fr-FR', description:provider.description, offers:{ '@type':'Offer', price:'0', priceCurrency:'EUR' } };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-lemmy/">
+  <header class="tool-hero"><div class="container tool-heading">
+    <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a>
+    <div class="social-tool-identity"><SocialProviderIcon provider="lemmy" /><p class="social-status social-status-available">Commentaires · API publique</p></div>
+    <h1>Tirage au sort Lemmy</h1><p>{provider.intro}</p>
+  </div></header>
+  <div class="container tool-page tool-page--youtube">
+    <LemmyContestTool />
+    <article class="tool-content prose">
+      <h2>Comment tirer au sort parmi les commentaires Lemmy ?</h2>
+      <p>Copiez l’adresse du post depuis son instance d’origine, par exemple Lemmy.world ou jlai.lu. Après analyse, TirageSimple affiche le titre, l’auteur et la date reçus de l’instance. Choisissez ensuite le nombre de gagnants et de suppléants, puis décidez si chaque commentaire donne une chance ou si chaque compte ne peut participer qu’une fois.</p>
+      <p>Vous pouvez inclure les réponses aux commentaires, imposer un mot ou une expression et exclure l’auteur du post ainsi que certaines adresses fédérées. Une modification de règle invalide l’import précédent : il faut relancer la collecte pour garantir que le récapitulatif correspond à la liste utilisée.</p>
+
+      <h2>Une identité fédérée plutôt qu’un simple pseudo</h2>
+      <p>Lemmy est fédéré : deux personnes peuvent porter le même nom sur deux instances différentes. La déduplication utilise donc l’adresse ActivityPub du compte renvoyée par l’API, et l’affichage ajoute le domaine de l’instance. Un changement de nom affiché ne crée pas automatiquement une seconde participation lorsque l’identité technique reste identique.</p>
+      <p>Si l’option « chaque commentaire compte » est désactivée, plusieurs commentaires du même compte ne donnent qu’une chance. Si elle est activée, ils augmentent son poids dans la liste, mais un même compte ne peut toujours pas gagner deux places dans un seul tirage.</p>
+
+      <h2>Ce que l’outil vérifie réellement</h2>
+      <p>Le connecteur importe les commentaires publics accessibles par l’API Lemmy 0.19. Il peut distinguer un commentaire principal d’une réponse, lire son contenu et identifier son auteur. Il ne récupère pas la liste des personnes ayant voté pour le post : la documentation Lemmy réserve l’identité des votants aux administrateurs et, selon le cas, aux modérateurs. Les votes, abonnements, âge, pays et identité réelle ne sont donc jamais annoncés comme vérifiés.</p>
+      <p>Les commentaires supprimés ou retirés et les comptes supprimés sont ignorés. Si une page de l’API échoue, le tirage reste bloqué afin d’éviter une sélection silencieuse dans une liste partielle.</p>
+
+      <h2>Quatre instances prises en charge au lancement</h2>
+      <p>Le service accepte actuellement Lemmy.world, Lemmy.ml, jlai.lu et Feddit.org. Cette liste contrôlée protège le serveur contre les adresses arbitraires et permet de vérifier la compatibilité des versions. D’autres instances pourront être ajoutées après contrôle. Les logiciels fédérés compatibles ActivityPub mais utilisant une API différente ne sont pas automatiquement compatibles.</p>
+      <p>La pagination est effectuée par lots. Comme une discussion peut recevoir de nouveaux commentaires pendant l’import, la liste n’est pas une archive historique immuable. Pour un concours, indiquez une heure de clôture dans votre règlement et lancez la collecte à ce moment.</p>
+
+      <h2>Résultat privé, reçu et partage facultatif</h2>
+      <p>Le tirage utilise Web Crypto et produit une référence, des empreintes techniques ainsi qu’un reçu JSON téléchargeable. Ces éléments permettent de détecter une modification, mais ne constituent pas une certification extérieure. Par défaut, le résultat reste privé. Si vous activez le partage, seuls le post, les règles, les gagnants et les empreintes sont affichés ; la liste complète et les identités exclues ne sont pas publiées.</p>
+
+      <h2>Questions fréquentes</h2>
+      <h3>Puis-je utiliser les votes comme participations ?</h3>
+      <p>Non. L’identité des votants n’est pas publiquement accessible pour ce service. Utilisez les commentaires, qui correspondent à une règle vérifiable.</p>
+      <h3>Les réponses sont-elles obligatoires ?</h3>
+      <p>Non. Elles sont exclues par défaut et peuvent être activées explicitement. Le choix figure ensuite dans le reçu du tirage.</p>
+      <p>Pour d’autres réseaux fédérés, découvrez aussi le <a href="/tirage-au-sort-mastodon/">tirage Mastodon</a> et le <a href="/tirage-au-sort-bluesky/">tirage Bluesky</a>. Consultez notre <a href="/guides/tirage-au-sort-transparent/">guide du tirage transparent</a> avant de publier le règlement.</p>
+    </article>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

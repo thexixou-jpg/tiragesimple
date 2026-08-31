@@ -1,0 +1,43 @@
+---
+const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
+const allowedHosts = 'lemmy.world,lemmy.ml,jlai.lu,feddit.org';
+---
+<section class="tool-shell lemmy-tool" data-social-contest data-provider="lemmy" data-api-url={apiUrl} data-allowed-hosts={allowedHosts} aria-labelledby="lemmy-import-title">
+  <div class="tool-panel-intro"><div><p class="eyebrow">API publique officielle · Sans connexion</p><h2 id="lemmy-import-title">Les commentaires du post deviennent votre liste.</h2><p>Importez les comptes ayant commenté une publication Lemmy publique et appliquez uniquement des règles réellement vérifiables.</p></div></div>
+  <form class="social-import-form" data-contest-form>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Post du concours</strong><small>Le post et ses commentaires doivent être publics.</small></div></div>
+      <label class="field"><span>URL du post Lemmy</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://jlai.lu/post/…" required data-video-url /><small>Instances : Lemmy.world, Lemmy.ml, jlai.lu et Feddit.org.</small></label>
+      <aside class="youtube-preview lemmy-preview" data-preview data-state="idle" aria-live="polite"><div class="youtube-preview__empty"><span aria-hidden="true">L</span><div><strong>Aperçu du post</strong><small>Le titre, l’auteur et la date apparaîtront ici.</small></div></div><div class="lemmy-post" data-publication hidden><p class="eyebrow">Post sélectionné</p><p data-publication-title></p><small data-publication-meta></small></div></aside>
+    </div>
+    <div class="youtube-form-section">
+      <div class="youtube-section-heading"><span>02</span><div><strong>Règles du tirage</strong><small>Les règles sont figées au moment de l’import.</small></div></div>
+      <div class="form-row"><label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label><label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label></div>
+      <label class="field"><span>Mot ou expression obligatoire <small>facultatif</small></span><input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. concours" /><small>Recherche sans distinction entre majuscules et minuscules.</small></label>
+      <label class="field"><span>Comptes à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="compte@instance.tld, autre@instance.tld" /><small>Adresses fédérées complètes, séparées par une virgule.</small></label>
+      <div class="social-rule-grid lemmy-rule-grid">
+        <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par identité ActivityPub.</small></span></label>
+        <label class="option-card"><input name="includeReplies" type="checkbox" /><span><strong>Inclure les réponses</strong><small>Les réponses aux autres commentaires participent aussi.</small></span></label>
+        <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur du post</strong><small>Le compte organisateur ne participe pas.</small></span></label>
+      </div>
+    </div>
+    <div class="actions"><button class="button button-secondary" type="submit">Analyser le post</button><button class="button button-primary" type="button" data-import disabled>Importer les commentaires</button></div>
+  </form>
+  <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
+  <div class="social-draw-panel" data-draw hidden><p data-progress></p><section class="social-rules-summary" aria-label="Règles appliquées"><h3>Votre liste, vos règles</h3><p>Règles figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section><label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>Le post, les gagnants, les règles et les empreintes sont partagés, pas la liste complète.</small></span></label><button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button><div class="result-card" data-result hidden></div></div>
+</section>
+<script>import '../scripts/social-contest';</script>
+<style>
+  .lemmy-tool { --color-primary:#67a331; }
+  .lemmy-tool .youtube-form-section { border-color:color-mix(in srgb,#67a331 28%,var(--color-border)); }
+  .lemmy-tool .youtube-form-section--source, .lemmy-preview { background:linear-gradient(120deg,color-mix(in srgb,#67a331 10%,var(--color-surface)),var(--color-surface)); }
+  .lemmy-tool .youtube-section-heading > span { color:#dfffc3; background:#35531f; }
+  .lemmy-preview { margin-top:1rem; border-color:color-mix(in srgb,#67a331 35%,var(--color-border)); color:var(--color-text); }
+  .lemmy-preview::after { background:none; }
+  .lemmy-preview .youtube-preview__empty small { color:var(--color-text-muted); }
+  .lemmy-post { padding:1.25rem; overflow-wrap:anywhere; }
+  .lemmy-post > p[data-publication-title] { font-size:1.08rem; line-height:1.55; }
+  .lemmy-post small { color:var(--color-text-muted); }
+  .lemmy-rule-grid { margin-top:1rem; }
+  @media (max-width:760px) { .lemmy-rule-grid { grid-template-columns:1fr; } }
+</style>

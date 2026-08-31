@@ -1,6 +1,6 @@
 # Activation du tirage YouTube — guide opérateur
 
-Ce guide configure YouTube, Bluesky et Mastodon. Instagram, Facebook, X et TikTok restent volontairement désactivés ou limités. Bluesky et Mastodon ne nécessitent aucun secret de plateforme supplémentaire.
+Ce guide configure YouTube, Bluesky, Mastodon et Lemmy. Instagram, Facebook, X et TikTok restent volontairement désactivés ou limités. Bluesky, Mastodon et Lemmy ne nécessitent aucun secret de plateforme supplémentaire.
 
 ## 1. Google Cloud : clé YouTube
 
@@ -47,7 +47,7 @@ npx wrangler secret put DATA_ENCRYPTION_KEY --config workers/social-api/wrangler
 npx wrangler secret put DRAW_SIGNING_SECRET --config workers/social-api/wrangler.production.toml
 ```
 
-Les variables non sensibles (`YOUTUBE_ENABLED`, `BLUESKY_ENABLED`, `MASTODON_ENABLED`, `MASTODON_ALLOWED_HOSTS`, origine autorisée, rétention et limite) sont déjà présentes dans le modèle de configuration. N’ajoute une instance Mastodon à la liste qu’après avoir contrôlé son domaine et sa compatibilité API.
+Les variables non sensibles (`YOUTUBE_ENABLED`, `BLUESKY_ENABLED`, `MASTODON_ENABLED`, `MASTODON_ALLOWED_HOSTS`, `LEMMY_ENABLED`, `LEMMY_ALLOWED_HOSTS`, origine autorisée, rétention et limite) sont déjà présentes dans le modèle de configuration. N’ajoute une instance fédérée à une liste qu’après avoir contrôlé son domaine et sa compatibilité API.
 
 ## 4. Déploiement et routes
 

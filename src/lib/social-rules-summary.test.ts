@@ -21,4 +21,10 @@ describe('social contest summaries', () => {
     expect(socialRulesSummary('mastodon', { ...base, interaction: 'likes' }).join('\n')).toContain('favori Mastodon');
     expect(socialRulesSummary('mastodon', { ...base, interaction: 'reposts' }).join('\n')).toContain('boost Mastodon');
   });
+  it('describes Lemmy comments without claiming access to voters', () => {
+    const text = socialRulesSummary('lemmy', { ...base, includeReplies: true, requiredKeyword: 'concours' }).join('\n');
+    expect(text).toContain('Commentaires et réponses inclus');
+    expect(text).toContain('Une seule chance par identité ActivityPub');
+    expect(text).toContain('Votes et abonnement à la communauté non vérifiés');
+  });
 });

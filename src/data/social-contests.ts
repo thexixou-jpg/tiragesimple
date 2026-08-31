@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -50,6 +50,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API REST publique Mastodon, sans mot de passe ni connexion.',
     limitations: ['13 instances vérifiées, dont mastodon.social, piaille.fr, Framapiaf, Mamot et Mastodon.art.', 'Favoris ou boosts, sans combiner les deux.', 'Les réponses, abonnements et interactions privées ne sont pas vérifiés.'],
     capabilities: { comments: false, likes: true, reposts: true, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'lemmy', name: 'Lemmy', status: 'available', statusLabel: 'Disponible sur 4 instances',
+    title: 'Tirage au sort Lemmy : commentaires d’un post | TirageSimple',
+    description: 'Importez les commentaires d’un post Lemmy public et tirez des gagnants avec filtre textuel, réponses, exclusions et comptes uniques.',
+    intro: 'Transformez les commentaires publics d’un post Lemmy en un tirage transparent, sans connecter de compte.',
+    connection: 'API publique Lemmy 0.19, sans mot de passe ni connexion.',
+    limitations: ['Instances prises en charge : Lemmy.world, Lemmy.ml, jlai.lu et Feddit.org.', 'Les votes et abonnements ne sont pas accessibles comme listes de participants.', 'La collecte n’est pas figée si des commentaires sont ajoutés pendant l’import.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {
     id: 'instagram', name: 'Instagram', status: 'limited', statusLabel: 'Fonctionnalités limitées',

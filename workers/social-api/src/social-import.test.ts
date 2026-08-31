@@ -9,6 +9,7 @@ import { nextYouTubeJob, processSocialImport, queueSocialImport } from './social
 import { getImport, listEligibleParticipants, purgeExpiredData } from './storage';
 import { createYouTubeDraw } from './youtube-import';
 import { getMastodonPublication, parseMastodonUrl } from './mastodon';
+import { getLemmyPublication, parseLemmyUrl } from './lemmy';
 import type { Env, SocialImportJob, SocialPublication } from './types';
 import worker from './index';
 
@@ -24,7 +25,7 @@ function fixture(maximum = '10000') {
     };
   };
   const jobs: SocialImportJob[] = [];
-  const env = { BLUESKY_ENABLED: 'true', MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
+  const env = { BLUESKY_ENABLED: 'true', MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr', LEMMY_ENABLED: 'true', LEMMY_ALLOWED_HOSTS: 'lemmy.world,jlai.lu', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
     PUBLIC_SITE_URL: 'https://example.test',
     DB: { prepare, batch: async (statements: ReturnType<typeof prepare>[]) => {
       sqlite.exec('BEGIN'); try { const result = statements.map(s => s.execute()); sqlite.exec('COMMIT'); return result; }
@@ -39,6 +40,33 @@ const response = (value: unknown) => new Response(JSON.stringify(value), { heade
 afterEach(() => vi.unstubAllGlobals());
 
 describe('official social connectors', () => {
+  it('accepts only allowlisted Lemmy post URLs', () => {
+    const env = { LEMMY_ALLOWED_HOSTS: 'lemmy.world,jlai.lu' };
+    expect(parseLemmyUrl('https://jlai.lu/post/42794207', env)).toEqual({ host: 'jlai.lu', postId: '42794207' });
+    for (const url of ['https://evil.test/post/1', 'http://jlai.lu/post/1', 'https://user:pass@jlai.lu/post/1', 'https://jlai.lu.evil.test/post/1', 'https://jlai.lu/post/../api', 'https://jlai.lu/c/france']) expect(parseLemmyUrl(url, env)).toBeNull();
+  });
+  it('loads a public Lemmy post through the fixed v3 API endpoint', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: URL, init?: RequestInit) => {
+      expect(url.origin).toBe('https://jlai.lu'); expect(url.pathname).toBe('/api/v3/post'); expect(url.searchParams.get('id')).toBe('42'); expect(init?.redirect).toBe('manual');
+      return response({ post_view: { post: { id: 42, name: 'Concours public', creator_id: 7, published: '2026-08-31T12:00:00Z', ap_id: 'https://jlai.lu/post/42' }, creator: { id: 7, name: 'alice', display_name: 'Alice', actor_id: 'https://jlai.lu/u/alice' } } });
+    }));
+    const post = await getLemmyPublication('https://jlai.lu/post/42', { LEMMY_ENABLED: 'true', LEMMY_ALLOWED_HOSTS: 'jlai.lu' });
+    expect(post).toMatchObject({ provider: 'lemmy', providerPublicationId: 'jlai.lu|42', authorProviderId: 'https://jlai.lu/u/alice', authorName: 'Alice', title: 'Concours public' });
+  });
+  it('paginates Lemmy comments and deduplicates people by ActivityPub identity', async () => {
+    const { env, jobs } = fixture();
+    const comment = (id: number, actor = 'https://remote.test/u/stable', path = `0.${id}`) => ({ comment: { id, content: 'concours', path, ap_id: `https://jlai.lu/comment/${id}` }, creator: { id, name: 'participant', actor_id: actor } });
+    vi.stubGlobal('fetch', vi.fn(async (url: URL) => {
+      expect(url.origin).toBe('https://jlai.lu'); expect(url.pathname).toBe('/api/v3/comment/list');
+      return response(url.searchParams.get('page') === '2'
+        ? { comments: [comment(51, 'https://jlai.lu/u/owner'), comment(52, 'https://remote.test/u/reply', '0.1.52')] }
+        : { comments: Array.from({ length: 50 }, (_, index) => comment(index + 1)) });
+    }));
+    const imported = await queueSocialImport(env, 'session', { provider: 'lemmy', providerPublicationId: 'jlai.lu|42', canonicalUrl: 'https://jlai.lu/post/42', authorProviderId: 'https://jlai.lu/u/owner' }, normalizeRules({ requiredKeyword: 'concours', includeReplies: false }));
+    while (jobs.length) await processSocialImport(jobs.shift()!, env);
+    expect(await getImport(env, imported.id)).toMatchObject({ status: 'ready', progress_current: 52, participant_count: 1 });
+    expect((await listEligibleParticipants(env, imported.id))[0]).toMatchObject({ providerUserId: 'https://remote.test/u/stable', username: 'participant@remote.test', entriesCount: 1 });
+  });
   it('accepts only allowlisted Mastodon status URLs', () => {
     const env = { MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr' };
     expect(parseMastodonUrl('https://mastodon.social/@alice/114123', env)).toEqual({ host: 'mastodon.social', statusId: '114123' });

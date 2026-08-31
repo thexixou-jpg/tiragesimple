@@ -13,11 +13,11 @@ export interface SummaryRules {
 export function socialRulesSummary(provider: string, rules: SummaryRules): string[] {
   return [
     `${rules.winnerCount} gagnant(s) · ${rules.alternateCount} suppléant(s), tous distincts`,
-    ...(provider === 'youtube' ? [
+    ...(provider === 'youtube' || provider === 'lemmy' ? [
       rules.includeReplies ? 'Commentaires et réponses inclus' : 'Commentaires principaux uniquement, sans les réponses',
-      rules.duplicateEntries ? 'Chaque commentaire éligible donne une chance ; un compte ne peut être sélectionné qu’une fois' : 'Une seule chance par identifiant de chaîne',
+      rules.duplicateEntries ? 'Chaque commentaire éligible donne une chance ; un compte ne peut être sélectionné qu’une fois' : provider === 'lemmy' ? 'Une seule chance par identité ActivityPub' : 'Une seule chance par identifiant de chaîne',
       rules.requiredKeyword ? `Texte contenant « ${rules.requiredKeyword} » (sans distinction majuscules/minuscules)` : 'Aucun filtre sur le texte',
-      'Abonnement à la chaîne et likes non vérifiés',
+      provider === 'lemmy' ? 'Votes et abonnement à la communauté non vérifiés' : 'Abonnement à la chaîne et likes non vérifiés',
     ] : provider === 'mastodon' ? [
       rules.interaction === 'reposts' ? 'Participation via un boost Mastodon' : 'Participation via un favori Mastodon',
       'Une seule chance par identifiant de compte ActivityPub',

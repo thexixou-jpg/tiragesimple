@@ -11,7 +11,7 @@ Le site public reste statique sur `tiragesimple.fr`. Les appels sociaux et les d
 5. Créer les secrets avec `wrangler secret put`; ne jamais ajouter les valeurs dans Git.
 6. Mettre `YOUTUBE_ENABLED=true` seulement après les tests de quota et de suppression.
 
-## Connecteurs YouTube, Bluesky et Mastodon
+## Connecteurs YouTube, Bluesky, Mastodon et Lemmy
 
 - `POST /v1/youtube/imports` : valide une URL, crée un import temporaire et place les pages de commentaires dans la Queue ;
 - `GET /v1/imports/:id` : expose la progression uniquement au navigateur qui a créé l’import (cookie signé, `HttpOnly`, `Secure`) ;
@@ -24,6 +24,8 @@ Les réponses YouTube sont importées avec `comments.list(parentId)` et leur pro
 Bluesky utilise `getLikes` ou `getRepostedBy` via l’API publique officielle. Les handles sont résolus en DID ; aucune connexion de compte n’est nécessaire. `BLUESKY_ENABLED=true` active le connecteur. Les réponses, citations, abonnements et combinaisons de critères ne sont pas proposés.
 
 Mastodon utilise les routes publiques `favourited_by` ou `reblogged_by` de l’instance d’origine et suit uniquement son paramètre `max_id`. `MASTODON_ALLOWED_HOSTS` constitue une liste fermée : le Worker ne suit jamais un hôte fourni par une réponse de pagination. Les comptes sont dédupliqués avec leur URI ActivityPub lorsque disponible.
+
+Lemmy utilise `GET /api/v3/post` puis `GET /api/v3/comment/list` sur une liste fermée d’instances 0.19. Les commentaires sont paginés par lots de 50 et les personnes sont dédupliquées par leur `actor_id` ActivityPub. Les votes ne sont jamais présentés comme accessibles.
 
 Appliquer aussi `migrations/0002_import_pages.sql` avant le déploiement. Les lots enregistrent un checkpoint et les participations dans une transaction : une livraison répétée ne doit pas doubler les chances. Les écritures JSON groupées respectent le plafond de requêtes D1 par invocation sur le plan gratuit. Les erreurs temporaires sont retentées avec backoff ; un import incomplet ne devient jamais prêt.
 
