@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MastodonContestTool from '../components/MastodonContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider = getSocialProvider('mastodon');
+const schema = { '@context':'https://schema.org', '@type':'WebApplication', name:'Tirage au sort Mastodon', url:'https://tiragesimple.fr/tirage-au-sort-mastodon/', applicationCategory:'UtilitiesApplication', operatingSystem:'Web', inLanguage:'fr-FR', description:provider.description, offers:{ '@type':'Offer', price:'0', priceCurrency:'EUR' } };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-mastodon/">
+  <header class="tool-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="mastodon" /><p class="social-status social-status-available">Favoris et boosts · API officielle</p></div><h1>Tirage au sort Mastodon</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube">
+    <MastodonContestTool />
+    <article class="tool-content prose">
+      <h2>Comment tirer au sort parmi les favoris ou les boosts ?</h2>
+      <p>Copiez l’URL du post depuis son instance d’origine, puis choisissez un seul critère : avoir ajouté le post aux favoris ou l’avoir boosté. L’aperçu affiche le texte, l’auteur et la date renvoyés par l’instance avant tout import. Le tirage n’additionne pas les favoris et les boosts, afin que la règle reste compréhensible et vérifiable.</p>
+      <p>Chaque compte est identifié par son adresse ActivityPub lorsqu’elle est fournie par l’API. Un même compte ne reçoit donc qu’une chance, même s’il apparaît plusieurs fois pendant la pagination. Vous pouvez exclure l’organisateur ainsi que des comptes précis avec leur adresse complète, par exemple <code>personne@instance.social</code>.</p>
+      <h2>Instances Mastodon actuellement prises en charge</h2>
+      <p>Le connecteur accepte mastodon.social, mastodon.online, mastodon.world, mstdn.social et piaille.fr. Cette liste limitée est volontaire : une plateforme fédérée comporte des milliers de serveurs administrés indépendamment. Autoriser une adresse arbitraire ferait courir un risque de sécurité au service et rendrait les quotas impossibles à maîtriser.</p>
+      <p>Une nouvelle instance pourra être ajoutée après vérification de son domaine, de sa compatibilité avec l’API Mastodon et de ses conditions d’accès. Un logiciel compatible ActivityPub mais doté d’une API différente n’est pas automatiquement pris en charge.</p>
+      <h2>Ce que l’API officielle permet réellement</h2>
+      <p>Pour les statuts publics, Mastodon documente des routes publiques permettant de consulter les comptes ayant ajouté un favori ou réalisé un boost. Chaque page contient au maximum 80 comptes et les pages suivantes sont récupérées à partir du lien de pagination fourni par l’instance. Une réponse privée, supprimée, incomplète ou limitée interrompt l’import : TirageSimple ne lance jamais un tirage sur une liste partielle.</p>
+      <p>Les réponses, les citations, l’abonnement à un compte, l’âge, la localisation et l’identité réelle ne sont pas vérifiés. Les interactions peuvent aussi changer après l’import si une personne retire son favori ou son boost. Le règlement du concours doit donc préciser la date de clôture et la méthode de collecte.</p>
+      <h2>Sans OAuth, mot de passe ou scraping</h2>
+      <p>Aucune connexion Mastodon n’est demandée pour ce cas public. TirageSimple n’utilise ni mot de passe, ni cookie, ni jeton collé manuellement. Les requêtes passent par les routes REST documentées par Mastodon et restent soumises aux limites propres à chaque instance. Par défaut, Mastodon indique une limite générale par adresse IP, mais l’administrateur d’une instance peut appliquer une politique plus stricte.</p>
+      <h2>Un reçu privé ou un résultat partageable</h2>
+      <p>Après l’import, contrôlez le nombre d’interactions analysées et de comptes éligibles. Le tirage utilise Web Crypto, fournit une référence et permet de télécharger un reçu JSON privé. Si vous activez explicitement le partage, une page publique présente les gagnants, les règles et les empreintes techniques sans révéler la liste complète des participants ni l’identité des comptes exclus.</p>
+      <h2>Questions fréquentes</h2>
+      <h3>Puis-je combiner favoris et boosts ?</h3><p>Non. Faites correspondre le critère choisi au règlement annoncé. Pour deux catégories distinctes, réalisez deux imports et deux tirages clairement identifiés.</p>
+      <h3>Pourquoi le compteur peut-il différer du post ?</h3><p>La fédération n’est pas instantanée, certaines interactions peuvent être retirées et les exclusions réduisent le total. Le nombre retenu est celui effectivement récupéré au moment de l’import.</p>
+      <p>Pour les commentaires de vidéos, utilisez plutôt le <a href="/tirage-au-sort-youtube/">tirage YouTube</a>. Pour les likes et reposts Bluesky, consultez le <a href="/tirage-au-sort-bluesky/">tirage Bluesky</a>.</p>
+    </article>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

@@ -8,6 +8,7 @@ import { ProviderRequestError } from './provider-http';
 import { nextYouTubeJob, processSocialImport, queueSocialImport } from './social-import';
 import { getImport, listEligibleParticipants, purgeExpiredData } from './storage';
 import { createYouTubeDraw } from './youtube-import';
+import { getMastodonPublication, parseMastodonUrl } from './mastodon';
 import type { Env, SocialImportJob, SocialPublication } from './types';
 import worker from './index';
 
@@ -23,7 +24,7 @@ function fixture(maximum = '10000') {
     };
   };
   const jobs: SocialImportJob[] = [];
-  const env = { BLUESKY_ENABLED: 'true', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
+  const env = { BLUESKY_ENABLED: 'true', MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
     PUBLIC_SITE_URL: 'https://example.test',
     DB: { prepare, batch: async (statements: ReturnType<typeof prepare>[]) => {
       sqlite.exec('BEGIN'); try { const result = statements.map(s => s.execute()); sqlite.exec('COMMIT'); return result; }
@@ -38,6 +39,41 @@ const response = (value: unknown) => new Response(JSON.stringify(value), { heade
 afterEach(() => vi.unstubAllGlobals());
 
 describe('official social connectors', () => {
+  it('accepts only allowlisted Mastodon status URLs', () => {
+    const env = { MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr' };
+    expect(parseMastodonUrl('https://mastodon.social/@alice/114123', env)).toEqual({ host: 'mastodon.social', statusId: '114123' });
+    expect(parseMastodonUrl('https://mastodon.social/%40alice/114123', env)).toEqual({ host: 'mastodon.social', statusId: '114123' });
+    expect(parseMastodonUrl('https://piaille.fr/users/alice/statuses/abc_123', env)).toEqual({ host: 'piaille.fr', statusId: 'abc_123' });
+    for (const url of ['https://evil.test/@alice/1', 'http://mastodon.social/@alice/1', 'https://user:pass@mastodon.social/@alice/1', 'https://mastodon.social.evil.test/@alice/1', 'https://127.0.0.1/@alice/1', 'https://mastodon.social/@alice/../api']) expect(parseMastodonUrl(url, env)).toBeNull();
+  });
+  it('loads a public Mastodon post without following redirects or arbitrary hosts', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: URL, init?: RequestInit) => {
+      expect(url.origin).toBe('https://mastodon.social'); expect(init?.redirect).toBe('manual');
+      return response({ id: '114123', uri: 'https://mastodon.social/users/alice/statuses/114123', url: 'https://mastodon.social/@alice/114123', content: '<p>Mon &amp; concours<br>public</p>', created_at: '2026-08-31T12:00:00Z', visibility: 'public', account: { id: '1', acct: 'alice', display_name: 'Alice', uri: 'https://mastodon.social/users/alice' } });
+    }));
+    const post = await getMastodonPublication('https://mastodon.social/@alice/114123', { MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social' });
+    expect(post).toMatchObject({ provider: 'mastodon', providerPublicationId: 'mastodon.social|114123', authorProviderId: 'https://mastodon.social/users/alice', title: 'Mon & concours\npublic' });
+  });
+  it('paginates Mastodon favourites from trusted Link headers and deduplicates ActivityPub accounts', async () => {
+    const { env, jobs } = fixture();
+    vi.stubGlobal('fetch', vi.fn(async (url: URL) => {
+      expect(url.origin).toBe('https://mastodon.social');
+      if (url.searchParams.has('max_id')) return response([{ id: '2', acct: 'renamed@remote.test', display_name: 'Renamed', uri: 'https://remote.test/users/stable' }, { id: '3', acct: 'bob', uri: 'https://mastodon.social/users/bob' }]);
+      return new Response(JSON.stringify([{ id: '1', acct: 'old@remote.test', uri: 'https://remote.test/users/stable' }, { id: '4', acct: 'owner', uri: 'https://mastodon.social/users/owner' }]), { headers: { 'content-type': 'application/json', link: '<https://mastodon.social/api/v1/statuses/114123/favourited_by?limit=80&max_id=next_2>; rel="next"' } });
+    }));
+    const imported = await queueSocialImport(env, 'session', { provider: 'mastodon', providerPublicationId: 'mastodon.social|114123', canonicalUrl: 'https://mastodon.social/@owner/114123', authorProviderId: 'https://mastodon.social/users/owner' }, normalizeRules({ interaction: 'likes' }));
+    while (jobs.length) await processSocialImport(jobs.shift()!, env);
+    expect(await getImport(env, imported.id)).toMatchObject({ status: 'ready', progress_current: 4, participant_count: 2 });
+    expect((await listEligibleParticipants(env, imported.id)).map(item => item.providerUserId)).toEqual(['https://mastodon.social/users/bob', 'https://remote.test/users/stable']);
+  });
+  it('ignores an untrusted Mastodon pagination host instead of fetching it', async () => {
+    const { env, jobs } = fixture();
+    const mocked = vi.fn(async () => new Response(JSON.stringify([{ id: '1', acct: 'alice', uri: 'https://mastodon.social/users/alice' }]), { headers: { 'content-type': 'application/json', link: '<https://evil.test/api/v1/statuses/1/favourited_by?max_id=x>; rel="next"' } }));
+    vi.stubGlobal('fetch', mocked);
+    const imported = await queueSocialImport(env, 'session', { provider: 'mastodon', providerPublicationId: 'mastodon.social|1', canonicalUrl: 'https://mastodon.social/@owner/1' }, normalizeRules({ interaction: 'likes' }));
+    while (jobs.length) await processSocialImport(jobs.shift()!, env);
+    expect(mocked).toHaveBeenCalledTimes(1); expect((await getImport(env, imported.id))?.status).toBe('ready');
+  });
   it('rejects unrelated hosts, credentials and malformed Bluesky URLs', () => {
     expect(parseBlueskyUrl('https://bsky.app/profile/alice.bsky.social/post/abc123')).toEqual({ actor: 'alice.bsky.social', rkey: 'abc123' });
     for (const url of ['https://evil.test/profile/a/post/b', 'http://bsky.app/profile/a.b/post/x', 'https://user:pass@bsky.app/profile/a.fr/post/x', 'https://bsky.app.evil.test/profile/a.fr/post/x', 'https://bsky.app/profile/a.fr/post/..']) expect(parseBlueskyUrl(url)).toBeNull();

@@ -13,7 +13,7 @@ const structuredData = {
 };
 ---
 
-<BaseLayout title="Tirage au sort réseaux sociaux : YouTube, Instagram et plus | TirageSimple" description="Préparez des tirages au sort transparents pour YouTube, Instagram, Facebook, X et TikTok, uniquement avec les API officielles disponibles." canonicalPath="/tirage-au-sort-reseaux-sociaux">
+<BaseLayout title="Tirage réseaux sociaux : YouTube, Bluesky, Mastodon | TirageSimple" description="Tirages au sort transparents pour YouTube, Bluesky et Mastodon avec leurs API officielles, sans scraping des plateformes indisponibles." canonicalPath="/tirage-au-sort-reseaux-sociaux">
   <header class="social-hub-hero">
     <div class="container social-hub-hero__inner">
       <div class="social-hub-hero__copy">
@@ -48,6 +48,7 @@ const structuredData = {
       <p>Un commentaire, une réponse, un mot-clé ou une mention ne sont proposés comme condition que si l’API de la plateforme permet de les récupérer. TirageSimple ne demandera jamais de mot de passe, cookie ou jeton collé manuellement.</p>
       <h2>Quelle plateforme fonctionne aujourd’hui ?</h2>
       <p><a href="/tirage-au-sort-bluesky/">Bluesky</a> permet de tirer parmi les likes ou les reposts d’une publication publique, sans connexion de compte. Chaque DID dispose d’une seule chance. Les réponses, citations et abonnements Bluesky ne sont pas contrôlés par cet outil.</p>
+      <p><a href="/tirage-au-sort-mastodon/">Mastodon</a> permet désormais un tirage parmi les favoris ou les boosts d’un post public, sans OAuth, sur cinq instances contrôlées. L’outil suit la pagination officielle et identifie les comptes par leur identité ActivityPub.</p>
       <p>Le connecteur YouTube est opérationnel pour les commentaires de vidéos et de Shorts publics. Il utilise l’API officielle, identifie les participants par leur chaîne et permet un filtre textuel. Les likes, abonnements et publications Communauté ne sont pas annoncés comme vérifiés.</p>
       <h2>Pourquoi Instagram et Facebook restent limités</h2>
       <p>Les API Meta réservent l’accès utile aux comptes professionnels et aux Pages autorisées, avec OAuth, permissions et examen de l’application. Une publication d’un profil personnel ou d’un compte qui n’a pas accordé l’accès ne peut pas être transformée proprement en concours automatique. Ces cartes décrivent l’état du projet mais ne renvoient plus vers un faux outil.</p>

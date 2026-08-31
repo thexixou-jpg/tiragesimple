@@ -8,6 +8,8 @@ workers_dev = false
 [vars]
 YOUTUBE_ENABLED = "true"
 BLUESKY_ENABLED = "true"
+MASTODON_ENABLED = "true"
+MASTODON_ALLOWED_HOSTS = "mastodon.social,mastodon.online,mastodon.world,mstdn.social,piaille.fr"
 ALLOWED_ORIGIN = "https://tiragesimple.fr"
 PUBLIC_SITE_URL = "https://tiragesimple.fr"
 RETENTION_DAYS = "30"

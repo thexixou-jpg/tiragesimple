@@ -1,0 +1,35 @@
+---
+const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
+const allowedHosts = 'mastodon.social,mastodon.online,mastodon.world,mstdn.social,piaille.fr';
+---
+<section class="tool-shell mastodon-tool" data-social-contest data-provider="mastodon" data-api-url={apiUrl} data-allowed-hosts={allowedHosts} aria-labelledby="mastodon-import-title">
+  <div class="tool-panel-intro"><div><p class="eyebrow">API REST officielle · Sans connexion</p><h2 id="mastodon-import-title">Votre post Mastodon. Un tirage vérifiable.</h2><p>Importez les comptes ayant ajouté un favori ou boosté un post public sur une instance prise en charge.</p></div></div>
+  <form class="social-import-form" data-contest-form>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Post du concours</strong><small>Le post doit être public ou non listé.</small></div></div>
+      <label class="field"><span>URL du post Mastodon</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://mastodon.social/@compte/…" required data-video-url /><small>Instances : mastodon.social, mastodon.online, mastodon.world, mstdn.social et piaille.fr.</small></label>
+      <aside class="youtube-preview mastodon-preview" data-preview data-state="idle" aria-live="polite"><div class="youtube-preview__empty"><span aria-hidden="true">M</span><div><strong>Aperçu du post</strong><small>Le texte, l’auteur et la date apparaîtront ici.</small></div></div><div class="mastodon-post" data-publication hidden><p class="eyebrow">Post sélectionné</p><p data-publication-title></p><small data-publication-meta></small></div></aside>
+    </div>
+    <div class="youtube-form-section">
+      <div class="youtube-section-heading"><span>02</span><div><strong>Règles du concours</strong><small>Un seul critère d’interaction est appliqué.</small></div></div>
+      <label class="field"><span>Participation via</span><select name="interaction"><option value="likes">Un favori sur le post</option><option value="reposts">Un boost du post</option></select></label>
+      <div class="form-row"><label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label><label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label></div>
+      <label class="field"><span>Comptes à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="compte@instance.social, autre@instance.social" /><small>Adresses complètes sans le premier @, séparées par une virgule.</small></label>
+      <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur du post</strong><small>Le compte organisateur ne participe pas.</small></span></label>
+    </div>
+    <div class="actions"><button class="button button-secondary" type="submit">Analyser le post</button><button class="button button-primary" type="button" data-import disabled>Importer les participants</button></div>
+  </form>
+  <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
+  <div class="social-draw-panel" data-draw hidden><p data-progress></p><section class="social-rules-summary" aria-label="Règles appliquées"><h3>Votre liste, vos règles</h3><p>Règles figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section><label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>Le post, les gagnants, les règles et les empreintes sont partagés, pas la liste complète.</small></span></label><button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button><div class="result-card" data-result hidden></div></div>
+</section>
+<script>import '../scripts/social-contest';</script>
+<style>
+  .mastodon-tool { --color-primary: #6364ff; }
+  .mastodon-tool .youtube-form-section { border-color: color-mix(in srgb, #6364ff 25%, var(--color-border)); }
+  .mastodon-tool .youtube-form-section--source, .mastodon-preview { background: linear-gradient(120deg, color-mix(in srgb, #6364ff 10%, var(--color-surface)), var(--color-surface)); }
+  .mastodon-tool .youtube-section-heading > span { background:#353657; color:#d9d9ff; }
+  .mastodon-preview { margin-top:1rem; border-color:color-mix(in srgb,#6364ff 30%,var(--color-border)); }
+  .mastodon-preview::after { background:none; }
+  .mastodon-post { padding:1.25rem; overflow-wrap:anywhere; }
+  .mastodon-post > p[data-publication-title] { white-space:pre-wrap; font-size:1.05rem; line-height:1.6; }
+</style>

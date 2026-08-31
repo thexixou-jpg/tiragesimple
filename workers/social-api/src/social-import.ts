@@ -5,6 +5,7 @@ import { ProviderRequestError } from './provider-http';
 import { checkImportAllowance, commitImportPage, createImport, getImport, getImportContext, getImportPage, importPageCount, reserveProviderRequest, savePublication, setImportStatus } from './storage';
 import type { ContestRules, Env, Participant, SocialImportJob, SocialPublication } from './types';
 import { getYouTubeCommentPage, getYouTubeReplyPage } from './youtube';
+import { getMastodonParticipantsPage } from './mastodon';
 
 export function nextYouTubeJob(job: SocialImportJob, nextPageToken?: string, replyParentIds: string[] = []): SocialImportJob | undefined {
   const base = { provider: job.provider, importId: job.importId };
@@ -31,7 +32,7 @@ export async function queueSocialImport(env: Env, sessionId: string, publication
 export async function processSocialImport(job: SocialImportJob, env: Env): Promise<void> {
   const context = await getImportContext(env, job.importId);
   if (!context || ['ready', 'failed'].includes(context.import.status) || context.import.expires_at <= new Date().toISOString()) return;
-  if (job.provider !== context.publication.provider || !['youtube', 'bluesky'].includes(job.provider)) throw new Error('Invalid import provider');
+  if (job.provider !== context.publication.provider || !['youtube', 'bluesky', 'mastodon'].includes(job.provider)) throw new Error('Invalid import provider');
   const key = await sha256(JSON.stringify([job.phase ?? 'main', job.pageToken ?? '', job.parentIds ?? [], job.nextThreadToken ?? '']));
   const previous = await getImportPage(env, job.importId, key);
   if (previous) {
@@ -51,8 +52,13 @@ export async function processSocialImport(job: SocialImportJob, env: Env): Promi
       participants = createParticipants(page.comments, context.rules, getProviderCapabilities('youtube'));
       analyzed = page.totalResults;
       next = nextYouTubeJob(job, page.nextPageToken, 'replyParentIds' in page ? page.replyParentIds : []);
-    } else {
+    } else if (job.provider === 'bluesky') {
       const page = await getBlueskyParticipantsPage(context.publication.providerPublicationId, job.pageToken, context.rules, env);
+      participants = page.participants;
+      analyzed = page.totalResults;
+      next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;
+    } else {
+      const page = await getMastodonParticipantsPage(context.publication.providerPublicationId, job.pageToken, context.rules, env);
       participants = page.participants;
       analyzed = page.totalResults;
       next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;

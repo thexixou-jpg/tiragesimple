@@ -17,4 +17,8 @@ describe('social contest summaries', () => {
     expect(text).toContain('Participation via un repost');
     expect(text).not.toContain('commentaire');
   });
+  it('uses Mastodon vocabulary for favourites and boosts', () => {
+    expect(socialRulesSummary('mastodon', { ...base, interaction: 'likes' }).join('\n')).toContain('favori Mastodon');
+    expect(socialRulesSummary('mastodon', { ...base, interaction: 'reposts' }).join('\n')).toContain('boost Mastodon');
+  });
 });

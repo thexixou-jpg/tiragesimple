@@ -106,6 +106,7 @@ button { cursor: pointer; }
 .social-provider-card__top { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: .75rem; }
 .social-provider-icon { display: block; width: 2.7rem; height: 2.7rem; flex: 0 0 auto; }
 .social-provider-icon--youtube { color: #ff0033; }
+.social-provider-icon--mastodon { color: #6364ff; }
 .social-provider-icon--instagram { color: #d94677; }
 .social-provider-icon--facebook { color: #1877f2; }
 .social-provider-icon--x { color: var(--color-text); }

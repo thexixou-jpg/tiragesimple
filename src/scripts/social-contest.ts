@@ -8,7 +8,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -55,15 +55,20 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   const eligibleUrl = (value: string) => {
     try {
       const url = new URL(value);
-      return url.protocol === 'https:' && (provider === 'bluesky'
-        ? url.hostname === 'bsky.app' && /^\/profile\/[^/]+\/post\/[^/]+\/?$/u.test(url.pathname)
-        : ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname));
+      if (url.protocol !== 'https:' || url.port || url.username || url.password) return false;
+      if (provider === 'bluesky') return url.hostname === 'bsky.app' && /^\/profile\/[^/]+\/post\/[^/]+\/?$/u.test(url.pathname);
+      if (provider === 'mastodon') {
+        const hosts = (root.dataset.allowedHosts || '').split(',');
+        const path = decodeURIComponent(url.pathname);
+        return hosts.includes(url.hostname.toLowerCase()) && [/^\/@[^/]+\/[A-Za-z0-9_-]+\/?$/u, /^\/users\/[^/]+\/statuses\/[A-Za-z0-9_-]+\/?$/u, /^\/web\/statuses\/[A-Za-z0-9_-]+\/?$/u].some(pattern => pattern.test(path));
+      }
+      return ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
     } catch { return false; }
   };
   const analyze = async () => {
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
-    if (!eligibleUrl(url)) { say(`Utilisez un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : 'YouTube vers une vidéo ou un Short'}.`); return; }
+    if (!eligibleUrl(url)) { say(`Utilisez un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : 'YouTube vers une vidéo ou un Short'}.`); return; }
     resetDraw();
     const current = ++revision;
     analyzedUrl = ''; importButton.disabled = true; publication.hidden = true;
@@ -97,7 +102,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       excludePublicationAuthor: data.get('excludePublicationAuthor') === 'on',
       requiredKeyword: provider === 'youtube' ? String(data.get('requiredKeyword') || '').trim() : undefined,
       excludedUsers: String(data.get('excludedUsers') || '').split(/[\n,]/u).map(v => v.trim().replace(/^@/u, '')).filter(Boolean),
-      ...(provider === 'bluesky' ? { interaction: String(data.get('interaction')) } : {}),
+      ...(provider !== 'youtube' ? { interaction: String(data.get('interaction')) } : {}),
     };
   };
   const poll = async (id: string, current: number) => {

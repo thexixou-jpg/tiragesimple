@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'bluesky' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -41,6 +41,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'Une clé API YouTube côté serveur est nécessaire. La connexion Google ne sera demandée que pour les fonctions nécessitant l’autorisation du propriétaire.',
     limitations: ['Les commentaires désactivés ne peuvent pas être importés.', 'Les réponses sont une option distincte.', 'Les abonnements à une chaîne ne sont pas vérifiables automatiquement.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
+  {
+    id: 'mastodon', name: 'Mastodon', status: 'available', statusLabel: 'Disponible sur 5 instances',
+    title: 'Tirage au sort Mastodon : favoris ou boosts | TirageSimple',
+    description: 'Tirez un gagnant parmi les favoris ou boosts d’un post Mastodon public, sans OAuth, sur les instances prises en charge.',
+    intro: 'Importez les favoris ou les boosts d’un post Mastodon public et effectuez un tirage transparent sans connecter votre compte.',
+    connection: 'API REST publique Mastodon, sans mot de passe ni connexion.',
+    limitations: ['Instances prises en charge : mastodon.social, mastodon.online, mastodon.world, mstdn.social et piaille.fr.', 'Favoris ou boosts, sans combiner les deux.', 'Les réponses, abonnements et interactions privées ne sont pas vérifiés.'],
+    capabilities: { comments: false, likes: true, reposts: true, mentions: false, followers: false, replies: false },
   },
   {
     id: 'instagram', name: 'Instagram', status: 'limited', statusLabel: 'Fonctionnalités limitées',
