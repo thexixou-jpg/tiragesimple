@@ -1,5 +1,5 @@
 interface Publication { title?: string; authorName?: string; publishedAt?: string; thumbnailUrl?: string }
-interface ClientPublication extends Publication { authorProviderId?: string; chatToken?: string; websocketUrl?: string }
+interface ClientPublication extends Publication { authorProviderId?: string; chatToken?: string; websocketUrl?: string; reactions?: Array<{ id:string; label:string; count:number }> }
 interface ClientComment { providerCommentId: string; providerUserId: string; username?: string; displayName?: string; text: string; isReply: false; createdAt?: string }
 interface ImportState { status: string; progress_current: number; participant_count: number; error_message?: string }
 interface Winner { displayName?: string; username?: string; providerUserId?: string }
@@ -10,7 +10,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : root.dataset.provider === 'trovo' ? 'trovo' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : root.dataset.provider === 'trovo' ? 'trovo' : root.dataset.provider === 'discord' ? 'discord' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -132,6 +132,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       if (provider === 'twitch') return ['twitch.tv', 'www.twitch.tv'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_]{4,25}\/?$/u.test(url.pathname);
       if (provider === 'kick') return ['kick.com', 'www.kick.com'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_-]{3,25}\/?$/u.test(url.pathname);
       if (provider === 'trovo') return ['trovo.live', 'www.trovo.live'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_]{3,50}\/?$/u.test(url.pathname);
+      if (provider === 'discord') return ['discord.com', 'www.discord.com'].includes(url.hostname.toLowerCase()) && /^\/channels\/[1-9]\d{16,19}\/[1-9]\d{16,19}\/[1-9]\d{16,19}\/?$/u.test(url.pathname);
       return ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
     } catch { return provider === 'twitch' && /^[A-Za-z0-9_]{4,25}$/u.test(value) || provider === 'kick' && /^[A-Za-z0-9_-]{3,25}$/u.test(value) || provider === 'trovo' && /^[A-Za-z0-9_]{3,50}$/u.test(value); }
   };
@@ -166,7 +167,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   const analyze = async () => {
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
-    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : provider === 'kick' ? 'le login ou le lien de votre chaîne Kick connectée' : provider === 'trovo' ? 'un login ou un lien de chaîne Trovo' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
+    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : provider === 'kick' ? 'le login ou le lien de votre chaîne Kick connectée' : provider === 'trovo' ? 'un login ou un lien de chaîne Trovo' : provider === 'discord' ? 'le lien complet d’un message Discord de serveur' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
     resetDraw();
     const current = ++revision;
     analyzedUrl = ''; clientSourced = false; clientPublication = undefined; importButton.disabled = true; publication.hidden = true;
@@ -181,6 +182,11 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       }
       if (current !== revision || url !== input.value.trim()) return;
       if (provider === 'trovo') { await startTrovo(data); clientSourced = true; clientPublication = data; }
+      if (provider === 'discord') {
+        const select=root.querySelector<HTMLSelectElement>('[data-discord-reaction]')!; select.replaceChildren();
+        for (const reaction of data.reactions || []) { const option=document.createElement('option'); option.value=reaction.id; option.textContent=`${reaction.label} · ${reaction.count} réaction${reaction.count > 1 ? 's' : ''}`; select.append(option); }
+        select.disabled=!select.options.length;
+      }
       root.querySelector<HTMLElement>('[data-publication-title]')!.textContent = data.title || 'Publication';
       const date = data.publishedAt && !Number.isNaN(Date.parse(data.publishedAt)) ? new Intl.DateTimeFormat('fr-FR').format(new Date(data.publishedAt)) : '';
       root.querySelector<HTMLElement>('[data-publication-meta]')!.textContent = [data.authorName, date].filter(Boolean).join(' · ');
@@ -210,6 +216,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       excludePublicationAuthor: data.get('excludePublicationAuthor') === 'on',
       requiredKeyword: commentProvider ? String(data.get('requiredKeyword') || '').trim() : undefined,
       excludedUsers: String(data.get('excludedUsers') || '').split(/[\n,]/u).map(v => v.trim().replace(/^@/u, '')).filter(Boolean),
+      providerInteractionId: provider === 'discord' ? String(data.get('providerInteractionId') || '') : undefined,
       ...(provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' ? { interaction: 'livechat' as const } : !commentProvider || provider === 'stackexchange' ? { interaction: String(data.get('interaction')) } : {}),
     };
   };
@@ -217,7 +224,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     try {
       const { import: state } = await request<{ import: ImportState }>(`/v1/imports/${id}`);
       if (current !== revision || id !== importId) return;
-      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' ? 'messages du chat analysés' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
+      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' ? 'messages du chat analysés' : provider === 'discord' ? 'réactions Discord analysées' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
       if (state.status === 'failed') { lock(false); say(state.error_message || 'Import interrompu. Aucun tirage partiel ne sera effectué.'); return; }
       if (state.status === 'ready') {
         lock(false);

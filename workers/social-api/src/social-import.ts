@@ -11,6 +11,7 @@ import { getGitHubParticipantsPage } from './github';
 import { getStackExchangeParticipantsPage } from './stackexchange';
 import { getYouTubeLiveChatSnapshot } from './youtube-live';
 import { getTwitchChattersPage } from './twitch';
+import { getDiscordParticipantsPage } from './discord';
 
 export function nextYouTubeJob(job: SocialImportJob, nextPageToken?: string, replyParentIds: string[] = []): SocialImportJob | undefined {
   const base = { provider: job.provider, importId: job.importId };
@@ -84,7 +85,7 @@ export async function createRecordedSocialImport(env: Env, sessionId: string, pu
 export async function processSocialImport(job: SocialImportJob, env: Env): Promise<void> {
   const context = await getImportContext(env, job.importId);
   if (!context || ['ready', 'failed'].includes(context.import.status) || context.import.expires_at <= new Date().toISOString()) return;
-  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'twitch', 'bluesky', 'mastodon', 'lemmy', 'github', 'stackexchange'].includes(job.provider)) throw new Error('Invalid import provider');
+  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'twitch', 'discord', 'bluesky', 'mastodon', 'lemmy', 'github', 'stackexchange'].includes(job.provider)) throw new Error('Invalid import provider');
   const key = await sha256(JSON.stringify([job.phase ?? 'main', job.pageToken ?? '', job.parentIds ?? [], job.nextThreadToken ?? '']));
   const previous = await getImportPage(env, job.importId, key);
   if (previous) {
@@ -113,6 +114,10 @@ export async function processSocialImport(job: SocialImportJob, env: Env): Promi
       const page = await getTwitchChattersPage(context.publication.providerPublicationId, job.pageToken, context.rules, env, context.import.owner_session_id);
       participants = page.participants;
       analyzed = page.totalResults;
+      next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;
+    } else if (job.provider === 'discord') {
+      const page = await getDiscordParticipantsPage(context.publication.providerPublicationId, job.pageToken, context.rules, env);
+      participants = page.participants; analyzed = page.totalResults;
       next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;
     } else if (job.provider === 'bluesky') {
       const page = await getBlueskyParticipantsPage(context.publication.providerPublicationId, job.pageToken, context.rules, env);

@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -59,6 +59,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API et service de chat WebSocket officiels Trovo, sans connexion du streamer.',
     limitations: ['Seuls les messages reçus après le démarrage explicite de la collecte sont inclus.', 'La fenêtre doit rester ouverte dans le navigateur pendant le concours.', 'Les viewers silencieux, follows, abonnements, cadeaux et anciens messages ne participent pas.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'discord', name: 'Discord', status: 'limited', statusLabel: 'Bot prêt · activation requise',
+    title: 'Tirage au sort Discord : réactions à un message',
+    description: 'Tirez des gagnants parmi les comptes ayant réagi avec un emoji précis à un message Discord, via le bot officiel TirageSimple.',
+    intro: 'Installez le bot TirageSimple sur votre serveur, collez le lien d’un message et choisissez la réaction qui définit la participation.',
+    connection: 'Bot Discord officiel avec les seules permissions Voir le salon et Lire l’historique des messages.',
+    limitations: ['Le bot doit être installé et autorisé dans le salon du message.', 'Une seule réaction est choisie par tirage ; les bots sont automatiquement exclus.', 'Le contenu du message, les rôles, présences et membres silencieux ne sont pas utilisés.'],
+    capabilities: { comments: false, likes: true, reposts: false, mentions: false, followers: false, replies: false },
   },
   {
     id: 'bluesky', name: 'Bluesky', status: 'available', statusLabel: 'Disponible',

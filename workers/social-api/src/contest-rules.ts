@@ -11,6 +11,7 @@ export function normalizeRules(input: Partial<ContestRules>): ContestRules {
   };
   if (input.excludedUsers !== undefined && (!Array.isArray(input.excludedUsers) || input.excludedUsers.length > 100 || input.excludedUsers.some(v => typeof v !== 'string' || v.length > 300))) throw new Error('La liste des exclusions est invalide.');
   if (input.requiredKeyword !== undefined && (typeof input.requiredKeyword !== 'string' || input.requiredKeyword.length > 120)) throw new Error('Le filtre textuel est invalide.');
+  if (input.providerInteractionId !== undefined && (typeof input.providerInteractionId !== 'string' || input.providerInteractionId.length > 200)) throw new Error('L’interaction sélectionnée est invalide.');
   return {
     winnerCount: count(input.winnerCount, 1, 1),
     alternateCount: count(input.alternateCount, 0, 0),
@@ -23,6 +24,7 @@ export function normalizeRules(input: Partial<ContestRules>): ContestRules {
     excludePublicationAuthor: input.excludePublicationAuthor ?? true,
     interaction: input.interaction === 'reposts' ? 'reposts' : input.interaction === 'answers' ? 'answers' : input.interaction === 'comments' ? 'comments' : 'likes',
     clientSourced: false,
+    providerInteractionId: input.providerInteractionId?.trim() || undefined,
   };
 }
 

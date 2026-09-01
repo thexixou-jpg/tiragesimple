@@ -28,7 +28,7 @@ const structuredData = {
   </header>
   <div class="container tool-page">
     <section class="social-provider-grid" aria-label="Plateformes disponibles">
-      {socialProviders.map((provider) => provider.status === 'available' || provider.id === 'twitch' || provider.id === 'kick' || provider.id === 'trovo' ? (
+      {socialProviders.map((provider) => provider.status === 'available' || provider.id === 'twitch' || provider.id === 'kick' || provider.id === 'trovo' || provider.id === 'discord' ? (
         <a class="social-provider-card" href={`/tirage-au-sort-${providerSlug(provider.id)}`}>
           <span class="social-provider-card__top"><SocialProviderIcon provider={provider.id} /><span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span></span>
           <h2>{provider.name}</h2>
@@ -56,6 +56,7 @@ const structuredData = {
       <p><a href="/tirage-au-sort-stack-overflow/">Stack Overflow</a> permet de choisir entre les auteurs de réponses et les auteurs de commentaires d’une question publique. La déduplication utilise l’identifiant numérique du compte ; les votes et la réputation ne modifient jamais les chances.</p>
       <p>Le connecteur YouTube classique est opérationnel pour les commentaires de vidéos et de Shorts publics. Il utilise l’API officielle, identifie les participants par leur chaîne et permet un filtre textuel. Les likes, abonnements et publications Communauté ne sont pas annoncés comme vérifiés.</p>
       <h2>Streaming : Twitch, Kick et Trovo</h2><p>Le <a href="/tirage-au-sort-twitch/">connecteur Twitch</a> prépare un instantané paginé des comptes présents dans le chat, avec l’autorisation du diffuseur ou d’un modérateur. Le <a href="/tirage-au-sort-kick/">connecteur Kick</a> ouvre une période de collecte des nouveaux messages via des webhooks officiels signés. Le <a href="/tirage-au-sort-trovo/">connecteur Trovo</a> reçoit les nouveaux messages depuis le WebSocket officiel pendant que la page reste ouverte. Chaque parcours reflète les capacités réelles de la plateforme ; Spotify ne fournit pas de liste publique exploitable des personnes ayant écouté un morceau.</p>
+      <h2>Communautés Discord</h2><p>Le <a href="/tirage-au-sort-discord/">tirage Discord</a> utilise un bot installé volontairement sur le serveur et importe uniquement les comptes ayant ajouté une réaction précise à un message. Les permissions demandées se limitent à voir le salon et lire son historique ; le contenu du message et l’intention privilégiée <code>MESSAGE_CONTENT</code> ne sont pas utilisés.</p>
       <h2>Pourquoi Instagram et Facebook restent limités</h2>
       <p>Les API Meta réservent l’accès utile aux comptes professionnels et aux Pages autorisées, avec OAuth, permissions et examen de l’application. Une publication d’un profil personnel ou d’un compte qui n’a pas accordé l’accès ne peut pas être transformée proprement en concours automatique. Ces cartes décrivent l’état du projet mais ne renvoient plus vers un faux outil.</p>
       <h2>Pourquoi X et TikTok ne sont pas proposés</h2>

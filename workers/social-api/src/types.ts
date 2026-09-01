@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -12,6 +12,7 @@ export interface ContestRules {
   excludePublicationAuthor: boolean;
   interaction?: 'likes' | 'reposts' | 'answers' | 'comments' | 'livechat' | 'chatters';
   clientSourced?: boolean;
+  providerInteractionId?: string;
 }
 
 export interface ProviderCapabilities {
@@ -75,6 +76,9 @@ export interface Env {
   KICK_REDIRECT_URI?: string;
   TROVO_ENABLED?: string;
   TROVO_CLIENT_ID?: string;
+  DISCORD_ENABLED?: string;
+  DISCORD_CLIENT_ID?: string;
+  DISCORD_BOT_TOKEN?: string;
   DATA_ENCRYPTION_KEY?: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_SITE_URL?: string;
