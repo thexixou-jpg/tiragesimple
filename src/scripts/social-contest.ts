@@ -10,7 +10,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : root.dataset.provider === 'trovo' ? 'trovo' : root.dataset.provider === 'discord' ? 'discord' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'reddit' ? 'reddit' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : root.dataset.provider === 'trovo' ? 'trovo' : root.dataset.provider === 'discord' ? 'discord' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -133,6 +133,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       if (provider === 'kick') return ['kick.com', 'www.kick.com'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_-]{3,25}\/?$/u.test(url.pathname);
       if (provider === 'trovo') return ['trovo.live', 'www.trovo.live'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_]{3,50}\/?$/u.test(url.pathname);
       if (provider === 'discord') return ['discord.com', 'www.discord.com'].includes(url.hostname.toLowerCase()) && /^\/channels\/[1-9]\d{16,19}\/[1-9]\d{16,19}\/[1-9]\d{16,19}\/?$/u.test(url.pathname);
+      if (provider === 'reddit') return ['reddit.com','www.reddit.com','old.reddit.com'].includes(url.hostname.toLowerCase()) && /^\/r\/[A-Za-z0-9_]{2,21}\/comments\/[a-z0-9]{5,10}(?:\/[^/]*)?\/?$/iu.test(url.pathname) || url.hostname.toLowerCase() === 'redd.it' && /^\/[a-z0-9]{5,10}\/?$/iu.test(url.pathname);
       return ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
     } catch { return provider === 'twitch' && /^[A-Za-z0-9_]{4,25}$/u.test(value) || provider === 'kick' && /^[A-Za-z0-9_-]{3,25}$/u.test(value) || provider === 'trovo' && /^[A-Za-z0-9_]{3,50}$/u.test(value); }
   };
@@ -167,7 +168,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   const analyze = async () => {
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
-    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : provider === 'kick' ? 'le login ou le lien de votre chaîne Kick connectée' : provider === 'trovo' ? 'un login ou un lien de chaîne Trovo' : provider === 'discord' ? 'le lien complet d’un message Discord de serveur' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
+    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : provider === 'kick' ? 'le login ou le lien de votre chaîne Kick connectée' : provider === 'trovo' ? 'un login ou un lien de chaîne Trovo' : provider === 'discord' ? 'le lien complet d’un message Discord de serveur' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'reddit' ? 'vers une publication Reddit publique' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
     resetDraw();
     const current = ++revision;
     analyzedUrl = ''; clientSourced = false; clientPublication = undefined; importButton.disabled = true; publication.hidden = true;
@@ -207,8 +208,8 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   };
   const readRules = () => {
     const data = new FormData(form);
-    const commentProvider = provider === 'youtube' || provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' || provider === 'lemmy' || provider === 'github' || provider === 'stackexchange';
-    const replyProvider = provider === 'youtube' || provider === 'lemmy';
+    const commentProvider = provider === 'youtube' || provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' || provider === 'lemmy' || provider === 'reddit' || provider === 'github' || provider === 'stackexchange';
+    const replyProvider = provider === 'youtube' || provider === 'lemmy' || provider === 'reddit';
     const duplicateEntries = commentProvider && data.get('duplicateEntries') === 'on';
     return { winnerCount: Number(data.get('winnerCount')), alternateCount: Number(data.get('alternateCount')),
       uniqueParticipants: !duplicateEntries, duplicateEntries,
@@ -224,7 +225,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     try {
       const { import: state } = await request<{ import: ImportState }>(`/v1/imports/${id}`);
       if (current !== revision || id !== importId) return;
-      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' ? 'messages du chat analysés' : provider === 'discord' ? 'réactions Discord analysées' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
+      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' ? 'messages du chat analysés' : provider === 'discord' ? 'réactions Discord analysées' : provider === 'youtube' || provider === 'lemmy' || provider === 'reddit' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
       if (state.status === 'failed') { lock(false); say(state.error_message || 'Import interrompu. Aucun tirage partiel ne sera effectué.'); return; }
       if (state.status === 'ready') {
         lock(false);

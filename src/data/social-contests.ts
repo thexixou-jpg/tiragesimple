@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -103,6 +103,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     intro: 'Transformez les commentaires publics d’un post Lemmy en un tirage transparent, sans connecter de compte.',
     connection: 'API publique Lemmy 0.19, sans mot de passe ni connexion.',
     limitations: ['Instances prises en charge : Lemmy.world, Lemmy.ml, jlai.lu et Feddit.org.', 'Les votes et abonnements ne sont pas accessibles comme listes de participants.', 'La collecte n’est pas figée si des commentaires sont ajoutés pendant l’import.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
+  {
+    id: 'reddit', name: 'Reddit', status: 'limited', statusLabel: 'Connecteur prêt · accès API requis',
+    title: 'Tirage au sort Reddit : commentaires d’une publication',
+    description: 'Tirez des gagnants parmi les commentaires d’une publication Reddit publique avec comptes uniques, réponses, filtre textuel et exclusions.',
+    intro: 'Importez l’arbre complet des commentaires d’une publication Reddit publique, puis appliquez des règles transparentes à des identifiants de compte stables.',
+    connection: 'API Reddit officielle avec identifiants OAuth serveur et User-Agent déclaré.',
+    limitations: ['Une application Reddit autorisée doit être configurée côté serveur.', 'Les votes, abonnements, récompenses et membres du subreddit ne sont pas accessibles comme listes de participants.', 'Les comptes supprimés sans identifiant stable et les commentaires supprimés sont exclus.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {

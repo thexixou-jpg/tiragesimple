@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RedditContestTool from '../components/RedditContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('reddit');
+const schema={ '@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Reddit',url:'https://tiragesimple.fr/tirage-au-sort-reddit/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'} };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-reddit/">
+  <header class="tool-hero reddit-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="reddit" /><p class="social-status social-status-limited">Commentaires · accès API requis</p></div><h1>Tirage au sort Reddit</h1><p>{provider.intro}</p></div></header>
+  <main class="container section"><RedditContestTool /><article class="content-section legal-copy">
+    <h2>Tirer un gagnant parmi les commentaires Reddit</h2><p>Collez l’adresse d’une publication publique. TirageSimple demande ses métadonnées et son arbre de commentaires à l’API Reddit officielle. Les éléments « continuer ce fil » sont développés par lots avant la création de la liste. Si Reddit refuse une partie de l’arbre, l’import échoue : aucun tirage silencieux sur un échantillon n’est proposé.</p>
+    <h2>Une participation liée au compte, pas au pseudo</h2><p>La déduplication utilise l’identifiant technique du compte fourni par Reddit. Un changement de pseudo ne crée donc pas volontairement une seconde identité. Les comptes supprimés qui ne possèdent plus cet identifiant ainsi que les commentaires retirés ou supprimés sont ignorés.</p>
+    <h2>Règles disponibles</h2><p>Vous pouvez limiter chaque compte à une chance ou compter plusieurs commentaires, inclure les réponses, imposer un mot ou une expression, exclure l’auteur et écarter certains comptes. Un compte ne gagne jamais deux places dans le même résultat, même lorsque plusieurs commentaires augmentent ses chances.</p>
+    <h2>Ce que Reddit ne permet pas de vérifier ici</h2><p>Les scores ne donnent pas la liste publique des personnes ayant voté. L’adhésion à un subreddit, les abonnements, récompenses, vues et partages ne sont donc pas annoncés comme conditions contrôlées. Le service ne demande ni mot de passe, ni cookie, ni jeton utilisateur collé dans le navigateur.</p>
+    <h2>Accès et limites de l’API</h2><p>Reddit exige une application, OAuth et un User-Agent descriptif. Selon l’usage, Reddit peut demander un examen ou un accord distinct. Le connecteur reste indiqué comme « activation requise » tant que ces paramètres ne sont pas présents côté serveur. Les discussions dépassant 10 000 commentaires sont refusées afin de préserver une limite de traitement explicite.</p>
+    <h2>Questions fréquentes</h2><h3>Puis-je tirer parmi les upvotes ?</h3><p>Non : le nombre de votes est visible, mais pas une liste publique complète et fiable des comptes à utiliser comme participants.</p><h3>Les réponses imbriquées sont-elles prises en charge ?</h3><p>Oui si vous activez l’option. L’outil suit également les références supplémentaires renvoyées par l’API. Pour d’autres communautés, essayez le <a href="/tirage-au-sort-lemmy/">tirage Lemmy</a>, le <a href="/tirage-au-sort-discord/">tirage Discord</a> ou le <a href="/tirage-au-sort-youtube/">tirage YouTube</a>.</p>
+  </article></main>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+<style>.reddit-hero{background:radial-gradient(circle at 82% 40%,#ff450024,transparent 30%),var(--color-bg)}</style>

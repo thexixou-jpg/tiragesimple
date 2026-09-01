@@ -1,23 +1,25 @@
 ---
+import type { SimpleIcon } from 'simple-icons';
+import { siBluesky, siDiscord, siFacebook, siGithub, siInstagram, siKick, siLemmy, siMastodon, siReddit, siStackoverflow, siTiktok, siTwitch, siX, siYoutube } from 'simple-icons';
 import type { SocialProviderId } from '../data/social-contests';
 
 interface Props { provider: SocialProviderId; }
 const { provider } = Astro.props;
+const icons: Partial<Record<SocialProviderId, SimpleIcon>> = {
+  youtube:siYoutube, youtube_live:siYoutube, twitch:siTwitch, kick:siKick, discord:siDiscord,
+  bluesky:siBluesky, mastodon:siMastodon, lemmy:siLemmy, github:siGithub,
+  stackexchange:siStackoverflow, instagram:siInstagram, facebook:siFacebook,
+  x:siX, tiktok:siTiktok, reddit:siReddit,
+};
+const icon=icons[provider];
+const preserveThemeColor=['github','x','tiktok'].includes(provider);
 ---
-<svg class:list={['social-provider-icon', `social-provider-icon--${provider}`]} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-  {provider === 'bluesky' && <path fill="#1681f5" d="M24 23C19 14 8 7 5 10c-3 3-1 13 2 16 2 2 5 3 9 3-7 2-9 5-6 9 4 5 11-1 14-7 3 6 10 12 14 7 3-4 1-7-6-9 4 0 7-1 9-3 3-3 5-13 2-16-3-3-14 4-19 13Z" />}
-  {provider === 'youtube' && <g><rect x="5" y="11" width="38" height="26" rx="8" fill="currentColor" /><path d="m21 18 11 6-11 6V18Z" fill="white" /></g>}
-  {provider === 'youtube_live' && <g><rect x="8" y="12" width="32" height="24" rx="7" fill="currentColor" /><path d="m21 18 10 6-10 6V18Z" fill="white" /><path d="M5 17c-4 4-4 10 0 14M43 17c4 4 4 10 0 14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></g>}
-  {provider === 'twitch' && <path fill="currentColor" d="M7 6h35v25L31 42h-8l-6 5v-5H7V6Zm6 6v24h8v5l5-5h8l3-3V12H13Zm9 6h4v11h-4V18Zm8 0h4v11h-4V18Z" />}
-  {provider === 'kick' && <g fill="currentColor"><rect x="6" y="6" width="36" height="36" rx="9"/><path fill="#101510" d="M14 14h7v8l7-8h8l-10 10 11 10h-9l-7-7v7h-7V14Z"/></g>}
-  {provider === 'trovo' && <g fill="currentColor"><path d="M7 8h34v24L31 42H17L7 32V8Zm7 7v14l6 6h8l6-6V15H14Z"/><path d="M19 19h10v9H19z"/></g>}
-  {provider === 'discord' && <path fill="currentColor" d="M38 10a34 34 0 0 0-8-3l-1 3a28 28 0 0 0-10 0l-1-3a34 34 0 0 0-8 3C5 18 4 26 5 34a32 32 0 0 0 10 5l3-4-4-2 1-1c6 3 12 3 18 0l1 1-4 2 3 4a32 32 0 0 0 10-5c1-9-1-17-5-24ZM18 29c-3 0-5-2-5-5s2-5 5-5 5 2 5 5-2 5-5 5Zm12 0c-3 0-5-2-5-5s2-5 5-5 5 2 5 5-2 5-5 5Z"/>}
-  {provider === 'mastodon' && <path fill="currentColor" d="M40 14c-.6-4.6-4.6-8.2-9.4-8.9C28.4 4.8 26.2 4.7 24 4.7s-4.4.1-6.6.4C12.6 5.8 8.6 9.4 8 14c-.4 3.2-.5 6.5-.2 9.7.7 7.9 5.3 10 10.3 10.7 2.3.3 4.3.2 5.9-.2 3-.7 4.7-2.5 4.7-2.5l-.1-3.1s-2.1.7-4.6 1c-2.4.3-5 .2-5.4-2.8a6 6 0 0 1-.1-1.2c5 .9 9.3.6 10.5.5 3.4-.4 6.4-2.3 6.8-4 .7-3 .6-7.4.2-8.1Zm-6.2 8h-4.1v-9.8c0-2.1-1-3.1-2.8-3.1-2 0-3 1.3-3 3.8v5.4h-4V13c0-2.5-1-3.8-3-3.8-1.8 0-2.8 1-2.8 3.1V22H10V12c0-2.1.5-3.8 1.6-5 1.1-1.3 2.6-2 4.5-2 2.2 0 3.9.9 5 2.6L24 12l2.9-4.4c1.1-1.7 2.8-2.6 5-2.6 1.9 0 3.4.7 4.5 2 1.1 1.2 1.6 2.9 1.6 5v10Z" transform="scale(.92) translate(2 2)" />}
-  {provider === 'lemmy' && <g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17c-5 3-6 10-2 15 4 5 11 6 16 3l4 5 2-7c5-3 7-9 4-14-3-6-10-8-16-5"/><circle cx="19" cy="25" r="2" fill="currentColor" stroke="none"/><circle cx="29" cy="23" r="2" fill="currentColor" stroke="none"/><path d="M18 31c4 2 8 1 11-2M17 14l-3-5m17 5 3-5"/></g>}
-  {provider === 'github' && <path fill="currentColor" d="M24 4C13 4 4 13 4 24c0 8.8 5.7 16.3 13.7 19 .9.2 1.3-.4 1.3-.9v-3.5c-5.6 1.2-6.8-2.4-6.8-2.4-.9-2.3-2.2-2.9-2.2-2.9-1.8-1.2.1-1.2.1-1.2 2 .1 3.1 2 3.1 2 1.8 3.1 4.7 2.2 5.8 1.7.2-1.3.7-2.2 1.3-2.7-4.5-.5-9.2-2.2-9.2-9.9 0-2.2.8-4 2.1-5.4-.2-.5-.9-2.6.2-5.3 0 0 1.7-.5 5.5 2.1a19 19 0 0 1 10 0c3.8-2.6 5.5-2.1 5.5-2.1 1.1 2.7.4 4.8.2 5.3 1.3 1.4 2.1 3.2 2.1 5.4 0 7.7-4.7 9.4-9.2 9.9.7.6 1.4 1.9 1.4 3.8v5.9c0 .5.4 1.1 1.3.9A20 20 0 0 0 44 24C44 13 35 4 24 4Z"/>}
-  {provider === 'stackexchange' && <path fill="currentColor" d="M9 38h25v-9h4v13H5V29h4v9Zm3-5 .8-3.8L32 33l-.8 3.9L12 33Zm2-9 1.6-3.6 17.7 7.8-1.6 3.7L14 24Zm4-8 2.6-3.1 14.8 12.2-2.6 3.1L18 16Zm6-6 3.3-2.2 10.8 16-3.3 2.2L24 10Z"/>}
-  {provider === 'instagram' && <g><rect x="7" y="7" width="34" height="34" rx="11" fill="none" stroke="currentColor" stroke-width="4" /><circle cx="24" cy="24" r="8" fill="none" stroke="currentColor" stroke-width="4" /><circle cx="34.5" cy="13.5" r="2.5" fill="currentColor" /></g>}
-  {provider === 'facebook' && <g><circle cx="24" cy="24" r="20" fill="currentColor" /><path d="M27 39V26h5l1-6h-6v-3.5c0-1.8.8-3 3.6-3H34V8.1c-1-.1-2.2-.3-4.1-.3-4.3 0-7.2 2.6-7.2 7.4V20h-5v6h5v13h4.3Z" fill="white" /></g>}
-  {provider === 'x' && <g><path d="M8 8h8.7l8.1 10.9L34.2 8H40l-12.5 14 13.1 18H32l-8.9-12-10.5 12H7l13.5-15.2L8 8Zm6.2 4 18.3 24h2.2L16.4 12h-2.2Z" fill="currentColor" /></g>}
-  {provider === 'tiktok' && <g><path d="M29 7c1.3 5.1 4.4 8.1 10 8.8v6.2c-3.8.1-7.1-1.2-10-3.3v11.8c0 7.7-8.5 12.5-15 8.5-5.2-3.2-5.7-11-1-15 2.3-1.9 5.1-2.7 8-2.1v6.5c-1.6-.5-3.3.2-4 1.7-1.1 2.3.6 5 3.1 5 1.8 0 3-1.4 3-3.2V7h5.9Z" fill="currentColor" /></g>}
+<svg
+  class:list={['social-provider-icon', `social-provider-icon--${provider}`]}
+  viewBox="0 0 24 24"
+  style={icon && !preserveThemeColor ? `color:#${icon.hex}` : undefined}
+  aria-hidden="true"
+  focusable="false"
+>
+  {icon ? <path d={icon.path} fill="currentColor" /> : provider === 'trovo' ? <image href="https://astatic.trovocdn.net/cat/favicon.ico" width="24" height="24" preserveAspectRatio="xMidYMid meet" /> : null}
 </svg>

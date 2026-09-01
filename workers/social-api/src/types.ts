@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -61,6 +61,10 @@ export interface Env {
   MASTODON_ALLOWED_HOSTS?: string;
   LEMMY_ENABLED?: string;
   LEMMY_ALLOWED_HOSTS?: string;
+  REDDIT_ENABLED?: string;
+  REDDIT_CLIENT_ID?: string;
+  REDDIT_CLIENT_SECRET?: string;
+  REDDIT_USER_AGENT?: string;
   GITHUB_ENABLED?: string;
   GITHUB_API_TOKEN?: string;
   STACKEXCHANGE_ENABLED?: string;
