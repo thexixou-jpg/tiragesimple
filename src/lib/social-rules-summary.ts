@@ -8,6 +8,7 @@ export interface SummaryRules {
   requiredKeyword?: string;
   interaction?: string;
   excludedAccountCount: number;
+  clientSourced?: boolean;
 }
 
 export function socialRulesSummary(provider: string, rules: SummaryRules): string[] {
@@ -29,5 +30,6 @@ export function socialRulesSummary(provider: string, rules: SummaryRules): strin
     ]),
     rules.excludePublicationAuthor ? 'Compte organisateur exclu' : 'Compte organisateur autorisé à participer',
     `${rules.excludedAccountCount} exclusion(s) configurée(s) — identités non publiées`,
+    ...(rules.clientSourced ? ['Collecte réalisée par le navigateur via l’API officielle ; liste non revérifiée par le serveur'] : []),
   ];
 }

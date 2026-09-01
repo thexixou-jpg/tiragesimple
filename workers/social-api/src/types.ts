@@ -11,6 +11,7 @@ export interface ContestRules {
   includeReplies: boolean;
   excludePublicationAuthor: boolean;
   interaction?: 'likes' | 'reposts' | 'answers' | 'comments';
+  clientSourced?: boolean;
 }
 
 export interface ProviderCapabilities {

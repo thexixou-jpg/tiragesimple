@@ -39,6 +39,8 @@ async function stackJson<T>(url: URL): Promise<StackResponse<T>> {
   try { response = await fetch(url, { signal: AbortSignal.timeout(15000), redirect: 'manual', headers: { accept: 'application/json', 'user-agent': 'TirageSimple' } }); }
   catch { throw new ProviderRequestError('Stack Overflow ne répond pas. Une nouvelle tentative sera effectuée.', true); }
   if (!response.ok) {
+    const detail = (await response.text()).slice(0, 300);
+    console.warn('stackexchange_api_error', { status: response.status, detail });
     if (response.status === 429 || response.status >= 500) throw new ProviderRequestError('Le quota Stack Overflow est atteint ou le service est temporairement indisponible.', true);
     throw new ProviderRequestError(`Question Stack Overflow indisponible (${response.status}). Vérifiez qu’elle est publique.`, false);
   }

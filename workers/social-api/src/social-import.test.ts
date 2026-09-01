@@ -65,6 +65,21 @@ describe('official social connectors', () => {
     expect(await getImport(env, imported.id)).toMatchObject({ status: 'ready', progress_current: 102, participant_count: 2 });
     expect((await listEligibleParticipants(env, imported.id)).map(item => item.providerUserId)).toEqual(['2', '3']);
   });
+  it('accepts a bounded browser-side Stack Exchange API collection and discloses its origin', async () => {
+    const { env } = fixture();
+    const body = { url: 'https://stackoverflow.com/questions/42/example', publication: { title: 'Question', authorName: 'Owner', authorProviderId: '1', publishedAt: '2026-09-01T10:00:00Z' },
+      rules: { winnerCount: 1, alternateCount: 0, interaction: 'answers', excludePublicationAuthor: true }, comments: [
+        { providerCommentId: 'answers:1', providerUserId: '1', displayName: 'Owner', text: 'entry', isReply: false },
+        { providerCommentId: 'answers:2', providerUserId: '2', displayName: 'Alice', text: 'entry', isReply: false },
+        { providerCommentId: 'answers:3', providerUserId: '2', displayName: 'Alice', text: 'entry', isReply: false },
+        { providerCommentId: 'answers:4', providerUserId: '3', displayName: 'Bob', text: 'entry', isReply: false },
+      ] };
+    const result = await worker.fetch(new Request('https://example.test/v1/stackexchange/client-imports', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }), env);
+    expect(result.status).toBe(201);
+    const payload = await result.json() as { import: { id: string; status: string }; rulesSummary: string[] };
+    expect(payload.import.status).toBe('ready'); expect(payload.rulesSummary.join('\n')).toContain('Collecte réalisée par le navigateur');
+    expect(await getImport(env, payload.import.id)).toMatchObject({ status: 'ready', progress_current: 4, participant_count: 2 });
+  });
   it('accepts only canonical public GitHub issue and pull request URLs', () => {
     expect(parseGitHubUrl('https://github.com/owner/repo/issues/42')).toEqual({ owner: 'owner', repo: 'repo', kind: 'issues', number: '42' });
     expect(parseGitHubUrl('https://github.com/owner/repo/pull/9')).toMatchObject({ kind: 'pull', number: '9' });

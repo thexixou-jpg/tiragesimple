@@ -22,6 +22,7 @@ export function normalizeRules(input: Partial<ContestRules>): ContestRules {
     includeReplies: input.includeReplies ?? false,
     excludePublicationAuthor: input.excludePublicationAuthor ?? true,
     interaction: input.interaction === 'reposts' ? 'reposts' : input.interaction === 'answers' ? 'answers' : input.interaction === 'comments' ? 'comments' : 'likes',
+    clientSourced: false,
   };
 }
 

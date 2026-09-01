@@ -1,16 +1,16 @@
 import { normalizeRules } from './contest-rules';
 import { providerStatus } from './providers';
 import { getOwnedImport, ownerSession, purgeExpiredData, reserveProviderRequest, setImportStatus } from './storage';
-import type { ContestRules, Env, SocialImportJob } from './types';
+import type { ContestRules, Env, SocialComment, SocialImportJob } from './types';
 import { createYouTubeDraw } from './youtube-import';
-import { processSocialImport, queueSocialImport } from './social-import';
+import { createClientSocialImport, processSocialImport, queueSocialImport } from './social-import';
 import { getBlueskyPublication } from './bluesky';
 import { getYouTubePublication } from './youtube';
 import { socialRulesSummary } from '../../../src/lib/social-rules-summary';
 import { getMastodonPublication } from './mastodon';
 import { getLemmyPublication } from './lemmy';
-import { getGitHubPublication } from './github';
-import { getStackExchangePublication } from './stackexchange';
+import { getGitHubPublication, parseGitHubUrl } from './github';
+import { getStackExchangePublication, parseStackOverflowUrl } from './stackexchange';
 
 function allowOrigin(request: Request, env: Env): string {
   const configured = env.ALLOWED_ORIGIN ?? 'https://tiragesimple.fr';
@@ -105,6 +105,42 @@ export default {
       return result
         ? new Response(publicDrawPage(result), { headers: { 'content-type': 'text/html; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } })
         : new Response('Résultat introuvable ou expiré.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8', 'x-robots-tag': 'noindex, nofollow' } });
+    }
+    const clientImportMatch = pathname.match(/^\/v1\/(github|stackexchange)\/client-imports$/u);
+    if (request.method === 'POST' && clientImportMatch) {
+      try {
+        if (request.headers.get('Origin') && request.headers.get('Origin') !== origin) return json({ error: 'Origine non autorisée.' }, 403, origin);
+        const length = Number(request.headers.get('content-length') || 0);
+        if (length > 3_000_000) return json({ error: 'Collecte navigateur trop volumineuse.' }, 413, origin);
+        const input = await request.json() as { url?: string; rules?: Partial<ContestRules>; publication?: { title?: string; authorName?: string; authorProviderId?: string; publishedAt?: string }; comments?: SocialComment[] };
+        if (typeof input.url !== 'string' || input.url.length > 2048 || !input.publication || !Array.isArray(input.comments)) return json({ error: 'Collecte navigateur invalide.' }, 400, origin);
+        const provider = clientImportMatch[1] as 'github' | 'stackexchange';
+        if (providerStatus(env)[provider] !== 'enabled') throw new Error('Le connecteur n’est pas activé (not enabled).');
+        const title = typeof input.publication.title === 'string' ? input.publication.title.trim().slice(0, 1000) : '';
+        const authorName = typeof input.publication.authorName === 'string' ? input.publication.authorName.trim().slice(0, 300) : undefined;
+        const authorProviderId = typeof input.publication.authorProviderId === 'string' && /^[1-9]\d{0,19}$/u.test(input.publication.authorProviderId) ? input.publication.authorProviderId : undefined;
+        const publishedAt = typeof input.publication.publishedAt === 'string' && !Number.isNaN(Date.parse(input.publication.publishedAt)) ? new Date(input.publication.publishedAt).toISOString() : undefined;
+        if (!title) throw new Error('Métadonnées de publication incomplètes.');
+        const github = provider === 'github' ? parseGitHubUrl(input.url) : null;
+        const stackId = provider === 'stackexchange' ? parseStackOverflowUrl(input.url) : null;
+        if (provider === 'github' && !github || provider === 'stackexchange' && !stackId) throw new Error('URL de publication invalide.');
+        const publication = provider === 'github'
+          ? { provider, providerPublicationId: `${github!.owner}|${github!.repo}|${github!.number}`, canonicalUrl: `https://github.com/${github!.owner}/${github!.repo}/${github!.kind}/${github!.number}`, authorProviderId, authorName, title, publishedAt }
+          : { provider, providerPublicationId: stackId!, canonicalUrl: `https://stackoverflow.com/questions/${stackId}`, authorProviderId, authorName, title, publishedAt };
+        const rules = normalizeRules(input.rules ?? {});
+        if (provider === 'github') {
+          if (input.rules?.interaction !== undefined || rules.includeReplies) throw new Error('GitHub accepte uniquement les commentaires généraux de la conversation.');
+          rules.excludedUsers = rules.excludedUsers.map(value => value.toLowerCase());
+        } else {
+          if (!['answers', 'comments'].includes(input.rules?.interaction ?? '')) throw new Error('Choisissez les réponses ou les commentaires de la question.');
+          if (rules.excludedUsers.some(value => !/^[1-9]\d{0,11}$/u.test(value))) throw new Error('Utilisez uniquement les identifiants utilisateur numériques pour les exclusions.');
+        }
+        const session = await ownerSession(request, env);
+        const imported = await createClientSocialImport(env, session.id, publication, rules, input.comments);
+        return json({ import: imported, rulesSummary: socialRulesSummary(provider, { ...rules, clientSourced: true, excludedAccountCount: rules.excludedUsers.length }), requestedCount: rules.winnerCount + rules.alternateCount }, 201, origin, session.setCookie);
+      } catch (error) {
+        return json({ error: error instanceof Error ? error.message : 'Impossible de traiter la collecte navigateur.' }, backendUnavailable(error) ? 503 : 400, origin);
+      }
     }
     const providerMatch = pathname.match(/^\/v1\/(youtube|bluesky|mastodon|lemmy|github|stackexchange)\/(publication|imports)$/u);
     if (request.method === 'POST' && providerMatch) {

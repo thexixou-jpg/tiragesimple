@@ -3,7 +3,7 @@ import { getBlueskyParticipantsPage } from './bluesky';
 import { getProviderCapabilities } from './providers';
 import { ProviderRequestError } from './provider-http';
 import { checkImportAllowance, commitImportPage, createImport, getImport, getImportContext, getImportPage, importPageCount, reserveProviderRequest, savePublication, setImportStatus } from './storage';
-import type { ContestRules, Env, Participant, SocialImportJob, SocialPublication } from './types';
+import type { ContestRules, Env, Participant, SocialComment, SocialImportJob, SocialPublication } from './types';
 import { getYouTubeCommentPage, getYouTubeReplyPage } from './youtube';
 import { getMastodonParticipantsPage } from './mastodon';
 import { getLemmyParticipantsPage } from './lemmy';
@@ -30,6 +30,35 @@ export async function queueSocialImport(env: Env, sessionId: string, publication
   try { await env.SOCIAL_IMPORT_QUEUE.send({ provider: publication.provider, importId: imported.id }); }
   catch (error) { await setImportStatus(env, imported.id, 'failed', { errorMessage: 'Impossible de démarrer l’import. Réessayez.' }); throw error; }
   return { id: imported.id, status: imported.status };
+}
+
+export async function createClientSocialImport(env: Env, sessionId: string, publication: SocialPublication, rules: ContestRules, comments: SocialComment[]) {
+  if (!['github', 'stackexchange'].includes(publication.provider)) throw new Error('Import navigateur non autorisé pour cette plateforme.');
+  if (!Array.isArray(comments) || comments.length > 10000) throw new Error('La collecte navigateur dépasse la limite de 10 000 contributions.');
+  let characters = 0;
+  for (const comment of comments) {
+    if (!comment || typeof comment !== 'object' || typeof comment.providerCommentId !== 'string' || !comment.providerCommentId || comment.providerCommentId.length > 300
+      || typeof comment.providerUserId !== 'string' || !comment.providerUserId || comment.providerUserId.length > 300
+      || typeof comment.text !== 'string' || comment.text.length > 20000
+      || comment.username !== undefined && (typeof comment.username !== 'string' || comment.username.length > 300)
+      || comment.displayName !== undefined && (typeof comment.displayName !== 'string' || comment.displayName.length > 300)
+      || comment.createdAt !== undefined && (typeof comment.createdAt !== 'string' || comment.createdAt.length > 60)
+      || comment.isReply !== false) throw new Error('Une contribution importée est invalide.');
+    characters += comment.providerCommentId.length + comment.providerUserId.length + comment.text.length + (comment.username?.length ?? 0) + (comment.displayName?.length ?? 0);
+  }
+  if (characters > 2_000_000) throw new Error('La collecte navigateur est trop volumineuse.');
+  await checkImportAllowance(env, sessionId);
+  const saved = await savePublication(env, publication);
+  rules.clientSourced = true;
+  const imported = await createImport(env, sessionId, saved, rules, getProviderCapabilities(publication.provider), null);
+  let participants = createParticipants(comments, rules, getProviderCapabilities(publication.provider));
+  if (rules.excludePublicationAuthor) participants = participants.filter(participant => participant.providerUserId !== publication.authorProviderId);
+  const maximum = Math.max(100, Math.min(10000, Number.parseInt(env.MAX_PARTICIPANTS ?? '10000', 10) || 10000));
+  await commitImportPage(env, imported.id, await sha256(`client:${publication.provider}:${publication.providerPublicationId}`), participants,
+    rules.duplicateEntries && !rules.uniqueParticipants, comments.length, undefined, maximum);
+  const complete = await getImport(env, imported.id);
+  if (!complete) throw new Error('Impossible de finaliser l’import navigateur.');
+  return { id: complete.id, status: complete.status };
 }
 
 export async function processSocialImport(job: SocialImportJob, env: Env): Promise<void> {

@@ -1,4 +1,6 @@
 interface Publication { title?: string; authorName?: string; publishedAt?: string; thumbnailUrl?: string }
+interface ClientPublication extends Publication { authorProviderId?: string }
+interface ClientComment { providerCommentId: string; providerUserId: string; username?: string; displayName?: string; text: string; isReply: false; createdAt?: string }
 interface ImportState { status: string; progress_current: number; participant_count: number; error_message?: string }
 interface Winner { displayName?: string; username?: string; providerUserId?: string }
 interface Draw {
@@ -21,7 +23,8 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   const progress = root.querySelector<HTMLElement>('[data-progress]')!;
   const rulesSummary = root.querySelector<HTMLElement>('[data-rules-summary]')!;
   const result = root.querySelector<HTMLElement>('[data-result]')!;
-  let ready = false, busy = false, analyzedUrl = '', importId = '', revision = 0;
+  let ready = false, busy = false, analyzedUrl = '', importId = '', revision = 0, clientSourced = false;
+  let clientPublication: ClientPublication | undefined;
   let requestedCount = 1, appliedSummary: string[] = [];
   let previewTimer: number | undefined, pollTimer: number | undefined, receiptObjectUrl = '';
   const say = (message: string) => { feedback.textContent = message; };
@@ -36,6 +39,58 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     const payload = await response.json().catch(() => ({ error: 'Le service ne répond pas correctement.' }));
     if (!response.ok || payload.error) throw new Error(payload.error || 'Le service est indisponible.');
     return payload as T;
+  };
+  const decodeHtml = (value: string) => new DOMParser().parseFromString(value, 'text/html').body.textContent?.replace(/\s+/gu, ' ').trim() || '';
+  const publicApi = async <T>(url: string): Promise<T> => {
+    let response: Response;
+    try { response = await fetch(url, { credentials: 'omit', headers: { accept: 'application/json' }, signal: AbortSignal.timeout(30000) }); }
+    catch { throw new Error('L’API publique ne répond pas depuis votre navigateur.'); }
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.error_id || payload.message && response.status >= 400) throw new Error(payload.error_message || payload.message || `API publique indisponible (${response.status}).`);
+    if (payload.backoff) throw new Error(`La plateforme demande une pause de ${payload.backoff} secondes. Réessayez ensuite.`);
+    return payload as T;
+  };
+  const directPreview = async (url: string): Promise<ClientPublication> => {
+    const parsed = new URL(url);
+    if (provider === 'github') {
+      const match = parsed.pathname.match(/^\/([^/]+)\/([^/]+)\/(?:issues|pull)\/([1-9]\d{0,9})\/?$/u)!;
+      const data = await publicApi<{ title?: string; created_at?: string; user?: { id?: number; login?: string } }>(`https://api.github.com/repos/${encodeURIComponent(match[1])}/${encodeURIComponent(match[2])}/issues/${match[3]}`);
+      if (!data.title || !data.user?.id) throw new Error('Conversation GitHub publique introuvable.');
+      return { title: data.title, authorName: data.user.login, authorProviderId: String(data.user.id), publishedAt: data.created_at };
+    }
+    if (provider === 'stackexchange') {
+      const id = parsed.pathname.match(/^\/questions\/([1-9]\d{0,11})/u)![1];
+      const data = await publicApi<{ items?: Array<{ title?: string; creation_date?: number; owner?: { user_id?: number; display_name?: string } }> }>(`https://api.stackexchange.com/2.3/questions/${id}?site=stackoverflow&filter=withbody`);
+      const question = data.items?.[0];
+      if (!question?.title) throw new Error('Question Stack Overflow publique introuvable.');
+      return { title: decodeHtml(question.title), authorName: decodeHtml(question.owner?.display_name || ''), authorProviderId: question.owner?.user_id ? String(question.owner.user_id) : undefined, publishedAt: question.creation_date ? new Date(question.creation_date * 1000).toISOString() : undefined };
+    }
+    throw new Error('Collecte navigateur non disponible.');
+  };
+  const directComments = async (url: string, rules: ReturnType<typeof readRules>): Promise<ClientComment[]> => {
+    const parsed = new URL(url); const comments: ClientComment[] = [];
+    if (provider === 'github') {
+      const match = parsed.pathname.match(/^\/([^/]+)\/([^/]+)\/(?:issues|pull)\/([1-9]\d{0,9})\/?$/u)!;
+      for (let page = 1; page <= 100; page++) {
+        say(`Collecte officielle GitHub dans votre navigateur · page ${page}…`);
+        const items = await publicApi<Array<{ id?: number; node_id?: string; body?: string; created_at?: string; user?: { id?: number; login?: string } }>>(`https://api.github.com/repos/${encodeURIComponent(match[1])}/${encodeURIComponent(match[2])}/issues/${match[3]}/comments?per_page=100&page=${page}&sort=created&direction=asc`);
+        for (const item of items) if (item.id && item.user?.id && item.user.login) comments.push({ providerCommentId: item.node_id || String(item.id), providerUserId: String(item.user.id), username: item.user.login.toLowerCase(), displayName: item.user.login, text: item.body || '', isReply: false, createdAt: item.created_at });
+        if (items.length < 100) return comments;
+      }
+    } else if (provider === 'stackexchange') {
+      const id = parsed.pathname.match(/^\/questions\/([1-9]\d{0,11})/u)![1];
+      const mode = rules.interaction === 'comments' ? 'comments' : 'answers';
+      for (let page = 1; page <= 100; page++) {
+        say(`Collecte officielle Stack Overflow dans votre navigateur · page ${page}…`);
+        const data = await publicApi<{ items?: Array<{ answer_id?: number; comment_id?: number; body?: string; creation_date?: number; owner?: { user_id?: number; display_name?: string } }>; has_more?: boolean }>(`https://api.stackexchange.com/2.3/questions/${id}/${mode}?site=stackoverflow&filter=withbody&pagesize=100&page=${page}&order=asc&sort=creation`);
+        for (const item of data.items || []) {
+          const contributionId = mode === 'comments' ? item.comment_id : item.answer_id;
+          if (contributionId && item.owner?.user_id) comments.push({ providerCommentId: `${mode}:${contributionId}`, providerUserId: String(item.owner.user_id), displayName: decodeHtml(item.owner.display_name || `Utilisateur ${item.owner.user_id}`), text: decodeHtml(item.body || ''), isReply: false, createdAt: item.creation_date ? new Date(item.creation_date * 1000).toISOString() : undefined });
+        }
+        if (!data.has_more) return comments;
+      }
+    }
+    throw new Error('La collecte dépasse 10 000 contributions et a été interrompue sans tirage partiel.');
   };
   const lock = (value: boolean) => {
     busy = value;
@@ -77,10 +132,16 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     if (!eligibleUrl(url)) { say(`Utilisez un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}.`); return; }
     resetDraw();
     const current = ++revision;
-    analyzedUrl = ''; importButton.disabled = true; publication.hidden = true;
+    analyzedUrl = ''; clientSourced = false; clientPublication = undefined; importButton.disabled = true; publication.hidden = true;
     preview.dataset.state = 'loading'; say('Chargement de l’aperçu…');
     try {
-      const { publication: data } = await request<{ publication: Publication }>(`/v1/${provider}/publication`, { url });
+      let data: ClientPublication;
+      try { data = (await request<{ publication: ClientPublication }>(`/v1/${provider}/publication`, { url })).publication; }
+      catch (backendError) {
+        if (provider !== 'github' && provider !== 'stackexchange') throw backendError;
+        say('Quota serveur partagé indisponible : collecte directe via l’API officielle…');
+        data = await directPreview(url); clientSourced = true; clientPublication = data;
+      }
       if (current !== revision || url !== input.value.trim()) return;
       root.querySelector<HTMLElement>('[data-publication-title]')!.textContent = data.title || 'Publication';
       const date = data.publishedAt && !Number.isNaN(Date.parse(data.publishedAt)) ? new Intl.DateTimeFormat('fr-FR').format(new Date(data.publishedAt)) : '';
@@ -132,7 +193,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   };
   form.addEventListener('submit', event => { event.preventDefault(); window.clearTimeout(previewTimer); void analyze(); });
   input.addEventListener('input', () => {
-    revision++; analyzedUrl = ''; publication.hidden = true; preview.dataset.state = 'idle'; importButton.disabled = true; resetDraw();
+    revision++; analyzedUrl = ''; clientSourced = false; clientPublication = undefined; publication.hidden = true; preview.dataset.state = 'idle'; importButton.disabled = true; resetDraw();
     window.clearTimeout(previewTimer);
     if (eligibleUrl(input.value.trim())) previewTimer = window.setTimeout(() => { void analyze(); }, 700);
   });
@@ -144,7 +205,9 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     if (provider === 'stackexchange' && rules.excludedUsers.some(id => !/^[1-9]\d{0,11}$/u.test(id))) { say('Pour les exclusions Stack Overflow, indiquez uniquement les identifiants utilisateur numériques.'); return; }
     resetDraw(); const current = ++revision; lock(true); say('Import en cours. Les grands volumes peuvent prendre plusieurs minutes.');
     try {
-      const payload = await request<{ import: { id: string }; rulesSummary: string[]; requestedCount: number }>(`/v1/${provider}/imports`, { url: analyzedUrl, rules });
+      const comments = clientSourced ? await directComments(analyzedUrl, rules) : undefined;
+      const payload = await request<{ import: { id: string }; rulesSummary: string[]; requestedCount: number }>(clientSourced ? `/v1/${provider}/client-imports` : `/v1/${provider}/imports`,
+        clientSourced ? { url: analyzedUrl, rules, publication: clientPublication, comments } : { url: analyzedUrl, rules });
       appliedSummary = payload.rulesSummary; requestedCount = payload.requestedCount;
       rulesSummary.replaceChildren(...appliedSummary.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
       importId = payload.import.id; drawPanel.hidden = false; progress.textContent = 'Import en attente…';
