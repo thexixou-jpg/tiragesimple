@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import VimeoContestTool from '../components/VimeoContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import {getSocialProvider} from '../data/social-contests';
+const provider=getSocialProvider('vimeo');
+const schema={'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Vimeo',url:'https://tiragesimple.fr/tirage-au-sort-vimeo/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}};
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-vimeo/">
+  <header class="tool-hero vimeo-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="vimeo" /><p class="social-status social-status-limited">Commentaires publics · application requise</p></div><h1>Tirage au sort Vimeo</h1><p>{provider.intro}</p></div></header>
+  <main class="container section"><VimeoContestTool /><article class="content-section legal-copy">
+    <h2>Créer un tirage à partir d’une vidéo Vimeo</h2><p>Collez le lien d’une vidéo publique. L’outil charge son titre, son auteur et sa miniature depuis l’API Vimeo, puis parcourt les commentaires par lots. Si vous activez les réponses, chaque fil annoncé par Vimeo est également importé avant que le tirage soit autorisé.</p>
+    <h2>Membres Vimeo et commentaires invités</h2><p>Un membre est identifié par son URI utilisateur Vimeo. Lorsqu’un commentaire invité possède une URI d’invité distincte, celle-ci sert aussi d’identité stable. Les contributions sans identifiant fiable sont ignorées : deux noms identiques ne doivent pas être arbitrairement considérés comme deux comptes différents ou comme un seul compte.</p>
+    <h2>Règles disponibles</h2><p>Chaque identité peut obtenir une seule chance ou plusieurs chances selon son nombre de commentaires éligibles. Vous pouvez inclure les réponses, imposer un texte, exclure l’auteur de la vidéo et ajouter des exclusions. Une même identité ne peut toutefois pas gagner deux places dans le même résultat.</p>
+    <h2>Données non présentées comme vérifiées</h2><p>Les likes, vues, followers, abonnements et ajouts à une collection ne deviennent pas des participants. Le connecteur n’accède qu’aux données publiques autorisées par son jeton d’application. Il ne demande pas le mot de passe Vimeo de l’organisateur ni un jeton collé dans la page.</p>
+    <h2>Limites et confidentialité</h2><p>Les vidéos privées, protégées ou dont les commentaires ne sont pas accessibles sont refusées. Le texte sert uniquement à appliquer les filtres pendant l’import ; la liste finale conserve l’identité normalisée et le nombre de chances nécessaires. En cas d’échec de pagination, aucun tirage partiel n’est proposé.</p>
+    <h2>Questions fréquentes</h2><h3>Une connexion Vimeo est-elle demandée aux participants ?</h3><p>Non. L’application serveur consulte uniquement les données publiques accessibles avec son propre jeton.</p><h3>Puis-je tirer parmi les personnes ayant aimé la vidéo ?</h3><p>Pas dans ce connecteur : seuls les commentaires et réponses sont utilisés comme conditions vérifiables. Pour d’autres vidéos, consultez aussi le <a href="/tirage-au-sort-youtube/">tirage YouTube</a> et le <a href="/tirage-au-sort-youtube-live/">tirage YouTube Live</a>.</p>
+  </article></main>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+<style>.vimeo-hero{background:radial-gradient(circle at 82% 40%,#1ab7ea25,transparent 30%),var(--color-bg)}</style>

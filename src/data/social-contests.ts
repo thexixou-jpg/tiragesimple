@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -85,6 +85,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     intro: 'Importez les commentaires d’une vidéo YouTube pour tirer des gagnants selon des règles transparentes.',
     connection: 'Une clé API YouTube côté serveur est nécessaire. La connexion Google ne sera demandée que pour les fonctions nécessitant l’autorisation du propriétaire.',
     limitations: ['Les commentaires désactivés ne peuvent pas être importés.', 'Les réponses sont une option distincte.', 'Les abonnements à une chaîne ne sont pas vérifiables automatiquement.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
+  {
+    id: 'vimeo', name: 'Vimeo', status: 'limited', statusLabel: 'Connecteur prêt · application requise',
+    title: 'Tirage au sort Vimeo : commentaires d’une vidéo',
+    description: 'Tirez des gagnants parmi les commentaires et réponses d’une vidéo Vimeo publique, avec comptes uniques, filtre textuel et exclusions.',
+    intro: 'Transformez les commentaires publics d’une vidéo Vimeo en une liste transparente, sans demander aux participants de connecter leur compte.',
+    connection: 'API Vimeo officielle avec jeton d’application limité aux données publiques.',
+    limitations: ['Une application Vimeo doit être configurée côté serveur.', 'Vidéos publiques et commentaires accessibles uniquement.', 'Likes, followers, vues et collections ne sont pas utilisés comme listes de participants.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {

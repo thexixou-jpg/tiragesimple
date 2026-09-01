@@ -3,6 +3,7 @@ import type { Env, ProviderCapabilities, ProviderId } from './types';
 export const providerCapabilities: Record<ProviderId, ProviderCapabilities> = {
   youtube: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   youtube_live: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  vimeo: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   twitch: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   kick: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   trovo: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
@@ -27,6 +28,7 @@ export function providerStatus(env: Env): Record<ProviderId, string> {
   return {
     youtube: env.YOUTUBE_ENABLED === 'true' && Boolean(env.YOUTUBE_API_KEY) ? 'enabled' : 'beta',
     youtube_live: env.YOUTUBE_ENABLED === 'true' && Boolean(env.YOUTUBE_API_KEY) && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'beta',
+    vimeo: env.VIMEO_ENABLED === 'true' && Boolean(env.VIMEO_CLIENT_ID && env.VIMEO_CLIENT_SECRET && env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'setup_required',
     twitch: env.TWITCH_ENABLED === 'true' && Boolean(env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET && env.TWITCH_REDIRECT_URI && env.DATA_ENCRYPTION_KEY && env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'setup_required',
     kick: env.KICK_ENABLED === 'true' && Boolean(env.KICK_CLIENT_ID && env.KICK_CLIENT_SECRET && env.KICK_REDIRECT_URI && env.DATA_ENCRYPTION_KEY && env.DB) ? 'enabled' : 'setup_required',
     trovo: env.TROVO_ENABLED === 'true' && Boolean(env.TROVO_CLIENT_ID && env.DB) ? 'enabled' : 'setup_required',

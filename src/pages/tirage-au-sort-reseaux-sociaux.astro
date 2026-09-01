@@ -28,7 +28,7 @@ const structuredData = {
   </header>
   <div class="container tool-page">
     <section class="social-provider-grid" aria-label="Plateformes disponibles">
-      {socialProviders.map((provider) => provider.status === 'available' || provider.id === 'twitch' || provider.id === 'kick' || provider.id === 'trovo' || provider.id === 'discord' || provider.id === 'reddit' ? (
+      {socialProviders.map((provider) => provider.status === 'available' || provider.id === 'vimeo' || provider.id === 'twitch' || provider.id === 'kick' || provider.id === 'trovo' || provider.id === 'discord' || provider.id === 'reddit' ? (
         <a class="social-provider-card" href={`/tirage-au-sort-${providerSlug(provider.id)}`}>
           <span class="social-provider-card__top"><SocialProviderIcon provider={provider.id} /><span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span></span>
           <h2>{provider.name}</h2>
@@ -52,6 +52,7 @@ const structuredData = {
       <p><a href="/tirage-au-sort-bluesky/">Bluesky</a> permet de tirer parmi les likes ou les reposts d’une publication publique, sans connexion de compte. Chaque DID dispose d’une seule chance. Les réponses, citations et abonnements Bluesky ne sont pas contrôlés par cet outil.</p>
       <p><a href="/tirage-au-sort-mastodon/">Mastodon</a> permet désormais un tirage parmi les favoris ou les boosts d’un post public, sans OAuth, sur treize instances contrôlées. L’outil suit la pagination officielle et identifie les comptes par leur identité ActivityPub.</p>
       <p><a href="/tirage-au-sort-lemmy/">Lemmy</a> permet un tirage parmi les commentaires publics d’un post sur quatre instances contrôlées. Les réponses, doublons et filtres textuels sont configurables ; les votes ne sont pas présentés comme accessibles.</p>
+      <p><a href="/tirage-au-sort-vimeo/">Vimeo</a> est préparé pour les commentaires et réponses des vidéos publiques. Un jeton d’application limité aux données publiques suffit ; le connecteur reste en activation requise jusqu’à la configuration des identifiants Vimeo côté serveur.</p>
       <p><a href="/tirage-au-sort-reddit/">Reddit</a> dispose maintenant d’un connecteur OAuth serveur pour les commentaires et réponses d’une publication publique. Il développe les fils supplémentaires avant d’autoriser le tirage et reste en activation requise tant que l’application Reddit n’est pas approuvée et configurée.</p>
       <p><a href="/tirage-au-sort-github/">GitHub</a> importe les commentaires généraux d’une issue ou pull request publique. Les revues de code, réactions et dépôts privés sont explicitement exclus.</p>
       <p><a href="/tirage-au-sort-stack-overflow/">Stack Overflow</a> permet de choisir entre les auteurs de réponses et les auteurs de commentaires d’une question publique. La déduplication utilise l’identifiant numérique du compte ; les votes et la réputation ne modifient jamais les chances.</p>
