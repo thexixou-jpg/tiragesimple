@@ -11,7 +11,7 @@ Le site public reste statique sur `tiragesimple.fr`. Les appels sociaux et les d
 5. Créer les secrets avec `wrangler secret put`; ne jamais ajouter les valeurs dans Git.
 6. Mettre `YOUTUBE_ENABLED=true` seulement après les tests de quota et de suppression.
 
-## Connecteurs YouTube, Bluesky, Mastodon, Lemmy et GitHub
+## Connecteurs YouTube, Bluesky, Mastodon, Lemmy, GitHub et Stack Overflow
 
 - `POST /v1/youtube/imports` : valide une URL, crée un import temporaire et place les pages de commentaires dans la Queue ;
 - `GET /v1/imports/:id` : expose la progression uniquement au navigateur qui a créé l’import (cookie signé, `HttpOnly`, `Secure`) ;
@@ -29,9 +29,11 @@ Lemmy utilise `GET /api/v3/post` puis `GET /api/v3/comment/list` sur une liste f
 
 GitHub utilise l’API REST officielle publique pour les issues et pull requests de dépôts publics. Le connecteur importe uniquement les commentaires de conversation renvoyés par `issues/:number/comments`, par pages de 100. Les commentaires de revue de code, réactions, commits et statuts de contributeur ne sont ni récupérés ni présentés comme vérifiés. Les personnes sont dédupliquées avec leur identifiant numérique GitHub stable, jamais avec leur seul login. Sans `GITHUB_API_TOKEN`, l’API GitHub limite les requêtes non authentifiées à 60 par heure et par adresse IP ; TirageSimple applique donc en plus un budget interne prudent de 50 requêtes par jour. Un jeton serveur optionnel peut augmenter la capacité, mais ne doit jamais être exposé au navigateur.
 
+Stack Overflow utilise l’API Stack Exchange 2.3 sur le domaine fixe `api.stackexchange.com`. L’organisateur choisit les réponses ou les commentaires directs de la question. Les contributions sont paginées par lots de 100 et dédupliquées avec l’identifiant utilisateur numérique. Les comptes supprimés sans identifiant stable sont ignorés. Sans `STACKEXCHANGE_API_KEY`, TirageSimple limite le budget partagé à 250 requêtes quotidiennes et respecte les demandes `backoff` de la plateforme en interrompant temporairement le traitement.
+
 Appliquer aussi `migrations/0002_import_pages.sql` avant le déploiement. Les lots enregistrent un checkpoint et les participations dans une transaction : une livraison répétée ne doit pas doubler les chances. Les écritures JSON groupées respectent le plafond de requêtes D1 par invocation sur le plan gratuit. Les erreurs temporaires sont retentées avec backoff ; un import incomplet ne devient jamais prêt.
 
-Limites : 10 imports/heure/session, 10 000 comptes par défaut, 100 000 interactions et 1 200 pages API/import ; budgets journaliers partagés de 6 000 requêtes YouTube, 10 000 pour chacun des connecteurs publics fédérés et 50 pour GitHub sans jeton serveur. L’aperçu Bluesky réserve deux unités pour résolution + publication. Ces budgets sont protecteurs, pas une garantie de disponibilité permanente des services tiers ou du forfait Cloudflare gratuit.
+Limites : 10 imports/heure/session, 10 000 comptes par défaut, 100 000 interactions et 1 200 pages API/import ; budgets journaliers partagés de 6 000 requêtes YouTube, 10 000 pour chacun des connecteurs publics fédérés, 50 pour GitHub sans jeton serveur et 250 pour Stack Exchange sans clé d’application. L’aperçu Bluesky réserve deux unités pour résolution + publication. Ces budgets sont protecteurs, pas une garantie de disponibilité permanente des services tiers ou du forfait Cloudflare gratuit.
 
 Chaque connecteur expose `POST /v1/:provider/publication` et `POST /v1/:provider/imports`. Progression et tirage réutilisent les routes communes. Le frontend lit `/v1/providers` avant activation. Le Worker est aussi accessible via `tiragesimple.fr/_tiragesimple/*`.
 

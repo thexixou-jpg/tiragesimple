@@ -1,6 +1,6 @@
 # Activation des tirages sociaux — guide opérateur
 
-Ce guide configure YouTube, Bluesky, Mastodon, Lemmy et GitHub. Instagram, Facebook, X et TikTok restent volontairement désactivés ou limités tant que leurs accès officiels ne sont pas configurés. Bluesky, Mastodon, Lemmy et GitHub public fonctionnent sans secret de plateforme supplémentaire.
+Ce guide configure YouTube, Bluesky, Mastodon, Lemmy, GitHub et Stack Overflow. Instagram, Facebook, X et TikTok restent volontairement désactivés ou limités tant que leurs accès officiels ne sont pas configurés. Bluesky, Mastodon, Lemmy, GitHub public et Stack Overflow fonctionnent sans secret de plateforme supplémentaire.
 
 ## 1. Google Cloud : clé YouTube
 
@@ -47,9 +47,11 @@ npx wrangler secret put DATA_ENCRYPTION_KEY --config workers/social-api/wrangler
 npx wrangler secret put DRAW_SIGNING_SECRET --config workers/social-api/wrangler.production.toml
 ```
 
-Les variables non sensibles (`YOUTUBE_ENABLED`, `BLUESKY_ENABLED`, `MASTODON_ENABLED`, `MASTODON_ALLOWED_HOSTS`, `LEMMY_ENABLED`, `LEMMY_ALLOWED_HOSTS`, `GITHUB_ENABLED`, origine autorisée, rétention et limite) sont déjà présentes dans le modèle de configuration. N’ajoute une instance fédérée à une liste qu’après avoir contrôlé son domaine et sa compatibilité API.
+Les variables non sensibles (`YOUTUBE_ENABLED`, `BLUESKY_ENABLED`, `MASTODON_ENABLED`, `MASTODON_ALLOWED_HOSTS`, `LEMMY_ENABLED`, `LEMMY_ALLOWED_HOSTS`, `GITHUB_ENABLED`, `STACKEXCHANGE_ENABLED`, origine autorisée, rétention et limite) sont déjà présentes dans le modèle de configuration. N’ajoute une instance fédérée à une liste qu’après avoir contrôlé son domaine et sa compatibilité API.
 
 GitHub peut rester sans secret pour le lancement : seuls les dépôts publics sont alors accessibles et le budget interne est limité à 50 requêtes par jour. Si le trafic le justifie, crée un jeton GitHub à permissions minimales, ajoute-le uniquement comme secret Worker `GITHUB_API_TOKEN`, puis redéploie. Ne place jamais ce jeton dans Pages ou dans une variable `PUBLIC_*`.
+
+Stack Overflow peut également fonctionner sans secret avec le quota anonyme Stack Exchange. Une clé d’application facultative peut être ajoutée comme secret Worker `STACKEXCHANGE_API_KEY` si le trafic augmente. Elle ne doit jamais être placée dans le frontend.
 
 ## 4. Déploiement et routes
 
@@ -81,6 +83,7 @@ Redéploie Pages pour injecter cette variable dans l’interface statique.
 3. Vérifie l’import, le filtre, le tirage et la suppression après rétention.
 4. Partage un résultat de test : `https://tiragesimple.fr/tirage/TS-...` doit répondre mais ne doit pas être indexable (`noindex`).
 5. Sur `/tirage-au-sort-github/`, teste une issue publique comportant des commentaires. Vérifie que seules les réponses de conversation sont comptées, sans réactions ni commentaires de revue de code.
+6. Sur `/tirage-au-sort-stack-overflow/`, teste séparément les réponses puis les commentaires d’une question publique. Vérifie que les utilisateurs supprimés et l’auteur exclu ne participent pas.
 
 ## Rappels de sécurité et de conformité
 

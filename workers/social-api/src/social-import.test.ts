@@ -11,6 +11,7 @@ import { createYouTubeDraw } from './youtube-import';
 import { getMastodonPublication, parseMastodonUrl } from './mastodon';
 import { getLemmyPublication, parseLemmyUrl } from './lemmy';
 import { getGitHubPublication, parseGitHubUrl } from './github';
+import { getStackExchangePublication, parseStackOverflowUrl } from './stackexchange';
 import type { Env, SocialImportJob, SocialPublication } from './types';
 import worker from './index';
 
@@ -26,7 +27,7 @@ function fixture(maximum = '10000') {
     };
   };
   const jobs: SocialImportJob[] = [];
-  const env = { BLUESKY_ENABLED: 'true', MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr', LEMMY_ENABLED: 'true', LEMMY_ALLOWED_HOSTS: 'lemmy.world,jlai.lu', GITHUB_ENABLED: 'true', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
+  const env = { BLUESKY_ENABLED: 'true', MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr', LEMMY_ENABLED: 'true', LEMMY_ALLOWED_HOSTS: 'lemmy.world,jlai.lu', GITHUB_ENABLED: 'true', STACKEXCHANGE_ENABLED: 'true', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
     PUBLIC_SITE_URL: 'https://example.test',
     DB: { prepare, batch: async (statements: ReturnType<typeof prepare>[]) => {
       sqlite.exec('BEGIN'); try { const result = statements.map(s => s.execute()); sqlite.exec('COMMIT'); return result; }
@@ -41,6 +42,29 @@ const response = (value: unknown) => new Response(JSON.stringify(value), { heade
 afterEach(() => vi.unstubAllGlobals());
 
 describe('official social connectors', () => {
+  it('accepts only canonical Stack Overflow question URLs', () => {
+    expect(parseStackOverflowUrl('https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster')).toBe('11227809');
+    expect(parseStackOverflowUrl('https://www.stackoverflow.com/questions/42')).toBe('42');
+    for (const url of ['https://evil.test/questions/1', 'http://stackoverflow.com/questions/1', 'https://user:pass@stackoverflow.com/questions/1', 'https://stackoverflow.com.evil.test/questions/1', 'https://stackoverflow.com/questions/../api']) expect(parseStackOverflowUrl(url)).toBeNull();
+  });
+  it('loads Stack Overflow question metadata only from the official API host', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: URL, init?: RequestInit) => {
+      expect(url.origin).toBe('https://api.stackexchange.com'); expect(url.pathname).toBe('/2.3/questions/42'); expect(url.searchParams.get('site')).toBe('stackoverflow'); expect(init?.redirect).toBe('manual');
+      return response({ items: [{ question_id: 42, title: 'A &amp; B', link: 'https://stackoverflow.com/questions/42/example', creation_date: 1788000000, owner: { user_id: 1, display_name: 'Owner' } }], has_more: false, quota_remaining: 299 });
+    }));
+    expect(await getStackExchangePublication('https://stackoverflow.com/questions/42/example', { STACKEXCHANGE_ENABLED: 'true' })).toMatchObject({ provider: 'stackexchange', providerPublicationId: '42', authorProviderId: '1', title: 'A & B' });
+  });
+  it('paginates Stack Overflow answers and deduplicates stable numeric user IDs', async () => {
+    const { env, jobs } = fixture();
+    const answer = (id: number, userId = 2, name = 'Alice') => ({ answer_id: id, body: '<p>concours</p>', creation_date: 1788000000, owner: { user_id: userId, display_name: name } });
+    vi.stubGlobal('fetch', vi.fn(async (url: URL) => response(url.searchParams.get('page') === '2'
+      ? { items: [answer(101, 1, 'Owner'), answer(102, 3, 'Bob')], has_more: false, quota_remaining: 298 }
+      : { items: Array.from({ length: 100 }, (_, index) => answer(index + 1)), has_more: true, quota_remaining: 299 })));
+    const imported = await queueSocialImport(env, 'session', { provider: 'stackexchange', providerPublicationId: '42', canonicalUrl: 'https://stackoverflow.com/questions/42/example', authorProviderId: '1' }, normalizeRules({ interaction: 'answers', requiredKeyword: 'concours' }));
+    while (jobs.length) await processSocialImport(jobs.shift()!, env);
+    expect(await getImport(env, imported.id)).toMatchObject({ status: 'ready', progress_current: 102, participant_count: 2 });
+    expect((await listEligibleParticipants(env, imported.id)).map(item => item.providerUserId)).toEqual(['2', '3']);
+  });
   it('accepts only canonical public GitHub issue and pull request URLs', () => {
     expect(parseGitHubUrl('https://github.com/owner/repo/issues/42')).toEqual({ owner: 'owner', repo: 'repo', kind: 'issues', number: '42' });
     expect(parseGitHubUrl('https://github.com/owner/repo/pull/9')).toMatchObject({ kind: 'pull', number: '9' });

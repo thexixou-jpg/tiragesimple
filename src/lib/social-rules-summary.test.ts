@@ -33,4 +33,11 @@ describe('social contest summaries', () => {
     expect(text).toContain('Une seule chance par identifiant utilisateur GitHub');
     expect(text).toContain('Réactions, commits et statut de contributeur non vérifiés');
   });
+  it('distinguishes Stack Overflow answers from question comments', () => {
+    const answers = socialRulesSummary('stackexchange', { ...base, interaction: 'answers' }).join('\n');
+    const comments = socialRulesSummary('stackexchange', { ...base, interaction: 'comments' }).join('\n');
+    expect(answers).toContain('Réponses à la question incluses');
+    expect(comments).toContain('Commentaires de la question inclus');
+    expect(comments).toContain('Votes, réputation et statut de réponse acceptée non utilisés');
+  });
 });

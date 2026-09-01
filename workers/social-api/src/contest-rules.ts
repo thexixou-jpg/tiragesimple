@@ -21,7 +21,7 @@ export function normalizeRules(input: Partial<ContestRules>): ContestRules {
     minimumMentions: input.minimumMentions && input.minimumMentions > 0 ? Math.min(20, Math.trunc(input.minimumMentions)) : undefined,
     includeReplies: input.includeReplies ?? false,
     excludePublicationAuthor: input.excludePublicationAuthor ?? true,
-    interaction: input.interaction === 'reposts' ? 'reposts' : 'likes',
+    interaction: input.interaction === 'reposts' ? 'reposts' : input.interaction === 'answers' ? 'answers' : input.interaction === 'comments' ? 'comments' : 'likes',
   };
 }
 

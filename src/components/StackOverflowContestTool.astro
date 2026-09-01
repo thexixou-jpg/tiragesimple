@@ -1,0 +1,41 @@
+---
+const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
+---
+<section class="tool-shell stack-tool" data-social-contest data-provider="stackexchange" data-api-url={apiUrl} aria-labelledby="stack-import-title">
+  <div class="tool-panel-intro"><div><p class="eyebrow">API Stack Exchange officielle · Questions publiques</p><h2 id="stack-import-title">Une question, ses contributeurs, vos gagnants.</h2><p>Choisissez les auteurs de réponses ou de commentaires. Aucun compte Stack Overflow n’est connecté.</p></div></div>
+  <form class="social-import-form" data-contest-form>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Question Stack Overflow</strong><small>L’aperçu confirme le titre et l’auteur avant l’import.</small></div></div>
+      <label class="field"><span>URL de la question</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://stackoverflow.com/questions/…" required data-video-url /><small>Collez l’adresse complète d’une question publique sur stackoverflow.com.</small></label>
+      <aside class="youtube-preview stack-preview" data-preview data-state="idle" aria-live="polite"><div class="youtube-preview__empty"><span aria-hidden="true">SO</span><div><strong>Aperçu de la question</strong><small>Le titre, l’auteur et la date apparaîtront ici.</small></div></div><div class="stack-post" data-publication hidden><p class="eyebrow">Question sélectionnée</p><p data-publication-title></p><small data-publication-meta></small></div></aside>
+    </div>
+    <div class="youtube-form-section">
+      <div class="youtube-section-heading"><span>02</span><div><strong>Participants et règles</strong><small>Les deux listes ne sont jamais mélangées silencieusement.</small></div></div>
+      <label class="field"><span>Type de participation</span><select name="interaction" required><option value="answers">Auteurs des réponses</option><option value="comments">Auteurs des commentaires de la question</option></select><small>Les commentaires déposés sous les réponses ne sont pas inclus.</small></label>
+      <div class="form-row"><label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label><label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label></div>
+      <label class="field"><span>Mot ou expression obligatoire <small>facultatif</small></span><input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. participation" /><small>Le filtre porte sur le texte rendu de la réponse ou du commentaire.</small></label>
+      <label class="field"><span>Utilisateurs à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="22656, 123456" /><small>Identifiants utilisateur numériques, séparés par une virgule.</small></label>
+      <div class="social-rule-grid stack-rule-grid">
+        <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque contribution compte</strong><small>Sinon, une seule chance par identifiant utilisateur.</small></span></label>
+        <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>La personne ayant posé la question ne participe pas.</small></span></label>
+      </div>
+    </div>
+    <div class="actions"><button class="button button-secondary" type="submit">Analyser la question</button><button class="button button-primary" type="button" data-import disabled>Importer les contributions</button></div>
+  </form>
+  <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
+  <div class="social-draw-panel" data-draw hidden><p data-progress></p><section class="social-rules-summary" aria-label="Règles appliquées"><h3>Votre liste, vos règles</h3><p>Règles figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section><label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>La question, les gagnants, les règles et les empreintes sont partagés, pas la liste complète.</small></span></label><button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button><div class="result-card" data-result hidden></div></div>
+</section>
+<script>import '../scripts/social-contest';</script>
+<style>
+  .stack-tool { --color-primary:#f48024; }
+  .stack-tool .youtube-form-section { border-color:color-mix(in srgb,#f48024 28%,var(--color-border)); }
+  .stack-tool .youtube-form-section--source,.stack-preview { background:linear-gradient(120deg,color-mix(in srgb,#f48024 8%,var(--color-surface)),var(--color-surface)); }
+  .stack-tool .youtube-section-heading > span { color:#fff; background:#c65d12; }
+  .stack-preview { margin-top:1rem; border-color:color-mix(in srgb,#f48024 36%,var(--color-border)); color:var(--color-text); }
+  .stack-preview::after { background:none; }
+  .stack-preview .youtube-preview__empty small,.stack-post small { color:var(--color-text-muted); }
+  .stack-post { padding:1.25rem; overflow-wrap:anywhere; }
+  .stack-post > p[data-publication-title] { font-size:1.08rem; line-height:1.55; }
+  .stack-rule-grid { margin-top:1rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  @media (max-width:650px) { .stack-rule-grid { grid-template-columns:1fr; } }
+</style>

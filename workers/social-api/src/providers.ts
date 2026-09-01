@@ -6,6 +6,7 @@ export const providerCapabilities: Record<ProviderId, ProviderCapabilities> = {
   mastodon: { comments: false, likes: true, reposts: true, mentions: false, followers: false, replies: false },
   lemmy: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   github: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  stackexchange: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   instagram: { comments: true, likes: false, reposts: false, mentions: true, followers: false, replies: true },
   facebook: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   x: { comments: false, likes: false, reposts: false, mentions: false, followers: false, replies: false },
@@ -23,6 +24,7 @@ export function providerStatus(env: Env): Record<ProviderId, string> {
     mastodon: env.MASTODON_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     lemmy: env.LEMMY_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     github: env.GITHUB_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
+    stackexchange: env.STACKEXCHANGE_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     instagram: 'limited', facebook: 'limited', x: 'disabled', tiktok: 'unsupported',
   };
 }

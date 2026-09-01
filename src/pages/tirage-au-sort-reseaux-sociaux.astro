@@ -3,17 +3,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SocialProviderIcon from '../components/SocialProviderIcon.astro';
 import { socialProviders } from '../data/social-contests';
 const availableProviders = socialProviders.filter((provider) => provider.status === 'available');
+const providerSlug = (id: string) => id === 'stackexchange' ? 'stack-overflow' : id;
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: 'Tirage au sort réseaux sociaux',
   url: 'https://tiragesimple.fr/tirage-au-sort-reseaux-sociaux/',
   inLanguage: 'fr-FR',
-  mainEntity: { '@type': 'ItemList', itemListElement: availableProviders.map((provider, position) => ({ '@type': 'ListItem', position: position + 1, name: `Tirage au sort ${provider.name}`, url: `https://tiragesimple.fr/tirage-au-sort-${provider.id}/` })) },
+  mainEntity: { '@type': 'ItemList', itemListElement: availableProviders.map((provider, position) => ({ '@type': 'ListItem', position: position + 1, name: `Tirage au sort ${provider.name}`, url: `https://tiragesimple.fr/tirage-au-sort-${providerSlug(provider.id)}/` })) },
 };
 ---
 
-<BaseLayout title="Tirage réseaux sociaux : YouTube, GitHub, Bluesky et plus" description="Tirages transparents pour YouTube, GitHub, Bluesky, Mastodon et Lemmy avec leurs API officielles, sans scraping des plateformes indisponibles." canonicalPath="/tirage-au-sort-reseaux-sociaux">
+<BaseLayout title="Tirage réseaux sociaux : YouTube, GitHub, Stack Overflow et plus" description="Tirages transparents pour YouTube, GitHub, Stack Overflow, Bluesky, Mastodon et Lemmy avec leurs API officielles, sans scraping." canonicalPath="/tirage-au-sort-reseaux-sociaux">
   <header class="social-hub-hero">
     <div class="container social-hub-hero__inner">
       <div class="social-hub-hero__copy">
@@ -28,7 +29,7 @@ const structuredData = {
   <div class="container tool-page">
     <section class="social-provider-grid" aria-label="Plateformes disponibles">
       {socialProviders.map((provider) => provider.status === 'available' ? (
-        <a class="social-provider-card" href={`/tirage-au-sort-${provider.id}`}>
+        <a class="social-provider-card" href={`/tirage-au-sort-${providerSlug(provider.id)}`}>
           <span class="social-provider-card__top"><SocialProviderIcon provider={provider.id} /><span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span></span>
           <h2>{provider.name}</h2>
           <p>{provider.description}</p>
@@ -51,6 +52,7 @@ const structuredData = {
       <p><a href="/tirage-au-sort-mastodon/">Mastodon</a> permet désormais un tirage parmi les favoris ou les boosts d’un post public, sans OAuth, sur treize instances contrôlées. L’outil suit la pagination officielle et identifie les comptes par leur identité ActivityPub.</p>
       <p><a href="/tirage-au-sort-lemmy/">Lemmy</a> permet un tirage parmi les commentaires publics d’un post sur quatre instances contrôlées. Les réponses, doublons et filtres textuels sont configurables ; les votes ne sont pas présentés comme accessibles.</p>
       <p><a href="/tirage-au-sort-github/">GitHub</a> importe les commentaires généraux d’une issue ou pull request publique. Les revues de code, réactions et dépôts privés sont explicitement exclus.</p>
+      <p><a href="/tirage-au-sort-stack-overflow/">Stack Overflow</a> permet de choisir entre les auteurs de réponses et les auteurs de commentaires d’une question publique. La déduplication utilise l’identifiant numérique du compte ; les votes et la réputation ne modifient jamais les chances.</p>
       <p>Le connecteur YouTube est opérationnel pour les commentaires de vidéos et de Shorts publics. Il utilise l’API officielle, identifie les participants par leur chaîne et permet un filtre textuel. Les likes, abonnements et publications Communauté ne sont pas annoncés comme vérifiés.</p>
       <h2>Pourquoi Instagram et Facebook restent limités</h2>
       <p>Les API Meta réservent l’accès utile aux comptes professionnels et aux Pages autorisées, avec OAuth, permissions et examen de l’application. Une publication d’un profil personnel ou d’un compte qui n’a pas accordé l’accès ne peut pas être transformée proprement en concours automatique. Ces cartes décrivent l’état du projet mais ne renvoient plus vers un faux outil.</p>

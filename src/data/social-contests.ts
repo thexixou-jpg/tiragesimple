@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -67,6 +67,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     intro: 'Importez les commentaires généraux d’une issue ou pull request publique et choisissez vos gagnants sans connecter de compte GitHub.',
     connection: 'API REST publique GitHub, avec quota gratuit strict sans authentification.',
     limitations: ['Dépôts publics uniquement.', 'Les revues de code, réactions, commits et discussions GitHub ne sont pas inclus.', 'Quota public partagé limité tant qu’aucun jeton serveur n’est configuré.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'stackexchange', name: 'Stack Overflow', status: 'available', statusLabel: 'Disponible · questions publiques',
+    title: 'Tirage au sort Stack Overflow : réponses ou commentaires',
+    description: 'Tirez des gagnants parmi les auteurs de réponses ou de commentaires d’une question Stack Overflow publique. Import officiel et comptes uniques.',
+    intro: 'Importez les réponses ou commentaires d’une question Stack Overflow et effectuez un tirage sans connecter de compte.',
+    connection: 'API publique Stack Exchange, sans mot de passe ni connexion.',
+    limitations: ['Questions publiques de Stack Overflow uniquement.', 'Choisissez les réponses ou les commentaires de la question, sans les combiner.', 'Les utilisateurs supprimés sans identifiant stable ne sont pas éligibles.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   },
   {

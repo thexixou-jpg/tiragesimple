@@ -109,6 +109,7 @@ button { cursor: pointer; }
 .social-provider-icon--mastodon { color: #6364ff; }
 .social-provider-icon--lemmy { color: #67a331; }
 .social-provider-icon--github { color: var(--color-text); }
+.social-provider-icon--stackexchange { color: #f48024; }
 .social-provider-icon--instagram { color: #d94677; }
 .social-provider-icon--facebook { color: #1877f2; }
 .social-provider-icon--x { color: var(--color-text); }

@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -10,7 +10,7 @@ export interface ContestRules {
   minimumMentions?: number;
   includeReplies: boolean;
   excludePublicationAuthor: boolean;
-  interaction?: 'likes' | 'reposts';
+  interaction?: 'likes' | 'reposts' | 'answers' | 'comments';
 }
 
 export interface ProviderCapabilities {
@@ -61,6 +61,8 @@ export interface Env {
   LEMMY_ALLOWED_HOSTS?: string;
   GITHUB_ENABLED?: string;
   GITHUB_API_TOKEN?: string;
+  STACKEXCHANGE_ENABLED?: string;
+  STACKEXCHANGE_API_KEY?: string;
   YOUTUBE_API_KEY?: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_SITE_URL?: string;

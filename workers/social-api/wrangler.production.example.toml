@@ -13,6 +13,7 @@ MASTODON_ALLOWED_HOSTS = "mastodon.social,mastodon.online,mastodon.world,mstdn.s
 LEMMY_ENABLED = "true"
 LEMMY_ALLOWED_HOSTS = "lemmy.world,lemmy.ml,jlai.lu,feddit.org"
 GITHUB_ENABLED = "true"
+STACKEXCHANGE_ENABLED = "true"
 ALLOWED_ORIGIN = "https://tiragesimple.fr"
 PUBLIC_SITE_URL = "https://tiragesimple.fr"
 RETENTION_DAYS = "30"
