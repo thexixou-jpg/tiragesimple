@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TwitchContestTool from '../components/TwitchContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('twitch');
+const schema={ '@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Twitch',url:'https://tiragesimple.fr/tirage-au-sort-twitch/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'} };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-twitch/">
+  <header class="tool-hero twitch-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="twitch" /><p class="social-status social-status-limited">Connexion officielle requise</p></div><h1>Tirage au sort Twitch</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube"><TwitchContestTool /><article class="tool-content prose">
+    <h2>Un tirage parmi les personnes présentes dans le chat</h2><p>Twitch fournit une liste officielle des comptes connectés au chat d’une chaîne. Le compte autorisant TirageSimple doit être le diffuseur ou l’un de ses modérateurs. L’import suit la pagination officielle par lots pouvant atteindre 1 000 comptes et conserve l’identifiant Twitch stable plutôt que le seul nom affiché.</p>
+    <h2>Pourquoi une connexion Twitch est nécessaire</h2><p>L’API Get Chatters impose la permission <code>moderator:read:chatters</code>. Le parcours OAuth est effectué sur Twitch : TirageSimple ne demande jamais votre mot de passe, cookie ou jeton. Les jetons d’accès et de renouvellement sont chiffrés côté serveur, ne sont jamais exposés au frontend et sont supprimés lors de la déconnexion.</p>
+    <h2>Ce que « présent dans le chat » prouve réellement</h2><p>La liste indique qu’un compte est connecté à la session de chat au moment de la collecte. Elle ne prouve pas qu’il a envoyé un message, suivi la chaîne ou souscrit un abonnement. Twitch signale aussi un délai possible entre l’arrivée ou le départ d’un compte et la mise à jour de la liste. Ces limites figurent dans l’interface et le reçu.</p>
+    <h2>Règles et confidentialité</h2><p>Chaque identifiant Twitch dispose d’une seule chance. Vous pouvez exclure le diffuseur, certains logins ou identifiants, puis choisir des gagnants et suppléants distincts. La liste complète reste privée et expire automatiquement ; le lien public optionnel ne contient que les résultats, les règles et les empreintes techniques.</p>
+    <h2>Questions fréquentes</h2><h3>Puis-je analyser une chaîne que je ne modère pas ?</h3><p>Non. Twitch refusera officiellement la requête. Cette restriction protège les données du chat et n’est pas contournée.</p><h3>Les lurkers peuvent-ils participer ?</h3><p>Oui, s’ils apparaissent dans la liste Get Chatters au moment de l’import. Un message n’est pas requis par ce mode.</p><p>Pour tirer uniquement parmi les auteurs de messages d’un direct YouTube, utilisez le <a href="/tirage-au-sort-youtube-live/">tirage YouTube Live</a>.</p>
+  </article></div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+<style>.twitch-hero{background:radial-gradient(circle at 80% 45%,#9146ff25,transparent 30%),var(--color-bg)}</style>

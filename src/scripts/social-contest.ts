@@ -10,7 +10,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -123,13 +123,14 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       }
       if (provider === 'github') return url.hostname.toLowerCase() === 'github.com' && /^\/[A-Za-z0-9][A-Za-z0-9-]{0,38}\/[A-Za-z0-9_.-]{1,100}\/(?:issues|pull)\/[1-9]\d{0,9}\/?$/u.test(url.pathname);
       if (provider === 'stackexchange') return ['stackoverflow.com', 'www.stackoverflow.com'].includes(url.hostname.toLowerCase()) && /^\/questions\/[1-9]\d{0,11}(?:\/[^/]*)?\/?$/u.test(url.pathname);
+      if (provider === 'twitch') return ['twitch.tv', 'www.twitch.tv'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_]{4,25}\/?$/u.test(url.pathname);
       return ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
-    } catch { return false; }
+    } catch { return provider === 'twitch' && /^[A-Za-z0-9_]{4,25}$/u.test(value); }
   };
   const analyze = async () => {
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
-    if (!eligibleUrl(url)) { say(`Utilisez un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}.`); return; }
+    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
     resetDraw();
     const current = ++revision;
     analyzedUrl = ''; clientSourced = false; clientPublication = undefined; importButton.disabled = true; publication.hidden = true;
@@ -178,7 +179,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     try {
       const { import: state } = await request<{ import: ImportState }>(`/v1/imports/${id}`);
       if (current !== revision || id !== importId) return;
-      progress.textContent = `${state.progress_current} ${provider === 'youtube_live' ? 'événements du chat analysés' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
+      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' ? 'événements du chat analysés' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
       if (state.status === 'failed') { lock(false); say(state.error_message || 'Import interrompu. Aucun tirage partiel ne sera effectué.'); return; }
       if (state.status === 'ready') {
         lock(false);

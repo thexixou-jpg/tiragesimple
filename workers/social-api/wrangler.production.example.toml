@@ -14,6 +14,10 @@ LEMMY_ENABLED = "true"
 LEMMY_ALLOWED_HOSTS = "lemmy.world,lemmy.ml,jlai.lu,feddit.org"
 GITHUB_ENABLED = "true"
 STACKEXCHANGE_ENABLED = "true"
+TWITCH_ENABLED = "false"
+# TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, DATA_ENCRYPTION_KEY and
+# SESSION_SIGNING_SECRET must be configured as Worker secrets/variables.
+# TWITCH_REDIRECT_URI = "https://tiragesimple.fr/_tiragesimple/v1/twitch/oauth/callback"
 ALLOWED_ORIGIN = "https://tiragesimple.fr"
 PUBLIC_SITE_URL = "https://tiragesimple.fr"
 RETENTION_DAYS = "30"

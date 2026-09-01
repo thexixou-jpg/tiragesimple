@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -31,6 +31,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     intro: 'Créez un instantané officiel du chat d’un direct YouTube en cours, puis tirez vos gagnants parmi les auteurs des messages éligibles.',
     connection: 'API YouTube Live Streaming officielle, sans connexion Google du spectateur.',
     limitations: ['Direct public en cours avec chat activé uniquement.', 'L’instantané contient les messages rendus disponibles par YouTube au moment de l’import, pas une archive garantie du direct.', 'Les likes, abonnements, Super Chats et messages supprimés ne deviennent pas automatiquement des chances.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'twitch', name: 'Twitch', status: 'limited', statusLabel: 'OAuth prêt · activation requise',
+    title: 'Tirage au sort Twitch : viewers présents dans le chat',
+    description: 'Préparez un tirage parmi les comptes présents dans un chat Twitch avec la connexion officielle du diffuseur ou d’un modérateur.',
+    intro: 'Connectez Twitch officiellement puis importez la liste paginée des comptes présents dans le chat de votre chaîne ou d’une chaîne que vous modérez.',
+    connection: 'OAuth Twitch avec la permission minimale moderator:read:chatters.',
+    limitations: ['Le compte connecté doit être le diffuseur ou un modérateur de la chaîne.', 'La liste Twitch des chatters peut avoir un léger délai lors des arrivées et départs.', 'La présence dans le chat ne prouve ni un message envoyé, ni un abonnement, ni un follow.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   },
   {

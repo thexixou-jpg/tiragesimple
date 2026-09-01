@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -10,7 +10,7 @@ export interface ContestRules {
   minimumMentions?: number;
   includeReplies: boolean;
   excludePublicationAuthor: boolean;
-  interaction?: 'likes' | 'reposts' | 'answers' | 'comments' | 'livechat';
+  interaction?: 'likes' | 'reposts' | 'answers' | 'comments' | 'livechat' | 'chatters';
   clientSourced?: boolean;
 }
 
@@ -65,6 +65,11 @@ export interface Env {
   STACKEXCHANGE_ENABLED?: string;
   STACKEXCHANGE_API_KEY?: string;
   YOUTUBE_API_KEY?: string;
+  TWITCH_ENABLED?: string;
+  TWITCH_CLIENT_ID?: string;
+  TWITCH_CLIENT_SECRET?: string;
+  TWITCH_REDIRECT_URI?: string;
+  DATA_ENCRYPTION_KEY?: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_SITE_URL?: string;
   MAX_PARTICIPANTS?: string;

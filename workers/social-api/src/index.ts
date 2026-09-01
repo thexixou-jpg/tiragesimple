@@ -12,6 +12,7 @@ import { getLemmyPublication } from './lemmy';
 import { getGitHubPublication, parseGitHubUrl } from './github';
 import { getStackExchangePublication, parseStackOverflowUrl } from './stackexchange';
 import { getYouTubeLivePublication } from './youtube-live';
+import { completeTwitchOAuth, disconnectTwitch, getTwitchAccount, getTwitchPublication, twitchOAuthUrl } from './twitch';
 
 function allowOrigin(request: Request, env: Env): string {
   const configured = env.ALLOWED_ORIGIN ?? 'https://tiragesimple.fr';
@@ -79,7 +80,7 @@ function publicDrawPage(payload: Record<string, unknown>): string {
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101220;color:#eff1ff;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(calc(100% - 2rem),52rem);margin:clamp(1rem,5vw,4rem) auto}.card{padding:clamp(1.25rem,4vw,2.5rem);border:1px solid #343953;border-radius:24px;background:#191d30}.tag{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:#2a294c;color:#c5baff;font-size:.8rem;font-weight:700}h1{font-size:clamp(1.5rem,5vw,2.4rem);line-height:1.2;letter-spacing:-.04em}h2{font-size:1.2rem;margin-top:2rem}a{color:#c1b3ff}a:focus-visible,summary:focus-visible{outline:2px solid #fff;outline-offset:4px}p,h1,strong,li,a,code{overflow-wrap:anywhere}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}.stats div{padding:1rem;background:#101524;border-radius:14px}.stats strong{display:block;font-size:1.7rem}.stats span,small{color:#b7bed4}.winners{padding:0;list-style:none}.winners li{display:flex;flex-wrap:wrap;padding:1rem;justify-content:space-between;gap:.5rem 1rem;border-radius:12px;background:#242b44}.winners li+li{margin-top:.5rem}.winners span{color:#c4cbe0}.rules{padding-left:1.2rem;color:#d1d7eb}.rules li+li{margin-top:.45rem}.proof{margin-top:2rem;padding:1rem;border:1px solid #343953;border-radius:14px;background:#111628}.proof summary{cursor:pointer;font-weight:700}.proof dl{margin-bottom:0}.proof dt{margin-top:.8rem;color:#b7bed4;font-size:.8rem}.proof dd{margin:.15rem 0 0}.proof code{display:block;padding:.55rem;border-radius:8px;background:#090c16;font-size:.72rem;word-break:break-all;user-select:all}footer{border-top:1px solid #343953;margin-top:2rem;padding-top:1rem}footer p{margin-bottom:0}@media(max-width:360px){.stats{grid-template-columns:1fr}}
 </style></head><body><main class="wrap"><article class="card">
-<a href="https://tiragesimple.fr/">TirageSimple</a><p><span class="tag">Résultat partagé · ${escapeHtml(draw.platform === 'youtube' ? 'YouTube' : draw.platform === 'youtube_live' ? 'YouTube Live' : draw.platform === 'mastodon' ? 'Mastodon' : draw.platform === 'lemmy' ? 'Lemmy' : draw.platform === 'github' ? 'GitHub' : draw.platform === 'stackexchange' ? 'Stack Overflow' : 'Bluesky')}</span></p>
+<a href="https://tiragesimple.fr/">TirageSimple</a><p><span class="tag">Résultat partagé · ${escapeHtml(draw.platform === 'youtube' ? 'YouTube' : draw.platform === 'youtube_live' ? 'YouTube Live' : draw.platform === 'twitch' ? 'Twitch' : draw.platform === 'mastodon' ? 'Mastodon' : draw.platform === 'lemmy' ? 'Lemmy' : draw.platform === 'github' ? 'GitHub' : draw.platform === 'stackexchange' ? 'Stack Overflow' : 'Bluesky')}</span></p>
 <h1>Tirage ${escapeHtml(draw.id)}</h1><p>${date(draw.createdAt)} (heure de Paris)</p>
 <p><a href="${escapeHtml(draw.publication.url)}" rel="noopener noreferrer">${escapeHtml(draw.publication.title || 'Voir la publication')}</a></p>
 <div class="stats"><div><strong>${escapeHtml(draw.participantCount)}</strong><span>comptes éligibles</span></div><div><strong>${escapeHtml(draw.analyzedCount)}</strong><span>interactions analysées</span></div></div>
@@ -100,6 +101,56 @@ export default {
     // It avoids a separate host and common blocker patterns such as "api"/"social".
     const pathname = url.pathname.startsWith('/_tiragesimple/') ? url.pathname.slice('/_tiragesimple'.length) : url.pathname;
     if (request.method === 'GET' && pathname === '/v1/providers') return json({ providers: providerStatus(env) }, 200, origin);
+    if (request.method === 'GET' && pathname === '/v1/twitch/oauth/start') {
+      try {
+        const session = await ownerSession(request, env); const location = await twitchOAuthUrl(env, session.id);
+        const headers = new Headers({ location, 'cache-control': 'no-store' }); if (session.setCookie) headers.set('set-cookie', session.setCookie);
+        return new Response(null, { status: 302, headers });
+      } catch { return new Response('Le connecteur Twitch doit encore être activé.', { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' } }); }
+    }
+    if (request.method === 'GET' && pathname === '/v1/twitch/oauth/callback') {
+      const session = await ownerSession(request, env); const publicSite = env.PUBLIC_SITE_URL ?? 'https://tiragesimple.fr';
+      try {
+        const code = url.searchParams.get('code'); const state = url.searchParams.get('state'); const denied = url.searchParams.get('error');
+        if (denied || !code || !state) throw new Error('Connexion Twitch annulée.');
+        await completeTwitchOAuth(env, session.id, state, code);
+        const headers = new Headers({ location: new URL('/tirage-au-sort-twitch/?twitch=connected', publicSite).toString(), 'cache-control': 'no-store' }); if (session.setCookie) headers.set('set-cookie', session.setCookie);
+        return new Response(null, { status: 302, headers });
+      } catch {
+        const headers = new Headers({ location: new URL('/tirage-au-sort-twitch/?twitch=error', publicSite).toString(), 'cache-control': 'no-store' }); if (session.setCookie) headers.set('set-cookie', session.setCookie);
+        return new Response(null, { status: 302, headers });
+      }
+    }
+    if (request.method === 'GET' && pathname === '/v1/twitch/account') {
+      try {
+        if (providerStatus(env).twitch !== 'enabled') return json({ connected: false, setupRequired: true }, 200, origin);
+        const session = await ownerSession(request, env); const account = await getTwitchAccount(env, session.id);
+        return json({ connected: Boolean(account), account: account ? { id: account.id, username: account.username, displayName: account.displayName } : undefined }, 200, origin, session.setCookie);
+      } catch (error) { return json({ connected: false, error: error instanceof Error ? error.message : 'Connexion Twitch indisponible.' }, 400, origin); }
+    }
+    if (request.method === 'POST' && pathname === '/v1/twitch/disconnect') {
+      try {
+        if (request.headers.get('Origin') && request.headers.get('Origin') !== origin) return json({ error: 'Origine non autorisée.' }, 403, origin);
+        const session = await ownerSession(request, env); await disconnectTwitch(env, session.id); return json({ connected: false }, 200, origin, session.setCookie);
+      } catch (error) { return json({ error: error instanceof Error ? error.message : 'Déconnexion Twitch impossible.' }, 400, origin); }
+    }
+    if (request.method === 'POST' && (pathname === '/v1/twitch/publication' || pathname === '/v1/twitch/imports')) {
+      try {
+        if (request.headers.get('Origin') && request.headers.get('Origin') !== origin) return json({ error: 'Origine non autorisée.' }, 403, origin);
+        if (providerStatus(env).twitch !== 'enabled') throw new Error('Twitch is not enabled');
+        const input = await request.json() as { channel?: string; url?: string; rules?: Partial<ContestRules> }; const channel = input.channel ?? input.url;
+        if (typeof channel !== 'string' || channel.length > 200) return json({ error: 'Indiquez une chaîne Twitch valide.' }, 400, origin);
+        const session = await ownerSession(request, env); await reserveProviderRequest(env, 'twitch');
+        const publication = await getTwitchPublication(channel, env, session.id);
+        if (pathname.endsWith('/publication')) return json({ publication }, 200, origin, session.setCookie);
+        const rules = normalizeRules(input.rules ?? {});
+        if (rules.requiredKeyword || rules.minimumMentions || rules.includeReplies || rules.duplicateEntries) throw new Error('Le tirage Twitch porte uniquement sur la présence dans le chat, sans pondération ni filtre de message.');
+        if (rules.excludedUsers.some(value => !/^(?:[1-9]\d{0,19}|[A-Za-z0-9_]{4,25})$/u.test(value))) throw new Error('Excluez un login Twitch ou un identifiant numérique valide.');
+        rules.interaction = 'chatters'; rules.uniqueParticipants = true;
+        const imported = await queueSocialImport(env, session.id, publication, rules);
+        return json({ import: imported, rulesSummary: socialRulesSummary('twitch', { ...rules, excludedAccountCount: rules.excludedUsers.length }), requestedCount: rules.winnerCount + rules.alternateCount }, 202, origin, session.setCookie);
+      } catch (error) { return json({ error: error instanceof Error ? error.message : 'Impossible de contacter Twitch.' }, backendUnavailable(error) ? 503 : 400, origin); }
+    }
     const sharedPageMatch = pathname.match(/^\/tirage\/(TS-\d{8}-[A-Z2-9]+)$/u);
     if (request.method === 'GET' && sharedPageMatch) {
       const result = await publicDraw(env, sharedPageMatch[1]);

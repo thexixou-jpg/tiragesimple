@@ -11,7 +11,7 @@ Le site public reste statique sur `tiragesimple.fr`. Les appels sociaux et les d
 5. Créer les secrets avec `wrangler secret put`; ne jamais ajouter les valeurs dans Git.
 6. Mettre `YOUTUBE_ENABLED=true` seulement après les tests de quota et de suppression.
 
-## Connecteurs YouTube, YouTube Live, Bluesky, Mastodon, Lemmy, GitHub et Stack Overflow
+## Connecteurs YouTube, YouTube Live, Twitch, Bluesky, Mastodon, Lemmy, GitHub et Stack Overflow
 
 - `POST /v1/youtube/imports` : valide une URL, crée un import temporaire et place les pages de commentaires dans la Queue ;
 - `GET /v1/imports/:id` : expose la progression uniquement au navigateur qui a créé l’import (cookie signé, `HttpOnly`, `Secure`) ;
@@ -22,6 +22,8 @@ Le site public reste statique sur `tiragesimple.fr`. Les appels sociaux et les d
 Les réponses YouTube sont importées avec `comments.list(parentId)` et leur propre pagination, avant de poursuivre les pages de commentaires principaux. Les réponses intégrées à `commentThreads.list` ne sont pas utilisées.
 
 YouTube Live utilise `videos.list(part=snippet,liveStreamingDetails)` pour vérifier qu’un direct public possède un `activeLiveChatId`, puis `liveChatMessages.list(part=snippet,authorDetails)` pour créer un instantané des messages texte disponibles. Les autres événements du chat sont ignorés. L’API ne garantit pas une archive exhaustive depuis le début du direct : cette limite est affichée dans l’outil et le volume réellement analysé figure dans le reçu.
+
+Twitch utilise le flux OAuth Authorization Code avec la seule portée `moderator:read:chatters`. Les jetons sont chiffrés AES-GCM au repos avec une clé serveur dérivée de `DATA_ENCRYPTION_KEY`, renouvelés côté Worker et supprimés à la déconnexion. `helix/users` valide la chaîne, puis `helix/chat/chatters` importe jusqu’à 1 000 comptes par page. Le `moderator_id` est toujours celui du compte OAuth connecté ; Twitch vérifie donc que ce compte diffuse ou modère réellement la chaîne visée.
 
 Bluesky utilise `getLikes` ou `getRepostedBy` via l’API publique officielle. Les handles sont résolus en DID ; aucune connexion de compte n’est nécessaire. `BLUESKY_ENABLED=true` active le connecteur. Les réponses, citations, abonnements et combinaisons de critères ne sont pas proposés.
 

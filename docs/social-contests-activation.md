@@ -53,6 +53,16 @@ GitHub peut rester sans secret pour le lancement : seuls les dépôts publics so
 
 Stack Overflow peut également fonctionner sans secret avec le quota anonyme Stack Exchange. Une clé d’application facultative peut être ajoutée comme secret Worker `STACKEXCHANGE_API_KEY` si le trafic augmente. Elle ne doit jamais être placée dans le frontend.
 
+## Twitch : application OAuth
+
+1. Active l’authentification à deux facteurs sur le compte Twitch développeur, puis enregistre une application dans la console Twitch.
+2. Ajoute exactement cette URL de redirection : `https://tiragesimple.fr/_tiragesimple/v1/twitch/oauth/callback`.
+3. Ajoute `TWITCH_CLIENT_ID` comme variable Worker et `TWITCH_CLIENT_SECRET` comme secret Worker.
+4. Ajoute `TWITCH_REDIRECT_URI=https://tiragesimple.fr/_tiragesimple/v1/twitch/oauth/callback` et `TWITCH_ENABLED=true`.
+5. Conserve `DATA_ENCRYPTION_KEY` et `SESSION_SIGNING_SECRET` comme secrets Worker longs et indépendants, puis redéploie.
+
+Le frontend ne reçoit ni client secret, ni access token, ni refresh token. La seule portée demandée est `moderator:read:chatters`. Le compte connecté doit diffuser ou modérer la chaîne analysée.
+
 ## 4. Déploiement et routes
 
 Déploie le Worker :
