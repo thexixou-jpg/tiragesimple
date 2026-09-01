@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -50,6 +50,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'OAuth 2.1 Kick avec PKCE et permission minimale de lecture des événements de la chaîne.',
     limitations: ['La chaîne connectée doit être celle qui organise le concours.', 'Seuls les messages reçus après le démarrage de la collecte sont inclus : aucun historique n’est inventé.', 'Les follows, abonnements et viewers silencieux ne sont pas utilisés comme participations.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
+  {
+    id: 'trovo', name: 'Trovo', status: 'limited', statusLabel: 'Collecteur prêt · clé applicative requise',
+    title: 'Tirage au sort Trovo : messages du chat en direct',
+    description: 'Collectez les nouveaux messages d’un chat Trovo public via le WebSocket officiel, puis tirez des gagnants par identifiant unique.',
+    intro: 'Ouvrez une fenêtre de participation sur une chaîne Trovo publique et tirez vos gagnants parmi les auteurs des nouveaux messages reçus.',
+    connection: 'API et service de chat WebSocket officiels Trovo, sans connexion du streamer.',
+    limitations: ['Seuls les messages reçus après le démarrage explicite de la collecte sont inclus.', 'La fenêtre doit rester ouverte dans le navigateur pendant le concours.', 'Les viewers silencieux, follows, abonnements, cadeaux et anciens messages ne participent pas.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   },
   {
     id: 'bluesky', name: 'Bluesky', status: 'available', statusLabel: 'Disponible',

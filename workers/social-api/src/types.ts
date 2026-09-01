@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'trovo' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -73,6 +73,8 @@ export interface Env {
   KICK_CLIENT_ID?: string;
   KICK_CLIENT_SECRET?: string;
   KICK_REDIRECT_URI?: string;
+  TROVO_ENABLED?: string;
+  TROVO_CLIENT_ID?: string;
   DATA_ENCRYPTION_KEY?: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_SITE_URL?: string;

@@ -35,7 +35,7 @@ export async function queueSocialImport(env: Env, sessionId: string, publication
 }
 
 export async function createClientSocialImport(env: Env, sessionId: string, publication: SocialPublication, rules: ContestRules, comments: SocialComment[]) {
-  if (!['github', 'stackexchange'].includes(publication.provider)) throw new Error('Import navigateur non autorisé pour cette plateforme.');
+  if (!['github', 'stackexchange', 'trovo'].includes(publication.provider)) throw new Error('Import navigateur non autorisé pour cette plateforme.');
   if (!Array.isArray(comments) || comments.length > 10000) throw new Error('La collecte navigateur dépasse la limite de 10 000 contributions.');
   let characters = 0;
   for (const comment of comments) {

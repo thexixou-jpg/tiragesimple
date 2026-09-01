@@ -1,5 +1,5 @@
 interface Publication { title?: string; authorName?: string; publishedAt?: string; thumbnailUrl?: string }
-interface ClientPublication extends Publication { authorProviderId?: string }
+interface ClientPublication extends Publication { authorProviderId?: string; chatToken?: string; websocketUrl?: string }
 interface ClientComment { providerCommentId: string; providerUserId: string; username?: string; displayName?: string; text: string; isReply: false; createdAt?: string }
 interface ImportState { status: string; progress_current: number; participant_count: number; error_message?: string }
 interface Winner { displayName?: string; username?: string; providerUserId?: string }
@@ -10,7 +10,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : root.dataset.provider === 'trovo' ? 'trovo' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -27,6 +27,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   let clientPublication: ClientPublication | undefined;
   let requestedCount = 1, appliedSummary: string[] = [];
   let previewTimer: number | undefined, pollTimer: number | undefined, receiptObjectUrl = '';
+  let trovoSocket: WebSocket | undefined, trovoHeartbeat: number | undefined, trovoComments: ClientComment[] = [];
   const say = (message: string) => { feedback.textContent = message; };
   const errorText = (error: unknown) => error instanceof Error ? error.message : 'Une erreur est survenue.';
   const request = async <T>(path: string, body?: unknown): Promise<T> => {
@@ -68,6 +69,11 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     throw new Error('Collecte navigateur non disponible.');
   };
   const directComments = async (url: string, rules: ReturnType<typeof readRules>): Promise<ClientComment[]> => {
+    if (provider === 'trovo') {
+      if (!trovoSocket) throw new Error('La collecte Trovo n’est pas active.');
+      trovoSocket.close(1000, 'collection complete'); trovoSocket = undefined; window.clearInterval(trovoHeartbeat);
+      return trovoComments.slice();
+    }
     const parsed = new URL(url); const comments: ClientComment[] = [];
     if (provider === 'github') {
       const match = parsed.pathname.match(/^\/([^/]+)\/([^/]+)\/(?:issues|pull)\/([1-9]\d{0,9})\/?$/u)!;
@@ -125,13 +131,42 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       if (provider === 'stackexchange') return ['stackoverflow.com', 'www.stackoverflow.com'].includes(url.hostname.toLowerCase()) && /^\/questions\/[1-9]\d{0,11}(?:\/[^/]*)?\/?$/u.test(url.pathname);
       if (provider === 'twitch') return ['twitch.tv', 'www.twitch.tv'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_]{4,25}\/?$/u.test(url.pathname);
       if (provider === 'kick') return ['kick.com', 'www.kick.com'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_-]{3,25}\/?$/u.test(url.pathname);
+      if (provider === 'trovo') return ['trovo.live', 'www.trovo.live'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_]{3,50}\/?$/u.test(url.pathname);
       return ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
-    } catch { return provider === 'twitch' && /^[A-Za-z0-9_]{4,25}$/u.test(value) || provider === 'kick' && /^[A-Za-z0-9_-]{3,25}$/u.test(value); }
+    } catch { return provider === 'twitch' && /^[A-Za-z0-9_]{4,25}$/u.test(value) || provider === 'kick' && /^[A-Za-z0-9_-]{3,25}$/u.test(value) || provider === 'trovo' && /^[A-Za-z0-9_]{3,50}$/u.test(value); }
   };
+  const stopTrovo = () => { trovoSocket?.close(1000, 'collection stopped'); trovoSocket = undefined; window.clearInterval(trovoHeartbeat); };
+  const startTrovo = (data: ClientPublication) => new Promise<void>((resolve, reject) => {
+    if (!data.chatToken || data.websocketUrl !== 'wss://open-chat.trovo.live/chat') return reject(new Error('Jeton de chat Trovo invalide.'));
+    stopTrovo(); trovoComments = []; const seen = new Set<string>(); let characters = 0; let authenticated = false;
+    const socket = new WebSocket(data.websocketUrl); trovoSocket = socket;
+    const timeout = window.setTimeout(() => { if (!authenticated) { socket.close(); reject(new Error('Le chat Trovo n’a pas répondu à temps.')); } }, 12000);
+    socket.addEventListener('open', () => socket.send(JSON.stringify({ type:'AUTH', nonce:crypto.randomUUID(), data:{ token:data.chatToken } })));
+    socket.addEventListener('message', event => {
+      try {
+        const payload = JSON.parse(String(event.data)) as { type?: string; error?: string; data?: { gap?: number; chats?: Array<{ type?: number; content?: string; nick_name?: string; message_id?: string; sender_id?: number | string; uid?: number | string; send_time?: number | string; user_name?: string }> } };
+        if (payload.error) throw new Error(payload.error);
+        if (payload.type === 'RESPONSE' && !authenticated) {
+          authenticated = true; window.clearTimeout(timeout); trovoHeartbeat = window.setInterval(() => { if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type:'PING', nonce:crypto.randomUUID() })); }, 30000); resolve(); return;
+        }
+        if (payload.type !== 'CHAT') return;
+        for (const chat of payload.data?.chats || []) {
+          const id = String(chat.message_id || ''); const userId = String(chat.sender_id || chat.uid || ''); const text = String(chat.content || '');
+          if (chat.type !== 0 || !id || !userId || !text || seen.has(id)) continue;
+          if (trovoComments.length >= 10000 || characters + text.length > 2_000_000) { say('Limite de sécurité atteinte : arrêtez la collecte et préparez le tirage.'); continue; }
+          seen.add(id); characters += text.length;
+          trovoComments.push({ providerCommentId:id, providerUserId:userId, username:chat.user_name, displayName:chat.nick_name || chat.user_name, text, isReply:false, createdAt:chat.send_time ? new Date(Number(chat.send_time) * 1000).toISOString() : undefined });
+          const counter = root.querySelector<HTMLElement>('[data-trovo-count]'); if (counter) counter.textContent = `${trovoComments.length} message${trovoComments.length > 1 ? 's' : ''} reçu${trovoComments.length > 1 ? 's' : ''}`;
+        }
+      } catch (error) { if (!authenticated) { window.clearTimeout(timeout); reject(error); } }
+    });
+    socket.addEventListener('error', () => { if (!authenticated) { window.clearTimeout(timeout); reject(new Error('Connexion WebSocket Trovo impossible.')); } else say('Le flux Trovo a été interrompu. Préparez le tirage avec les messages déjà reçus.'); });
+    socket.addEventListener('close', () => { window.clearInterval(trovoHeartbeat); if (trovoSocket === socket) trovoSocket = undefined; });
+  });
   const analyze = async () => {
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
-    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : provider === 'kick' ? 'le login ou le lien de votre chaîne Kick connectée' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
+    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : provider === 'kick' ? 'le login ou le lien de votre chaîne Kick connectée' : provider === 'trovo' ? 'un login ou un lien de chaîne Trovo' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
     resetDraw();
     const current = ++revision;
     analyzedUrl = ''; clientSourced = false; clientPublication = undefined; importButton.disabled = true; publication.hidden = true;
@@ -145,6 +180,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
         data = await directPreview(url); clientSourced = true; clientPublication = data;
       }
       if (current !== revision || url !== input.value.trim()) return;
+      if (provider === 'trovo') { await startTrovo(data); clientSourced = true; clientPublication = data; }
       root.querySelector<HTMLElement>('[data-publication-title]')!.textContent = data.title || 'Publication';
       const date = data.publishedAt && !Number.isNaN(Date.parse(data.publishedAt)) ? new Intl.DateTimeFormat('fr-FR').format(new Date(data.publishedAt)) : '';
       root.querySelector<HTMLElement>('[data-publication-meta]')!.textContent = [data.authorName, date].filter(Boolean).join(' · ');
@@ -156,15 +192,16 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
         else image.removeAttribute('src');
       }
       analyzedUrl = url; publication.hidden = false; preview.dataset.state = 'ready'; importButton.disabled = false;
-      say(provider === 'kick' ? 'Collecte démarrée. Laissez cette période ouverte pendant votre concours, puis arrêtez-la pour préparer le tirage.' : 'Aperçu prêt. Choisissez vos règles puis lancez l’import.');
+      say(provider === 'kick' || provider === 'trovo' ? 'Collecte démarrée. Gardez cette page ouverte, puis arrêtez-la pour préparer le tirage.' : 'Aperçu prêt. Choisissez vos règles puis lancez l’import.');
     } catch (error) {
       if (current !== revision) return;
+      if (provider === 'trovo') stopTrovo();
       preview.dataset.state = 'error'; say(errorText(error));
     }
   };
   const readRules = () => {
     const data = new FormData(form);
-    const commentProvider = provider === 'youtube' || provider === 'youtube_live' || provider === 'kick' || provider === 'lemmy' || provider === 'github' || provider === 'stackexchange';
+    const commentProvider = provider === 'youtube' || provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' || provider === 'lemmy' || provider === 'github' || provider === 'stackexchange';
     const replyProvider = provider === 'youtube' || provider === 'lemmy';
     const duplicateEntries = commentProvider && data.get('duplicateEntries') === 'on';
     return { winnerCount: Number(data.get('winnerCount')), alternateCount: Number(data.get('alternateCount')),
@@ -173,14 +210,14 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       excludePublicationAuthor: data.get('excludePublicationAuthor') === 'on',
       requiredKeyword: commentProvider ? String(data.get('requiredKeyword') || '').trim() : undefined,
       excludedUsers: String(data.get('excludedUsers') || '').split(/[\n,]/u).map(v => v.trim().replace(/^@/u, '')).filter(Boolean),
-      ...(provider === 'youtube_live' || provider === 'kick' ? { interaction: 'livechat' as const } : !commentProvider || provider === 'stackexchange' ? { interaction: String(data.get('interaction')) } : {}),
+      ...(provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' ? { interaction: 'livechat' as const } : !commentProvider || provider === 'stackexchange' ? { interaction: String(data.get('interaction')) } : {}),
     };
   };
   const poll = async (id: string, current: number) => {
     try {
       const { import: state } = await request<{ import: ImportState }>(`/v1/imports/${id}`);
       if (current !== revision || id !== importId) return;
-      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' || provider === 'kick' ? 'messages du chat analysés' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
+      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' || provider === 'kick' || provider === 'trovo' ? 'messages du chat analysés' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
       if (state.status === 'failed') { lock(false); say(state.error_message || 'Import interrompu. Aucun tirage partiel ne sera effectué.'); return; }
       if (state.status === 'ready') {
         lock(false);
@@ -195,9 +232,10 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   };
   form.addEventListener('submit', event => { event.preventDefault(); window.clearTimeout(previewTimer); void analyze(); });
   input.addEventListener('input', () => {
+    if (provider === 'trovo') stopTrovo();
     revision++; analyzedUrl = ''; clientSourced = false; clientPublication = undefined; publication.hidden = true; preview.dataset.state = 'idle'; importButton.disabled = true; resetDraw();
     window.clearTimeout(previewTimer);
-    if (eligibleUrl(input.value.trim())) previewTimer = window.setTimeout(() => { void analyze(); }, 700);
+    if (provider !== 'trovo' && eligibleUrl(input.value.trim())) previewTimer = window.setTimeout(() => { void analyze(); }, 700);
   });
   form.addEventListener('change', event => { if (event.target !== input && !busy) { if (importId) revision++; resetDraw(); say('Règles modifiées : importez à nouveau pour les appliquer.'); } });
   importButton.addEventListener('click', async () => {
@@ -264,7 +302,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   });
   void request<{ providers: Record<string, string> }>('/v1/providers').then(data => {
     ready = data.providers[provider] === 'enabled';
-    say(ready ? provider === 'kick' ? 'Prêt. Connectez votre chaîne puis démarrez la collecte au début du concours.' : 'Prêt. Collez le lien de votre publication.' : 'Ce connecteur est temporairement indisponible.');
-    if (ready && provider !== 'kick' && eligibleUrl(input.value.trim())) void analyze();
+    say(ready ? provider === 'kick' ? 'Prêt. Connectez votre chaîne puis démarrez la collecte au début du concours.' : provider === 'trovo' ? 'Prêt. Indiquez une chaîne Trovo puis démarrez la collecte.' : 'Prêt. Collez le lien de votre publication.' : 'Ce connecteur est temporairement indisponible.');
+    if (ready && provider !== 'kick' && provider !== 'trovo' && eligibleUrl(input.value.trim())) void analyze();
   }).catch(error => say(errorText(error)));
 }
