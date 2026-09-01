@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -59,6 +59,8 @@ export interface Env {
   MASTODON_ALLOWED_HOSTS?: string;
   LEMMY_ENABLED?: string;
   LEMMY_ALLOWED_HOSTS?: string;
+  GITHUB_ENABLED?: string;
+  GITHUB_API_TOKEN?: string;
   YOUTUBE_API_KEY?: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_SITE_URL?: string;

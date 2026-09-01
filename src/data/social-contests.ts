@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -59,6 +59,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API publique Lemmy 0.19, sans mot de passe ni connexion.',
     limitations: ['Instances prises en charge : Lemmy.world, Lemmy.ml, jlai.lu et Feddit.org.', 'Les votes et abonnements ne sont pas accessibles comme listes de participants.', 'La collecte n’est pas figée si des commentaires sont ajoutés pendant l’import.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
+  {
+    id: 'github', name: 'GitHub', status: 'available', statusLabel: 'Disponible · dépôts publics',
+    title: 'Tirage au sort GitHub : commentaires d’issue ou pull request',
+    description: 'Tirez des gagnants parmi les commentaires d’une issue ou pull request GitHub publique, avec comptes uniques, filtre et exclusions.',
+    intro: 'Importez les commentaires généraux d’une issue ou pull request publique et choisissez vos gagnants sans connecter de compte GitHub.',
+    connection: 'API REST publique GitHub, avec quota gratuit strict sans authentification.',
+    limitations: ['Dépôts publics uniquement.', 'Les revues de code, réactions, commits et discussions GitHub ne sont pas inclus.', 'Quota public partagé limité tant qu’aucun jeton serveur n’est configuré.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   },
   {
     id: 'instagram', name: 'Instagram', status: 'limited', statusLabel: 'Fonctionnalités limitées',

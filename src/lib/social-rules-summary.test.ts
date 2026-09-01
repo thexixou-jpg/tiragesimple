@@ -27,4 +27,10 @@ describe('social contest summaries', () => {
     expect(text).toContain('Une seule chance par identité ActivityPub');
     expect(text).toContain('Votes et abonnement à la communauté non vérifiés');
   });
+  it('limits GitHub summaries to general conversation comments', () => {
+    const text = socialRulesSummary('github', { ...base, requiredKeyword: 'ready' }).join('\n');
+    expect(text).toContain('Commentaires généraux de la conversation inclus');
+    expect(text).toContain('Une seule chance par identifiant utilisateur GitHub');
+    expect(text).toContain('Réactions, commits et statut de contributeur non vérifiés');
+  });
 });

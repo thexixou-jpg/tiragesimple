@@ -10,6 +10,7 @@ import { getImport, listEligibleParticipants, purgeExpiredData } from './storage
 import { createYouTubeDraw } from './youtube-import';
 import { getMastodonPublication, parseMastodonUrl } from './mastodon';
 import { getLemmyPublication, parseLemmyUrl } from './lemmy';
+import { getGitHubPublication, parseGitHubUrl } from './github';
 import type { Env, SocialImportJob, SocialPublication } from './types';
 import worker from './index';
 
@@ -25,7 +26,7 @@ function fixture(maximum = '10000') {
     };
   };
   const jobs: SocialImportJob[] = [];
-  const env = { BLUESKY_ENABLED: 'true', MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr', LEMMY_ENABLED: 'true', LEMMY_ALLOWED_HOSTS: 'lemmy.world,jlai.lu', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
+  const env = { BLUESKY_ENABLED: 'true', MASTODON_ENABLED: 'true', MASTODON_ALLOWED_HOSTS: 'mastodon.social,piaille.fr', LEMMY_ENABLED: 'true', LEMMY_ALLOWED_HOSTS: 'lemmy.world,jlai.lu', GITHUB_ENABLED: 'true', YOUTUBE_ENABLED: 'true', YOUTUBE_API_KEY: 'test-key', SESSION_SIGNING_SECRET: 'test-session-secret', MAX_PARTICIPANTS: maximum,
     PUBLIC_SITE_URL: 'https://example.test',
     DB: { prepare, batch: async (statements: ReturnType<typeof prepare>[]) => {
       sqlite.exec('BEGIN'); try { const result = statements.map(s => s.execute()); sqlite.exec('COMMIT'); return result; }
@@ -40,6 +41,30 @@ const response = (value: unknown) => new Response(JSON.stringify(value), { heade
 afterEach(() => vi.unstubAllGlobals());
 
 describe('official social connectors', () => {
+  it('accepts only canonical public GitHub issue and pull request URLs', () => {
+    expect(parseGitHubUrl('https://github.com/owner/repo/issues/42')).toEqual({ owner: 'owner', repo: 'repo', kind: 'issues', number: '42' });
+    expect(parseGitHubUrl('https://github.com/owner/repo/pull/9')).toMatchObject({ kind: 'pull', number: '9' });
+    for (const url of ['https://evil.test/a/b/issues/1', 'http://github.com/a/b/issues/1', 'https://user:pass@github.com/a/b/issues/1', 'https://github.com.evil.test/a/b/issues/1', 'https://github.com/a/b/issues/../x']) expect(parseGitHubUrl(url)).toBeNull();
+  });
+  it('loads GitHub issue metadata only from api.github.com', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: URL, init?: RequestInit) => {
+      expect(url.origin).toBe('https://api.github.com'); expect(url.pathname).toBe('/repos/octocat/Hello-World/issues/42'); expect(init?.redirect).toBe('manual');
+      expect(new Headers(init?.headers).get('user-agent')).toBe('TirageSimple');
+      return response({ number: 42, title: 'Giveaway', html_url: 'https://github.com/octocat/Hello-World/issues/42', created_at: '2026-08-31', user: { id: 1, login: 'octocat' } });
+    }));
+    expect(await getGitHubPublication('https://github.com/octocat/Hello-World/issues/42', { GITHUB_ENABLED: 'true' })).toMatchObject({ provider: 'github', providerPublicationId: 'octocat|Hello-World|42', authorProviderId: '1' });
+  });
+  it('paginates GitHub comments and deduplicates stable numeric user IDs', async () => {
+    const { env, jobs } = fixture();
+    const comment = (id: number, userId = 2, login = 'alice') => ({ id, node_id: `C_${id}`, body: 'concours', user: { id: userId, login } });
+    vi.stubGlobal('fetch', vi.fn(async (url: URL) => response(url.searchParams.get('page') === '2'
+      ? [comment(101, 1, 'owner'), comment(102, 3, 'bob')]
+      : Array.from({ length: 100 }, (_, index) => comment(index + 1)))));
+    const imported = await queueSocialImport(env, 'session', { provider: 'github', providerPublicationId: 'octocat|Hello-World|42', canonicalUrl: 'https://github.com/octocat/Hello-World/issues/42', authorProviderId: '1' }, normalizeRules({ requiredKeyword: 'concours' }));
+    while (jobs.length) await processSocialImport(jobs.shift()!, env);
+    expect(await getImport(env, imported.id)).toMatchObject({ status: 'ready', progress_current: 102, participant_count: 2 });
+    expect((await listEligibleParticipants(env, imported.id)).map(item => item.providerUserId)).toEqual(['2', '3']);
+  });
   it('accepts only allowlisted Lemmy post URLs', () => {
     const env = { LEMMY_ALLOWED_HOSTS: 'lemmy.world,jlai.lu' };
     expect(parseLemmyUrl('https://jlai.lu/post/42794207', env)).toEqual({ host: 'jlai.lu', postId: '42794207' });
