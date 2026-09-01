@@ -56,7 +56,6 @@ export async function getYouTubeLiveChatSnapshot(providerPublicationId: string, 
     comments.push({
       providerCommentId: item.id,
       providerUserId: item.authorDetails.channelId,
-      username: item.authorDetails.channelUrl?.split('/').filter(Boolean).pop(),
       displayName: item.authorDetails.displayName,
       text: item.snippet.textMessageDetails?.messageText ?? item.snippet.displayMessage ?? '',
       isReply: false,
