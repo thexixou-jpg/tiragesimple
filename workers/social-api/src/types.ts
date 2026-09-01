@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -10,7 +10,7 @@ export interface ContestRules {
   minimumMentions?: number;
   includeReplies: boolean;
   excludePublicationAuthor: boolean;
-  interaction?: 'likes' | 'reposts' | 'answers' | 'comments';
+  interaction?: 'likes' | 'reposts' | 'answers' | 'comments' | 'livechat';
   clientSourced?: boolean;
 }
 

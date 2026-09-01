@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import YouTubeLiveContestTool from '../components/YouTubeLiveContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('youtube_live');
+const schema={ '@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort YouTube Live',url:'https://tiragesimple.fr/tirage-au-sort-youtube-live/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'} };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-youtube-live/">
+  <header class="tool-hero live-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="youtube_live" /><p class="social-status social-status-available">Directs publics en cours</p></div><h1>Tirage au sort YouTube Live</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube"><YouTubeLiveContestTool /><article class="tool-content prose">
+    <h2>Un tirage parmi les personnes actives dans le chat</h2><p>Collez l’URL d’un direct YouTube public encore en cours. TirageSimple vérifie la vidéo et son chat avec l’API YouTube Live Streaming officielle, puis importe l’instantané de messages rendu disponible au moment précis où vous lancez la collecte. Chaque auteur est identifié par l’identifiant stable de sa chaîne YouTube.</p>
+    <h2>Instantané, pas fausse archive exhaustive</h2><p>L’API officielle fournit une partie ou la totalité de l’historique disponible lors du premier appel, puis sert surtout à suivre les nouveaux messages. Cet outil effectue volontairement un instantané ponctuel. Il n’affirme pas avoir observé les messages antérieurs que YouTube n’a pas renvoyés. Le volume analysé est inscrit dans le résultat.</p><p>Pour un concours long, annoncez une période de participation courte et créez l’instantané juste avant le tirage. Un futur mode de collecte continue pourra enregistrer les messages à partir du démarrage explicite de la session.</p>
+    <h2>Règles vérifiables</h2><p>Vous pouvez imposer un mot-clé, donner une seule chance par chaîne ou une chance par message, exclure la chaîne organisatrice et retirer des identifiants précis. Les likes, abonnements, Super Chats, cadeaux, rôles de modération et messages supprimés ne sont pas utilisés comme critères.</p>
+    <h2>Directs terminés et rediffusions</h2><p>Le chat officiel n’est accessible par cette méthode que pendant le direct. Une première, une vidéo programmée sans chat actif ou une rediffusion terminée est refusée clairement. Pour les commentaires publiés sous une vidéo ou un replay, utilisez plutôt le <a href="/tirage-au-sort-youtube/">tirage YouTube classique</a>.</p>
+    <h2>Confidentialité et résultat</h2><p>La liste complète reste privée et expire automatiquement. Le reçu contient le volume, les règles, les gagnants et les empreintes techniques. Un lien public reste optionnel et ne constitue pas une certification indépendante de YouTube.</p>
+    <h2>Questions fréquentes</h2><h3>Les spectateurs silencieux participent-ils ?</h3><p>Non. Seules les chaînes associées à un message texte présent dans l’instantané peuvent participer.</p><h3>Un message payant donne-t-il plus de chances ?</h3><p>Non. Les événements de financement ne sont pas transformés en participations. Seuls les messages texte ordinaires sont traités.</p>
+  </article></div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+<style>.live-hero{background:radial-gradient(circle at 78% 45%,#ff174422,transparent 28%),var(--color-bg)}</style>

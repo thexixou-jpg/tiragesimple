@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -24,6 +24,15 @@ export interface SocialProviderDefinition {
 }
 
 export const socialProviders: SocialProviderDefinition[] = [
+  {
+    id: 'youtube_live', name: 'YouTube Live', status: 'available', statusLabel: 'Disponible · directs en cours',
+    title: 'Tirage au sort YouTube Live : participants du chat en direct',
+    description: 'Tirez des gagnants parmi les auteurs des messages actuellement disponibles dans le chat d’un direct YouTube, avec filtre et comptes uniques.',
+    intro: 'Créez un instantané officiel du chat d’un direct YouTube en cours, puis tirez vos gagnants parmi les auteurs des messages éligibles.',
+    connection: 'API YouTube Live Streaming officielle, sans connexion Google du spectateur.',
+    limitations: ['Direct public en cours avec chat activé uniquement.', 'L’instantané contient les messages rendus disponibles par YouTube au moment de l’import, pas une archive garantie du direct.', 'Les likes, abonnements, Super Chats et messages supprimés ne deviennent pas automatiquement des chances.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
   {
     id: 'bluesky', name: 'Bluesky', status: 'available', statusLabel: 'Disponible',
     title: 'Tirage au sort Bluesky : likes ou reposts | TirageSimple',
