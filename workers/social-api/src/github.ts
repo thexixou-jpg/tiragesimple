@@ -28,6 +28,9 @@ async function githubJson<T>(endpoint: URL, env: Env): Promise<T> {
   try { response = await fetch(endpoint, { signal: AbortSignal.timeout(15000), redirect: 'manual', headers: headers(env) }); }
   catch { throw new ProviderRequestError('GitHub ne répond pas. Une nouvelle tentative sera effectuée.', true); }
   if (!response.ok) {
+    const remaining = response.headers.get('x-ratelimit-remaining');
+    const reset = response.headers.get('x-ratelimit-reset');
+    console.warn('github_api_error', { status: response.status, remaining, reset, requestId: response.headers.get('x-github-request-id') });
     if (response.status === 403 || response.status === 429 || response.status >= 500) throw new ProviderRequestError('Le quota GitHub est atteint ou le service est temporairement indisponible.', true);
     throw new ProviderRequestError(`Issue ou pull request GitHub indisponible (${response.status}). Vérifiez qu’elle est publique.`, false);
   }
