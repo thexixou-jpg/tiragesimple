@@ -63,6 +63,24 @@ export async function createClientSocialImport(env: Env, sessionId: string, publ
   return { id: complete.id, status: complete.status };
 }
 
+/** Turns server-verified, short-lived webhook events into a normal draw import.
+ * Raw message text is deleted by the provider immediately after this succeeds. */
+export async function createRecordedSocialImport(env: Env, sessionId: string, publication: SocialPublication, rules: ContestRules, comments: SocialComment[]) {
+  if (publication.provider !== 'kick') throw new Error('Collecte serveur non autorisée pour cette plateforme.');
+  if (!Array.isArray(comments) || comments.length > 100000) throw new Error('La collecte dépasse la limite de 100 000 messages.');
+  await checkImportAllowance(env, sessionId);
+  const saved = await savePublication(env, publication);
+  const imported = await createImport(env, sessionId, saved, rules, getProviderCapabilities(publication.provider), comments.length);
+  let participants = createParticipants(comments, rules, getProviderCapabilities(publication.provider));
+  if (rules.excludePublicationAuthor) participants = participants.filter(participant => participant.providerUserId !== publication.authorProviderId);
+  const maximum = Math.max(100, Math.min(100000, Number.parseInt(env.MAX_PARTICIPANTS ?? '10000', 10) || 10000));
+  await commitImportPage(env, imported.id, await sha256(`recorded:${publication.provider}:${publication.providerPublicationId}`), participants,
+    rules.duplicateEntries && !rules.uniqueParticipants, comments.length, undefined, maximum);
+  const complete = await getImport(env, imported.id);
+  if (!complete) throw new Error('Impossible de finaliser la collecte Kick.');
+  return { id: complete.id, status: complete.status };
+}
+
 export async function processSocialImport(job: SocialImportJob, env: Env): Promise<void> {
   const context = await getImportContext(env, job.importId);
   if (!context || ['ready', 'failed'].includes(context.import.status) || context.import.expires_at <= new Date().toISOString()) return;

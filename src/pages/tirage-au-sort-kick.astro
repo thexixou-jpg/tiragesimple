@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import KickContestTool from '../components/KickContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider = getSocialProvider('kick');
+const schema = { '@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Kick',url:'https://tiragesimple.fr/tirage-au-sort-kick/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'} };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-kick/">
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+  <header class="tool-hero kick-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="kick" /><p class="social-status social-status-limited">Collecte officielle en temps réel</p></div><h1>Tirage au sort Kick</h1><p>{provider.intro}</p></div></header>
+  <main class="container section"><KickContestTool /><article class="content-section legal-copy"><h2>Un concours Kick sans faux historique</h2><p>L’API officielle Kick transmet les nouveaux messages à TirageSimple au moyen d’un webhook signé. Elle ne fournit pas une archive arbitraire du chat : la période commence uniquement lorsque vous cliquez sur « Démarrer la collecte ».</p><h2>Comment lancer le tirage</h2><ol><li>Connectez la chaîne Kick qui organise le concours.</li><li>Démarrez la collecte juste avant d’annoncer la participation.</li><li>Demandez éventuellement un mot-clé précis dans le chat.</li><li>Arrêtez la collecte, vérifiez le nombre de comptes éligibles et lancez le tirage.</li></ol><h2>Questions fréquentes</h2><h3>Puis-je analyser la chaîne d’un autre streamer ?</h3><p>Non. L’autorisation officielle est liée à la chaîne connectée. TirageSimple ne contourne pas cette restriction.</p><h3>Les viewers silencieux participent-ils ?</h3><p>Non. Ce mode porte sur les auteurs de messages reçus pendant la période de collecte, pas sur la liste privée des spectateurs.</p><h3>Les messages sont-ils conservés ?</h3><p>Ils servent temporairement à appliquer le mot-clé et les chances multiples, puis sont supprimés dès que la liste du tirage est préparée.</p><p>Pour un instantané des personnes actuellement présentes plutôt que des auteurs de messages, utilisez le <a href="/tirage-au-sort-twitch/">tirage Twitch</a>. Pour les messages d’un direct YouTube en cours, utilisez <a href="/tirage-au-sort-youtube-live/">YouTube Live</a>.</p></article></main>
+</BaseLayout>
+<style>.kick-hero{background:radial-gradient(circle at 80% 45%,#53fc1818,transparent 30%),var(--color-bg)}</style>

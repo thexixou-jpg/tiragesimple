@@ -170,6 +170,8 @@ export async function purgeExpiredData(env: Env): Promise<void> {
   if (!env.DB) return;
   const now = new Date().toISOString();
   await env.DB.batch([
+    env.DB.prepare('DELETE FROM kick_collection_messages WHERE collection_id IN (SELECT id FROM kick_collections WHERE expires_at <= ?)').bind(now),
+    env.DB.prepare('DELETE FROM kick_collections WHERE expires_at <= ?').bind(now),
     env.DB.prepare('DELETE FROM contest_winners WHERE draw_id IN (SELECT id FROM contest_draws WHERE expires_at <= ?)').bind(now),
     env.DB.prepare('DELETE FROM contest_draws WHERE expires_at <= ?').bind(now),
     env.DB.prepare('DELETE FROM contest_rules WHERE import_id IN (SELECT id FROM contest_imports WHERE expires_at <= ?)').bind(now),
@@ -184,7 +186,7 @@ export async function purgeExpiredData(env: Env): Promise<void> {
 export async function reserveProviderRequest(env: Env, provider: string): Promise<void> {
   assertDatabase(env);
   // A shared server budget also bounds abuse. No paid quota expansion.
-  const limit = provider === 'youtube' || provider === 'youtube_live' ? 6000 : provider === 'twitch' ? 8000 : provider === 'github' ? (env.GITHUB_API_TOKEN ? 4000 : 50) : provider === 'stackexchange' ? (env.STACKEXCHANGE_API_KEY ? 9000 : 250) : 10000;
+  const limit = provider === 'youtube' || provider === 'youtube_live' ? 6000 : provider === 'twitch' || provider === 'kick' ? 8000 : provider === 'github' ? (env.GITHUB_API_TOKEN ? 4000 : 50) : provider === 'stackexchange' ? (env.STACKEXCHANGE_API_KEY ? 9000 : 250) : 10000;
   const row = await env.DB.prepare(`INSERT INTO provider_usage (provider, usage_date, requests_count) VALUES (?, ?, 1)
     ON CONFLICT(provider, usage_date) DO UPDATE SET requests_count = requests_count + 1 WHERE requests_count < ? RETURNING requests_count`)
     .bind(provider, new Date().toISOString().slice(0, 10), limit).first();

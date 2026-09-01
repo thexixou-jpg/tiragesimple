@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -69,6 +69,10 @@ export interface Env {
   TWITCH_CLIENT_ID?: string;
   TWITCH_CLIENT_SECRET?: string;
   TWITCH_REDIRECT_URI?: string;
+  KICK_ENABLED?: string;
+  KICK_CLIENT_ID?: string;
+  KICK_CLIENT_SECRET?: string;
+  KICK_REDIRECT_URI?: string;
   DATA_ENCRYPTION_KEY?: string;
   ALLOWED_ORIGIN?: string;
   PUBLIC_SITE_URL?: string;

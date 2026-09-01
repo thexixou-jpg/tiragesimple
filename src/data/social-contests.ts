@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'twitch' | 'kick' | 'bluesky' | 'mastodon' | 'lemmy' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -41,6 +41,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'OAuth Twitch avec la permission minimale moderator:read:chatters.',
     limitations: ['Le compte connecté doit être le diffuseur ou un modérateur de la chaîne.', 'La liste Twitch des chatters peut avoir un léger délai lors des arrivées et départs.', 'La présence dans le chat ne prouve ni un message envoyé, ni un abonnement, ni un follow.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'kick', name: 'Kick', status: 'limited', statusLabel: 'OAuth prêt · activation requise',
+    title: 'Tirage au sort Kick : messages du chat en direct',
+    description: 'Collectez officiellement les messages reçus pendant une période définie sur votre chat Kick, puis tirez des gagnants par identifiant unique.',
+    intro: 'Connectez votre propre chaîne Kick, ouvrez une fenêtre de collecte pendant le direct puis choisissez vos gagnants parmi les auteurs des messages reçus.',
+    connection: 'OAuth 2.1 Kick avec PKCE et permission minimale de lecture des événements de la chaîne.',
+    limitations: ['La chaîne connectée doit être celle qui organise le concours.', 'Seuls les messages reçus après le démarrage de la collecte sont inclus : aucun historique n’est inventé.', 'Les follows, abonnements et viewers silencieux ne sont pas utilisés comme participations.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {
     id: 'bluesky', name: 'Bluesky', status: 'available', statusLabel: 'Disponible',

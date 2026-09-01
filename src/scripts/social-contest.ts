@@ -10,7 +10,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -124,13 +124,14 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       if (provider === 'github') return url.hostname.toLowerCase() === 'github.com' && /^\/[A-Za-z0-9][A-Za-z0-9-]{0,38}\/[A-Za-z0-9_.-]{1,100}\/(?:issues|pull)\/[1-9]\d{0,9}\/?$/u.test(url.pathname);
       if (provider === 'stackexchange') return ['stackoverflow.com', 'www.stackoverflow.com'].includes(url.hostname.toLowerCase()) && /^\/questions\/[1-9]\d{0,11}(?:\/[^/]*)?\/?$/u.test(url.pathname);
       if (provider === 'twitch') return ['twitch.tv', 'www.twitch.tv'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_]{4,25}\/?$/u.test(url.pathname);
+      if (provider === 'kick') return ['kick.com', 'www.kick.com'].includes(url.hostname.toLowerCase()) && /^\/[A-Za-z0-9_-]{3,25}\/?$/u.test(url.pathname);
       return ['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
-    } catch { return provider === 'twitch' && /^[A-Za-z0-9_]{4,25}$/u.test(value); }
+    } catch { return provider === 'twitch' && /^[A-Za-z0-9_]{4,25}$/u.test(value) || provider === 'kick' && /^[A-Za-z0-9_-]{3,25}$/u.test(value); }
   };
   const analyze = async () => {
     if (!ready || busy || !form.reportValidity()) return;
     const url = input.value.trim();
-    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
+    if (!eligibleUrl(url)) { say(`Utilisez ${provider === 'twitch' ? 'un login ou un lien de chaîne Twitch' : provider === 'kick' ? 'le login ou le lien de votre chaîne Kick connectée' : `un lien ${provider === 'bluesky' ? 'bsky.app vers une publication' : provider === 'mastodon' ? 'provenant d’une instance Mastodon prise en charge' : provider === 'lemmy' ? 'vers un post d’une instance Lemmy prise en charge' : provider === 'github' ? 'vers une issue ou pull request GitHub publique' : provider === 'stackexchange' ? 'vers une question Stack Overflow publique' : 'YouTube vers une vidéo ou un Short'}`}.`); return; }
     resetDraw();
     const current = ++revision;
     analyzedUrl = ''; clientSourced = false; clientPublication = undefined; importButton.disabled = true; publication.hidden = true;
@@ -155,7 +156,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
         else image.removeAttribute('src');
       }
       analyzedUrl = url; publication.hidden = false; preview.dataset.state = 'ready'; importButton.disabled = false;
-      say('Aperçu prêt. Choisissez vos règles puis lancez l’import.');
+      say(provider === 'kick' ? 'Collecte démarrée. Laissez cette période ouverte pendant votre concours, puis arrêtez-la pour préparer le tirage.' : 'Aperçu prêt. Choisissez vos règles puis lancez l’import.');
     } catch (error) {
       if (current !== revision) return;
       preview.dataset.state = 'error'; say(errorText(error));
@@ -163,7 +164,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   };
   const readRules = () => {
     const data = new FormData(form);
-    const commentProvider = provider === 'youtube' || provider === 'youtube_live' || provider === 'lemmy' || provider === 'github' || provider === 'stackexchange';
+    const commentProvider = provider === 'youtube' || provider === 'youtube_live' || provider === 'kick' || provider === 'lemmy' || provider === 'github' || provider === 'stackexchange';
     const replyProvider = provider === 'youtube' || provider === 'lemmy';
     const duplicateEntries = commentProvider && data.get('duplicateEntries') === 'on';
     return { winnerCount: Number(data.get('winnerCount')), alternateCount: Number(data.get('alternateCount')),
@@ -172,14 +173,14 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
       excludePublicationAuthor: data.get('excludePublicationAuthor') === 'on',
       requiredKeyword: commentProvider ? String(data.get('requiredKeyword') || '').trim() : undefined,
       excludedUsers: String(data.get('excludedUsers') || '').split(/[\n,]/u).map(v => v.trim().replace(/^@/u, '')).filter(Boolean),
-      ...(provider === 'youtube_live' ? { interaction: 'livechat' as const } : !commentProvider || provider === 'stackexchange' ? { interaction: String(data.get('interaction')) } : {}),
+      ...(provider === 'youtube_live' || provider === 'kick' ? { interaction: 'livechat' as const } : !commentProvider || provider === 'stackexchange' ? { interaction: String(data.get('interaction')) } : {}),
     };
   };
   const poll = async (id: string, current: number) => {
     try {
       const { import: state } = await request<{ import: ImportState }>(`/v1/imports/${id}`);
       if (current !== revision || id !== importId) return;
-      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' ? 'événements du chat analysés' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
+      progress.textContent = `${state.progress_current} ${provider === 'twitch' ? 'comptes présents analysés' : provider === 'youtube_live' || provider === 'kick' ? 'messages du chat analysés' : provider === 'youtube' || provider === 'lemmy' ? 'commentaires et réponses analysés' : provider === 'github' ? 'commentaires analysés' : provider === 'stackexchange' ? 'contributions analysées' : 'interactions analysées'} · ${state.participant_count} comptes éligibles`;
       if (state.status === 'failed') { lock(false); say(state.error_message || 'Import interrompu. Aucun tirage partiel ne sera effectué.'); return; }
       if (state.status === 'ready') {
         lock(false);
@@ -263,7 +264,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
   });
   void request<{ providers: Record<string, string> }>('/v1/providers').then(data => {
     ready = data.providers[provider] === 'enabled';
-    say(ready ? 'Prêt. Collez le lien de votre publication.' : 'Ce connecteur est temporairement indisponible.');
-    if (ready && eligibleUrl(input.value.trim())) void analyze();
+    say(ready ? provider === 'kick' ? 'Prêt. Connectez votre chaîne puis démarrez la collecte au début du concours.' : 'Prêt. Collez le lien de votre publication.' : 'Ce connecteur est temporairement indisponible.');
+    if (ready && provider !== 'kick' && eligibleUrl(input.value.trim())) void analyze();
   }).catch(error => say(errorText(error)));
 }
