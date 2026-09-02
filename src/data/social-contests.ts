@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'devto' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'devto' | 'hackernews' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -166,6 +166,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     intro: 'Importez tout le fil de commentaires d’un article DEV.to public et tirez vos gagnants avec les identifiants stables des membres.',
     connection: 'API Forem officielle de DEV Community, accessible en lecture publique sans clé API.',
     limitations: ['Articles publics de dev.to uniquement.', 'Les réactions et abonnés ne sont pas exposés comme listes de participants.', 'Les commentaires masqués ou sans compte identifiable sont exclus.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
+  {
+    id: 'hackernews', name: 'Hacker News', status: 'available', statusLabel: 'Disponible · sans connexion',
+    title: 'Tirage au sort Hacker News : commentaires d’une publication',
+    description: 'Tirez des gagnants parmi les commentaires et réponses d’une publication Hacker News publique, avec membres uniques, filtres et exclusions.',
+    intro: 'Importez progressivement tout le fil d’une publication Hacker News et tirez vos gagnants parmi les comptes identifiés.',
+    connection: 'API officielle Hacker News hébergée par Firebase, publique et accessible sans clé.',
+    limitations: ['Publications publiques news.ycombinator.com uniquement.', 'Les commentaires supprimés, morts ou anonymes sont exclus mais leurs réponses restent parcourues.', 'Les votes, le karma et l’abonnement ne sont pas des critères de participation.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {

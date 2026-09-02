@@ -17,6 +17,7 @@ export const providerCapabilities: Record<ProviderId, ProviderCapabilities> = {
   github: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   gitlab: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   devto: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  hackernews: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   stackexchange: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   instagram: { comments: true, likes: false, reposts: false, mentions: true, followers: false, replies: true },
   facebook: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
@@ -46,6 +47,7 @@ export function providerStatus(env: Env): Record<ProviderId, string> {
     github: env.GITHUB_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     gitlab: env.GITLAB_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     devto: env.DEVTO_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
+    hackernews: env.HACKERNEWS_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     stackexchange: env.STACKEXCHANGE_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     instagram: 'limited', facebook: 'limited', x: 'disabled', tiktok: 'unsupported',
   };

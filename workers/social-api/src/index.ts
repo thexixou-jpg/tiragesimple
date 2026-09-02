@@ -22,6 +22,7 @@ import { getSoundCloudPublication } from './soundcloud';
 import { getMixcloudPublication } from './mixcloud';
 import { getGitLabPublication } from './gitlab';
 import { getDevPublication } from './devto';
+import { getHackerNewsPublication } from './hackernews';
 
 function allowOrigin(request: Request, env: Env): string {
   const configured = env.ALLOWED_ORIGIN ?? 'https://tiragesimple.fr';
@@ -89,7 +90,7 @@ function publicDrawPage(payload: Record<string, unknown>): string {
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101220;color:#eff1ff;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(calc(100% - 2rem),52rem);margin:clamp(1rem,5vw,4rem) auto}.card{padding:clamp(1.25rem,4vw,2.5rem);border:1px solid #343953;border-radius:24px;background:#191d30}.tag{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:#2a294c;color:#c5baff;font-size:.8rem;font-weight:700}h1{font-size:clamp(1.5rem,5vw,2.4rem);line-height:1.2;letter-spacing:-.04em}h2{font-size:1.2rem;margin-top:2rem}a{color:#c1b3ff}a:focus-visible,summary:focus-visible{outline:2px solid #fff;outline-offset:4px}p,h1,strong,li,a,code{overflow-wrap:anywhere}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}.stats div{padding:1rem;background:#101524;border-radius:14px}.stats strong{display:block;font-size:1.7rem}.stats span,small{color:#b7bed4}.winners{padding:0;list-style:none}.winners li{display:flex;flex-wrap:wrap;padding:1rem;justify-content:space-between;gap:.5rem 1rem;border-radius:12px;background:#242b44}.winners li+li{margin-top:.5rem}.winners span{color:#c4cbe0}.rules{padding-left:1.2rem;color:#d1d7eb}.rules li+li{margin-top:.45rem}.proof{margin-top:2rem;padding:1rem;border:1px solid #343953;border-radius:14px;background:#111628}.proof summary{cursor:pointer;font-weight:700}.proof dl{margin-bottom:0}.proof dt{margin-top:.8rem;color:#b7bed4;font-size:.8rem}.proof dd{margin:.15rem 0 0}.proof code{display:block;padding:.55rem;border-radius:8px;background:#090c16;font-size:.72rem;word-break:break-all;user-select:all}footer{border-top:1px solid #343953;margin-top:2rem;padding-top:1rem}footer p{margin-bottom:0}@media(max-width:360px){.stats{grid-template-columns:1fr}}
 </style></head><body><main class="wrap"><article class="card">
-<a href="https://tiragesimple.fr/">TirageSimple</a><p><span class="tag">Résultat partagé · ${escapeHtml(draw.platform === 'youtube' ? 'YouTube' : draw.platform === 'youtube_live' ? 'YouTube Live' : draw.platform === 'vimeo' ? 'Vimeo' : draw.platform === 'soundcloud' ? 'SoundCloud' : draw.platform === 'mixcloud' ? 'Mixcloud' : draw.platform === 'twitch' ? 'Twitch' : draw.platform === 'kick' ? 'Kick' : draw.platform === 'trovo' ? 'Trovo' : draw.platform === 'discord' ? 'Discord' : draw.platform === 'mastodon' ? 'Mastodon' : draw.platform === 'lemmy' ? 'Lemmy' : draw.platform === 'reddit' ? 'Reddit' : draw.platform === 'github' ? 'GitHub' : draw.platform === 'gitlab' ? 'GitLab' : draw.platform === 'devto' ? 'DEV Community' : draw.platform === 'stackexchange' ? 'Stack Overflow' : 'Bluesky')}</span></p>
+<a href="https://tiragesimple.fr/">TirageSimple</a><p><span class="tag">Résultat partagé · ${escapeHtml(draw.platform === 'youtube' ? 'YouTube' : draw.platform === 'youtube_live' ? 'YouTube Live' : draw.platform === 'vimeo' ? 'Vimeo' : draw.platform === 'soundcloud' ? 'SoundCloud' : draw.platform === 'mixcloud' ? 'Mixcloud' : draw.platform === 'twitch' ? 'Twitch' : draw.platform === 'kick' ? 'Kick' : draw.platform === 'trovo' ? 'Trovo' : draw.platform === 'discord' ? 'Discord' : draw.platform === 'mastodon' ? 'Mastodon' : draw.platform === 'lemmy' ? 'Lemmy' : draw.platform === 'reddit' ? 'Reddit' : draw.platform === 'github' ? 'GitHub' : draw.platform === 'gitlab' ? 'GitLab' : draw.platform === 'devto' ? 'DEV Community' : draw.platform === 'hackernews' ? 'Hacker News' : draw.platform === 'stackexchange' ? 'Stack Overflow' : 'Bluesky')}</span></p>
 <h1>Tirage ${escapeHtml(draw.id)}</h1><p>${date(draw.createdAt)} (heure de Paris)</p>
 <p><a href="${escapeHtml(draw.publication.url)}" rel="noopener noreferrer">${escapeHtml(draw.publication.title || 'Voir la publication')}</a></p>
 <div class="stats"><div><strong>${escapeHtml(draw.participantCount)}</strong><span>comptes éligibles</span></div><div><strong>${escapeHtml(draw.analyzedCount)}</strong><span>interactions analysées</span></div></div>
@@ -252,7 +253,7 @@ export default {
         return json({ error: error instanceof Error ? error.message : 'Impossible de traiter la collecte navigateur.' }, backendUnavailable(error) ? 503 : 400, origin);
       }
     }
-    const providerMatch = pathname.match(/^\/v1\/(youtube|youtube_live|vimeo|soundcloud|mixcloud|discord|bluesky|mastodon|lemmy|reddit|github|gitlab|devto|stackexchange)\/(publication|imports)$/u);
+    const providerMatch = pathname.match(/^\/v1\/(youtube|youtube_live|vimeo|soundcloud|mixcloud|discord|bluesky|mastodon|lemmy|reddit|github|gitlab|devto|hackernews|stackexchange)\/(publication|imports)$/u);
     if (request.method === 'POST' && providerMatch) {
       try {
         if (request.headers.get('Origin') && request.headers.get('Origin') !== origin) return json({ error: 'Origine non autorisée.' }, 403, origin);
@@ -273,7 +274,8 @@ export default {
                 : provider === 'reddit' ? await getRedditPublication(input.url, env)
                 : provider === 'github' ? await getGitHubPublication(input.url, env)
                 : provider === 'gitlab' ? await getGitLabPublication(input.url, env)
-                : provider === 'devto' ? await getDevPublication(input.url, env) : await getStackExchangePublication(input.url, env);
+                : provider === 'devto' ? await getDevPublication(input.url, env)
+                : provider === 'hackernews' ? await getHackerNewsPublication(input.url, env) : await getStackExchangePublication(input.url, env);
         if (providerMatch[2] === 'publication') return json({ publication }, 200, origin);
         const rules = normalizeRules(input.rules ?? {});
         if ((provider === 'youtube' || provider === 'youtube_live') && rules.excludedUsers.some(id => !/^UC[\w-]{22}$/u.test(id))) throw new Error('Utilisez les identifiants de chaîne UC… pour les exclusions YouTube, pas les noms affichés.');
@@ -328,6 +330,10 @@ export default {
           if (input.rules?.interaction !== undefined || rules.minimumMentions) throw new Error('DEV Community importe uniquement les commentaires publics et leurs réponses.');
           if (rules.excludedUsers.some(value => !/^(?:[1-9]\d{0,19}|[A-Za-z0-9_-]{2,100})$/u.test(value))) throw new Error('Utilisez un nom utilisateur ou un identifiant numérique DEV Community valide pour les exclusions.');
           rules.excludedUsers = rules.excludedUsers.map(value => value.toLocaleLowerCase('fr-FR'));
+        }
+        if (provider === 'hackernews') {
+          if (input.rules?.interaction !== undefined || rules.minimumMentions) throw new Error('Hacker News importe uniquement les commentaires publics et leurs réponses.');
+          if (rules.excludedUsers.some(value => !/^[A-Za-z0-9_-]{2,100}$/u.test(value))) throw new Error('Utilisez les identifiants exacts et sensibles à la casse des membres Hacker News.');
         }
         if (provider === 'stackexchange') {
           if (!['answers', 'comments'].includes(input.rules?.interaction ?? '')) throw new Error('Choisissez les réponses ou les commentaires de la question.');

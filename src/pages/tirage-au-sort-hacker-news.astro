@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HackerNewsContestTool from '../components/HackerNewsContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('hackernews');
+const faq=[
+  {q:'Quelles publications Hacker News sont compatibles ?',a:'Les stories, Ask HN, Show HN et sondages publics accessibles avec une URL news.ycombinator.com/item?id=… peuvent être analysés.'},
+  {q:'Faut-il connecter un compte Hacker News ?',a:'Non. L’API officielle est publique et ne demande ni mot de passe, ni cookie, ni clé personnelle.'},
+  {q:'Les réponses imbriquées sont-elles incluses ?',a:'Oui si vous activez l’option. Le fil est parcouru progressivement par lots pour ne pas bloquer le navigateur.'},
+  {q:'Les votes et le karma influencent-ils le tirage ?',a:'Non. Seule la présence d’un commentaire public éligible compte. Le score et le karma ne sont jamais utilisés.'},
+];
+const schema=[
+  {'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Hacker News',url:'https://tiragesimple.fr/tirage-au-sort-hacker-news/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}},
+  {'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(item=>({'@type':'Question',name:item.q,acceptedAnswer:{'@type':'Answer',text:item.a}}))},
+];
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-hacker-news/">
+  <header class="tool-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="hackernews" /><p class="social-status social-status-available">Discussions publiques · sans connexion</p></div><h1>Tirage au sort Hacker News</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube"><HackerNewsContestTool /><article class="tool-content prose">
+    <h2>Tirer au sort parmi les commentaires Hacker News</h2><p>Collez le lien d’une discussion publique : story classique, Ask HN, Show HN ou sondage. L’aperçu vérifie la publication avant l’import. Vous pouvez ensuite choisir les gagnants, les suppléants, un filtre de texte facultatif et les comptes à exclure.</p>
+    <h2>Import complet traité par lots</h2><p>L’API Hacker News expose chaque commentaire séparément et fournit les identifiants de ses réponses. TirageSimple parcourt donc l’arbre par lots côté serveur, affiche la progression et refuse d’activer le tirage tant que la discussion n’est pas complètement collectée. Cette architecture évite de figer le navigateur sur les longs fils.</p>
+    <h2>Une chance par compte ou par commentaire</h2><p>Les utilisateurs Hacker News sont identifiés par leur nom de compte unique et sensible à la casse, tel que défini par l’API officielle. Vous pouvez accorder une seule chance par compte ou une chance par commentaire éligible. Dans les deux cas, un même compte ne peut occuper qu’une seule place parmi les gagnants et suppléants.</p>
+    <h2>Ce qui est réellement vérifié</h2><p>Les commentaires publics comportant un auteur sont éligibles. Les éléments supprimés, morts ou sans auteur sont exclus, mais leurs descendants restent parcourus afin de ne pas perdre les réponses valides. Les votes, le score de la publication, le karma et tout éventuel abonnement ne sont jamais utilisés comme critères.</p>
+    <h2>Résultat et confidentialité</h2><p>Le tirage emploie une source aléatoire cryptographiquement robuste. Un reçu JSON permet de conserver les paramètres et empreintes ; le partage public reste facultatif et ne révèle jamais la liste complète des participants. Les données normalisées sont conservées temporairement selon la politique du site.</p>
+    <h2>Questions fréquentes</h2>{faq.map(item=><><h3>{item.q}</h3><p>{item.a}</p></>)}<p>Pour d’autres communautés techniques, découvrez aussi le <a href="/tirage-au-sort-devto/">tirage DEV Community</a>, le <a href="/tirage-au-sort-github/">tirage GitHub</a> et le <a href="/tirage-au-sort-stack-overflow/">tirage Stack Overflow</a>.</p>
+  </article></div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
