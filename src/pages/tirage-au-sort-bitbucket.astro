@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BitbucketContestTool from '../components/BitbucketContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('bitbucket');
+const faq=[
+  {q:'Quelles pull requests Bitbucket sont compatibles ?',a:'Les pull requests de dépôts publics hébergés sur Bitbucket Cloud. Les dépôts privés et Bitbucket Data Center ne sont pas annoncés comme compatibles.'},
+  {q:'Les commentaires attachés au code sont-ils inclus ?',a:'Oui. L’import couvre les commentaires généraux et inline fournis par l’API, ainsi que leurs réponses lorsque vous activez cette option.'},
+  {q:'Faut-il connecter un compte Atlassian ?',a:'Non pour les dépôts publics, mais les requêtes anonymes partagent un quota strict. TirageSimple affiche une erreur claire si ce quota est temporairement épuisé.'},
+  {q:'Comment les doublons sont-ils détectés ?',a:'La déduplication utilise l’UUID stable du compte Bitbucket, pas seulement son nom affiché ou son nickname.'},
+];
+const schema=[
+  {'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Bitbucket',url:'https://tiragesimple.fr/tirage-au-sort-bitbucket/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}},
+  {'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(item=>({'@type':'Question',name:item.q,acceptedAnswer:{'@type':'Answer',text:item.a}}))},
+];
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-bitbucket/">
+  <header class="tool-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="bitbucket" /><p class="social-status social-status-available">Pull requests publiques · sans connexion</p></div><h1>Tirage au sort Bitbucket</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube"><BitbucketContestTool /><article class="tool-content prose">
+    <h2>Tirer au sort parmi les commentaires d’une pull request</h2><p>Collez l’adresse principale d’une pull request Bitbucket Cloud publique. L’aperçu confirme le titre, l’auteur et la date avant l’import. Vous choisissez ensuite les gagnants, les suppléants, un filtre de texte facultatif et les comptes à exclure.</p>
+    <h2>Commentaires généraux, code et réponses</h2><p>L’API officielle réunit les commentaires placés sur la conversation et ceux attachés à une ligne du diff. TirageSimple les traite de la même façon. Les réponses peuvent être incluses ou écartées selon le règlement du concours ; les commentaires supprimés et ceux encore en attente ne participent jamais.</p>
+    <h2>Déduplication avec l’UUID Bitbucket</h2><p>Le nom affiché et le nickname peuvent évoluer. L’outil identifie donc chaque participant avec l’UUID de compte renvoyé par Bitbucket. Si chaque commentaire donne une chance, les chances s’additionnent mais une même identité ne peut occuper qu’une place parmi les gagnants et suppléants.</p>
+    <h2>Quota public et limites annoncées</h2><p>La lecture anonyme est possible sur les dépôts publics, mais Atlassian applique une limite stricte aux requêtes non authentifiées. TirageSimple borne son propre usage et interrompt proprement l’import si le service n’est pas disponible. Les approbations, commits, tâches, membres du dépôt et statut humain ou automatisé d’un compte ne sont pas utilisés comme critères.</p>
+    <h2>Résultat transparent et données temporaires</h2><p>Le tirage utilise une source aléatoire cryptographiquement robuste. Le reçu JSON conserve les règles et empreintes techniques ; une page publique peut être créée uniquement si vous le demandez et ne publie jamais la liste complète des participants.</p>
+    <h2>Questions fréquentes</h2>{faq.map(item=><><h3>{item.q}</h3><p>{item.a}</p></>)}<p>Vous utilisez plusieurs forges ? Essayez également le <a href="/tirage-au-sort-github/">tirage GitHub</a> ou le <a href="/tirage-au-sort-gitlab/">tirage GitLab</a>.</p>
+  </article></div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

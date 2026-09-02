@@ -1,0 +1,48 @@
+---
+const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
+---
+<section class="tool-shell bitbucket-tool" data-social-contest data-provider="bitbucket" data-api-url={apiUrl} aria-labelledby="bitbucket-import-title">
+  <div class="tool-panel-intro"><div><p class="eyebrow">API Bitbucket Cloud officielle · Dépôts publics</p><h2 id="bitbucket-import-title">Importez une conversation de pull request.</h2><p>Collez son URL : l’aperçu confirme la source avant de parcourir les commentaires généraux, les échanges de code et leurs réponses.</p></div></div>
+  <form class="social-import-form" data-contest-form>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Pull request du concours</strong><small>Le dépôt et la pull request doivent être publics sur bitbucket.org.</small></div></div>
+      <label class="field"><span>URL Bitbucket Cloud</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://bitbucket.org/workspace/depot/pull-requests/…" required data-video-url /><small>Utilisez l’adresse principale de la pull request, sans onglet ni paramètre ajouté.</small></label>
+      <aside class="youtube-preview bitbucket-preview" data-preview data-state="idle" aria-live="polite"><div class="youtube-preview__empty"><span aria-hidden="true">BB</span><div><strong>Aperçu de la pull request</strong><small>Le titre, l’auteur et la date apparaîtront ici.</small></div></div><div class="bitbucket-pr" data-publication hidden><p class="eyebrow">Pull request sélectionnée</p><p data-publication-title></p><small data-publication-meta></small></div></aside>
+    </div>
+    <div class="bitbucket-settings">
+      <div class="youtube-form-section">
+        <div class="youtube-section-heading"><span>02</span><div><strong>Format du tirage</strong><small>Choisissez les places et les filtres.</small></div></div>
+        <div class="form-row"><label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label><label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label></div>
+        <label class="field"><span>Mot ou expression obligatoire <small>facultatif</small></span><input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. approved" /><small>Le filtre s’applique au texte brut fourni par Bitbucket.</small></label>
+        <label class="field"><span>Comptes à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="nickname, {uuid}" /><small>Noms de compte ou UUID Bitbucket, séparés par une virgule.</small></label>
+      </div>
+      <div class="youtube-form-section">
+        <div class="youtube-section-heading"><span>03</span><div><strong>Éligibilité</strong><small>Les commentaires supprimés ou en attente sont toujours exclus.</small></div></div>
+        <div class="social-rule-grid bitbucket-rule-grid">
+          <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par UUID de compte.</small></span></label>
+          <label class="option-card"><input name="includeReplies" type="checkbox" checked /><span><strong>Inclure les réponses</strong><small>Les réponses aux fils de revue participent aussi.</small></span></label>
+          <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>Le créateur de la pull request ne participe pas.</small></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="actions"><button class="button button-secondary" type="submit">Analyser la pull request</button><button class="button button-primary" type="button" data-import disabled>Importer tous les commentaires</button></div>
+  </form>
+  <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
+  <div class="social-draw-panel" data-draw hidden><p data-progress></p><section class="social-rules-summary" aria-label="Règles appliquées"><h3>Ce que le tirage vérifie</h3><p>Les règles sont figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section><label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>La source, les gagnants, les règles et les empreintes sont partagés, jamais la liste complète.</small></span></label><button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button><div class="result-card" data-result hidden></div></div>
+</section>
+<script>import '../scripts/social-contest';</script>
+<style>
+  .bitbucket-tool { --color-primary:#2684ff; }
+  .bitbucket-tool .youtube-form-section { border-color:color-mix(in srgb,#2684ff 30%,var(--color-border)); }
+  .bitbucket-tool .youtube-form-section--source { background:linear-gradient(130deg,color-mix(in srgb,#2684ff 10%,var(--color-surface)),color-mix(in srgb,#0052cc 5%,var(--color-surface))); }
+  .bitbucket-tool .youtube-section-heading > span { color:#fff;background:linear-gradient(135deg,#579dff,#0052cc);box-shadow:0 7px 18px color-mix(in srgb,#2684ff 25%,transparent); }
+  .bitbucket-preview { margin-top:1rem;border-color:color-mix(in srgb,#2684ff 35%,var(--color-border));background:var(--color-surface);color:var(--color-text); }
+  .bitbucket-preview::after { background:none; }
+  .bitbucket-preview .youtube-preview__empty > span { background:linear-gradient(135deg,#579dff,#0052cc);color:#fff;border:0;font-size:.75rem;font-weight:900; }
+  .bitbucket-preview .youtube-preview__empty small,.bitbucket-pr small { color:var(--color-text-muted); }
+  .bitbucket-pr { padding:1.35rem;overflow-wrap:anywhere; }
+  .bitbucket-pr > p[data-publication-title] { margin:.35rem 0;font-size:1.12rem;font-weight:800;line-height:1.45; }
+  .bitbucket-settings { display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:1rem; }
+  .bitbucket-rule-grid { grid-template-columns:1fr; }
+  @media (max-width:800px) { .bitbucket-settings { grid-template-columns:1fr; } }
+</style>

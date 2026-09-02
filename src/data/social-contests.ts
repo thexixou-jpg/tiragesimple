@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'devto' | 'hackernews' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -158,6 +158,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API REST et GraphQL officielles de GitLab.com, sans connexion pour les projets publics.',
     limitations: ['Projets publics sur gitlab.com uniquement.', 'Les notes système, internes et confidentielles sont exclues.', 'Les discussions de revue de code, approbations, commits et réactions ne sont pas incluses.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'bitbucket', name: 'Bitbucket', status: 'available', statusLabel: 'Disponible · dépôts publics',
+    title: 'Tirage au sort Bitbucket : commentaires de pull request',
+    description: 'Tirez des gagnants parmi les commentaires et réponses d’une pull request Bitbucket Cloud publique, avec comptes uniques et filtres.',
+    intro: 'Importez les commentaires d’une pull request publique, y compris les échanges attachés au code, puis tirez vos gagnants avec les UUID de compte.',
+    connection: 'API REST officielle Bitbucket Cloud, sans connexion pour les dépôts publics et dans la limite du quota anonyme.',
+    limitations: ['Dépôts et pull requests publics sur bitbucket.org uniquement.', 'Le quota anonyme partagé est limité à 60 requêtes par heure par adresse serveur.', 'Les approbations, commits, tâches et comptes automatisés non explicitement identifiés ne sont pas utilisés.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {
     id: 'devto', name: 'DEV Community', status: 'available', statusLabel: 'Disponible · sans connexion',
