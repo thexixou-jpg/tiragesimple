@@ -65,7 +65,7 @@ for (const file of pages) {
   }
   const isSocialInformationPage = page === 'tirage-au-sort-reseaux-sociaux/index.html' || page.startsWith('tirage-au-sort-instagram/') || page.startsWith('tirage-au-sort-youtube/') || page.startsWith('tirage-au-sort-x/') || page.startsWith('tirage-au-sort-tiktok/') || page.startsWith('tirage-au-sort-facebook/');
   const acceptedStructuredTypes = new Set(['WebApplication', 'Article', 'AboutPage', 'CollectionPage']);
-  const hasAcceptedStructuredData = schemas.some((schema) => acceptedStructuredTypes.has(schema['@type'])
+  const hasAcceptedStructuredData = schemas.flatMap((schema) => Array.isArray(schema) ? schema : [schema]).some((schema) => acceptedStructuredTypes.has(schema['@type'])
     || schema['@graph']?.some((item) => acceptedStructuredTypes.has(item['@type'])));
   if (page !== 'index.html' && page !== '404.html' && page !== 'mentions-legales/index.html' && page !== 'confidentialite/index.html' && page !== 'cookies/index.html' && !isSocialInformationPage
     && !hasAcceptedStructuredData) {
@@ -122,6 +122,7 @@ else {
     'https://tiragesimple.fr/tirage-au-sort-lemmy/',
     'https://tiragesimple.fr/tirage-au-sort-github/',
     'https://tiragesimple.fr/tirage-au-sort-stack-overflow/',
+    'https://tiragesimple.fr/tirage-au-sort-wordpress/',
     'https://tiragesimple.fr/roue-des-prenoms/',
     'https://tiragesimple.fr/roue-alphabet/',
     'https://tiragesimple.fr/a-propos/',

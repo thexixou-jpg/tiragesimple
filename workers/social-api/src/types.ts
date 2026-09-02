@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -74,6 +74,7 @@ export interface Env {
   HACKERNEWS_ENABLED?: string;
   STACKEXCHANGE_ENABLED?: string;
   STACKEXCHANGE_API_KEY?: string;
+  WORDPRESS_ENABLED?: string;
   YOUTUBE_API_KEY?: string;
   VIMEO_ENABLED?: string;
   VIMEO_CLIENT_ID?: string;

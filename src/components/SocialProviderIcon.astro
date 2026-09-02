@@ -1,6 +1,6 @@
 ---
 import type { SimpleIcon } from 'simple-icons';
-import { siBitbucket, siBluesky, siDevdotto, siDiscord, siFacebook, siGithub, siGitlab, siInstagram, siKick, siLemmy, siMastodon, siMixcloud, siReddit, siSoundcloud, siStackoverflow, siTiktok, siTwitch, siVimeo, siX, siYcombinator, siYoutube } from 'simple-icons';
+import { siBitbucket, siBluesky, siDevdotto, siDiscord, siFacebook, siGithub, siGitlab, siInstagram, siKick, siLemmy, siMastodon, siMixcloud, siReddit, siSoundcloud, siStackoverflow, siTiktok, siTwitch, siVimeo, siWordpress, siX, siYcombinator, siYoutube } from 'simple-icons';
 import type { SocialProviderId } from '../data/social-contests';
 
 interface Props { provider: SocialProviderId; }
@@ -13,6 +13,7 @@ const icons: Partial<Record<SocialProviderId, SimpleIcon>> = {
   devto:siDevdotto,
   hackernews:siYcombinator,
   stackexchange:siStackoverflow, instagram:siInstagram, facebook:siFacebook,
+  wordpress:siWordpress,
   x:siX, tiktok:siTiktok, reddit:siReddit,
 };
 const icon=icons[provider];

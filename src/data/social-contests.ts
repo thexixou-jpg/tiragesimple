@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -194,6 +194,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API publique Stack Exchange, sans mot de passe ni connexion.',
     limitations: ['Questions publiques de Stack Overflow uniquement.', 'Choisissez les réponses ou les commentaires de la question, sans les combiner.', 'Les utilisateurs supprimés sans identifiant stable ne sont pas éligibles.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'wordpress', name: 'WordPress.com', status: 'available', statusLabel: 'Disponible · blogs publics',
+    title: 'Tirage au sort WordPress.com : commentaires d’un article',
+    description: 'Tirez gratuitement des gagnants parmi les commentaires et réponses d’un article WordPress.com public, avec comptes uniques et filtres.',
+    intro: 'Importez les commentaires approuvés d’un article WordPress.com public, puis tirez vos gagnants parmi les comptes possédant un identifiant stable.',
+    connection: 'API REST publique officielle WordPress.com, sans connexion pour les articles et commentaires publics.',
+    limitations: ['Articles publics hébergés sur un sous-domaine wordpress.com uniquement.', 'Les commentaires invités sans compte WordPress.com identifiable sont exclus pour éviter une fausse déduplication par nom.', 'Likes, abonnés, vues, adresses e-mail et commentaires non approuvés ne sont pas utilisés.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {
     id: 'instagram', name: 'Instagram', status: 'limited', statusLabel: 'Fonctionnalités limitées',

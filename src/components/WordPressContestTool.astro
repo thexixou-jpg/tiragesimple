@@ -1,0 +1,52 @@
+---
+const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
+---
+<section class="tool-shell wordpress-tool" data-social-contest data-provider="wordpress" data-api-url={apiUrl} aria-labelledby="wordpress-import-title">
+  <div class="tool-panel-intro"><div><p class="eyebrow">API WordPress.com officielle · Sans connexion</p><h2 id="wordpress-import-title">Transformez les commentaires d’un article en tirage.</h2><p>Collez le lien d’un article public : l’aperçu confirme la source, puis l’import parcourt les commentaires approuvés et leurs réponses.</p></div></div>
+  <form class="social-import-form" data-contest-form>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Article du concours</strong><small>Le contenu doit être public et hébergé sur un sous-domaine wordpress.com.</small></div></div>
+      <label class="field"><span>URL de l’article WordPress.com</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://monblog.wordpress.com/2026/09/mon-concours/" required data-video-url /><small>Les sites WordPress auto-hébergés ne sont pas encore compatibles.</small></label>
+      <aside class="youtube-preview wp-preview" data-preview data-state="idle" aria-live="polite"><div class="youtube-preview__empty"><span aria-hidden="true">W</span><div><strong>Aperçu de l’article</strong><small>Image mise en avant, titre, auteur et date apparaîtront ici.</small></div></div><div class="wp-post" data-publication hidden><img data-thumbnail hidden alt="" /><div><p class="eyebrow">Article sélectionné</p><p data-publication-title></p><small data-publication-meta></small></div></div></aside>
+    </div>
+    <div class="wp-settings">
+      <div class="youtube-form-section">
+        <div class="youtube-section-heading"><span>02</span><div><strong>Format du tirage</strong><small>Définissez les places, le mot-clé et les exclusions.</small></div></div>
+        <div class="form-row"><label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label><label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label></div>
+        <label class="field"><span>Mot ou expression obligatoire <small>facultatif</small></span><input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. je participe" /><small>Recherche sans distinction entre majuscules et minuscules.</small></label>
+        <label class="field"><span>Comptes à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="admin, 123456" /><small>Logins WordPress.com ou identifiants numériques, séparés par une virgule.</small></label>
+      </div>
+      <div class="youtube-form-section">
+        <div class="youtube-section-heading"><span>03</span><div><strong>Éligibilité transparente</strong><small>Seuls les comptes WordPress.com identifiables participent.</small></div></div>
+        <div class="social-rule-grid wp-rule-grid">
+          <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par compte.</small></span></label>
+          <label class="option-card"><input name="includeReplies" type="checkbox" checked /><span><strong>Inclure les réponses</strong><small>Les réponses approuvées sont ajoutées au tirage.</small></span></label>
+          <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>Le compte de l’auteur de l’article ne participe pas.</small></span></label>
+        </div>
+        <p class="wp-notice"><strong>Protection anti-doublon :</strong> les visiteurs invités sans identifiant WordPress.com sont exclus, car un nom affiché seul ne prouve pas une identité unique.</p>
+      </div>
+    </div>
+    <div class="actions"><button class="button button-secondary" type="submit">Analyser l’article</button><button class="button button-primary" type="button" data-import disabled>Importer les commentaires</button></div>
+  </form>
+  <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
+  <div class="social-draw-panel" data-draw hidden><p data-progress></p><section class="social-rules-summary" aria-label="Règles appliquées"><h3>Ce que le tirage vérifie</h3><p>Les règles sont figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section><label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>La source, les gagnants, les règles et les empreintes sont partagés, jamais la liste complète.</small></span></label><button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button><div class="result-card" data-result hidden></div></div>
+</section>
+<script>import '../scripts/social-contest';</script>
+<style>
+  .wordpress-tool { --color-primary:#3858e9; }
+  .wordpress-tool .youtube-form-section { border-color:color-mix(in srgb,#3858e9 28%,var(--color-border)); }
+  .wordpress-tool .youtube-form-section--source { background:linear-gradient(135deg,color-mix(in srgb,#3858e9 9%,var(--color-surface)),color-mix(in srgb,#0693e3 5%,var(--color-surface))); }
+  .wordpress-tool .youtube-section-heading > span { color:#fff;background:linear-gradient(135deg,#3858e9,#0693e3);box-shadow:0 7px 18px color-mix(in srgb,#3858e9 24%,transparent); }
+  .wp-preview { margin-top:1rem;border-color:color-mix(in srgb,#3858e9 35%,var(--color-border));background:var(--color-surface);color:var(--color-text); }
+  .wp-preview::after { background:none; }
+  .wp-preview .youtube-preview__empty > span { background:linear-gradient(135deg,#3858e9,#0693e3);color:#fff;border:0;font-family:Georgia,serif;font-size:1.2rem;font-weight:900; }
+  .wp-preview .youtube-preview__empty small,.wp-post small { color:var(--color-text-muted); }
+  .wp-post { display:grid;grid-template-columns:minmax(150px,240px) 1fr;align-items:stretch;min-height:145px; }
+  .wp-post > img { width:100%;height:100%;min-height:145px;object-fit:cover;background:var(--color-surface-soft); }
+  .wp-post > div { padding:1.35rem;align-self:center;overflow-wrap:anywhere; }
+  .wp-post p[data-publication-title] { margin:.35rem 0;font-size:1.12rem;font-weight:800;line-height:1.45; }
+  .wp-settings { display:grid;grid-template-columns:minmax(0,1.1fr) minmax(310px,.9fr);gap:1rem; }
+  .wp-rule-grid { grid-template-columns:1fr; }
+  .wp-notice { margin:1rem 0 0;padding:.85rem 1rem;border-radius:.75rem;background:color-mix(in srgb,#3858e9 8%,var(--color-surface));color:var(--color-text-muted);font-size:.88rem;line-height:1.55; }
+  @media (max-width:800px) { .wp-settings,.wp-post { grid-template-columns:1fr; } .wp-post > img { max-height:210px; } }
+</style>

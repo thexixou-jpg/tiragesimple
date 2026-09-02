@@ -20,6 +20,7 @@ export const providerCapabilities: Record<ProviderId, ProviderCapabilities> = {
   devto: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   hackernews: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   stackexchange: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  wordpress: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   instagram: { comments: true, likes: false, reposts: false, mentions: true, followers: false, replies: true },
   facebook: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   x: { comments: false, likes: false, reposts: false, mentions: false, followers: false, replies: false },
@@ -51,6 +52,7 @@ export function providerStatus(env: Env): Record<ProviderId, string> {
     devto: env.DEVTO_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     hackernews: env.HACKERNEWS_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     stackexchange: env.STACKEXCHANGE_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
+    wordpress: env.WORDPRESS_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     instagram: 'limited', facebook: 'limited', x: 'disabled', tiktok: 'unsupported',
   };
 }

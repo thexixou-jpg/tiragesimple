@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WordPressContestTool from '../components/WordPressContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('wordpress');
+const faq=[
+  {q:'Quels sites WordPress sont compatibles ?',a:'Les articles publics hébergés sur un sous-domaine wordpress.com sont compatibles. Les installations WordPress auto-hébergées utilisent des configurations différentes et ne sont pas encore prises en charge.'},
+  {q:'Faut-il connecter un compte WordPress.com ?',a:'Non. TirageSimple utilise l’API publique officielle pour lire l’article et ses commentaires approuvés.'},
+  {q:'Pourquoi certains commentaires ne participent-ils pas ?',a:'Les commentaires invités sans identifiant de compte stable sont exclus. Utiliser leur simple nom affiché pourrait fusionner deux personnes ou donner plusieurs identités à une même personne.'},
+  {q:'Les réponses peuvent-elles participer ?',a:'Oui. L’option Inclure les réponses permet d’ajouter les réponses approuvées, tout en conservant la déduplication par identifiant WordPress.com.'},
+  {q:'Les likes et abonnés sont-ils vérifiés ?',a:'Non. Ils ne sont pas proposés comme conditions car les listes nécessaires ne sont pas accessibles publiquement pour ce tirage.'},
+];
+const schema=[
+  {'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort WordPress.com',url:'https://tiragesimple.fr/tirage-au-sort-wordpress/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}},
+  {'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(item=>({'@type':'Question',name:item.q,acceptedAnswer:{'@type':'Answer',text:item.a}}))},
+];
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-wordpress/">
+  <header class="tool-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux et communautés</a><div class="social-tool-identity"><SocialProviderIcon provider="wordpress" /><p class="social-status social-status-available">Articles publics · sans connexion</p></div><h1>Tirage au sort WordPress.com</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube"><WordPressContestTool /><article class="tool-content prose">
+    <h2>Un tirage fiable parmi les commentaires WordPress.com</h2><p>Collez l’URL d’un article public hébergé sur WordPress.com. TirageSimple vérifie le titre, l’auteur, la date et l’éventuelle image mise en avant, puis importe progressivement les commentaires approuvés. Vous choisissez le nombre de gagnants et de suppléants, un mot-clé facultatif et les comptes à exclure.</p>
+    <h2>Déduplication par identifiant, jamais par simple nom</h2><p>Deux visiteurs peuvent choisir le même nom et un invité peut le modifier à chaque commentaire. Pour préserver l’équité, seuls les commentaires associés à un identifiant WordPress.com stable sont retenus. Le login sert à l’affichage et aux exclusions ; l’identifiant numérique reste la référence de déduplication.</p>
+    <h2>Commentaires principaux et réponses</h2><p>Vous pouvez limiter le concours aux commentaires principaux ou inclure les réponses. L’import se fait par pages de 100 contributions côté serveur afin de préserver la fluidité du navigateur sur les articles très commentés. Le tirage reste bloqué tant que toutes les pages n’ont pas été traitées.</p>
+    <h2>Une chance par compte ou par commentaire</h2><p>En mode standard, chaque compte identifiable reçoit une seule chance, quel que soit son nombre de commentaires. L’option « chaque commentaire compte » ajoute une chance par contribution éligible, mais un même compte ne peut occuper qu’une seule place parmi les gagnants et suppléants.</p>
+    <h2>Ce que l’outil ne prétend pas vérifier</h2><p>Les likes, abonnements au blog, vues, adresses e-mail, commentaires non approuvés et données de modération ne sont pas utilisés. Un résultat public facultatif expose la source, les règles et les gagnants, jamais la liste complète des participants.</p>
+    <h2>Questions fréquentes</h2>{faq.map(item=><><h3>{item.q}</h3><p>{item.a}</p></>)}<p>Découvrez également le <a href="/tirage-au-sort-youtube/">tirage YouTube</a>, le <a href="/tirage-au-sort-reddit/">tirage Reddit</a> et le <a href="/tirage-au-sort-devto/">tirage DEV Community</a>.</p>
+  </article></div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
