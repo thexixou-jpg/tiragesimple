@@ -1,6 +1,6 @@
 ---
 import type { SimpleIcon } from 'simple-icons';
-import { siBluesky, siDiscord, siFacebook, siGithub, siGitlab, siInstagram, siKick, siLemmy, siMastodon, siMixcloud, siReddit, siSoundcloud, siStackoverflow, siTiktok, siTwitch, siVimeo, siX, siYoutube } from 'simple-icons';
+import { siBluesky, siDevdotto, siDiscord, siFacebook, siGithub, siGitlab, siInstagram, siKick, siLemmy, siMastodon, siMixcloud, siReddit, siSoundcloud, siStackoverflow, siTiktok, siTwitch, siVimeo, siX, siYoutube } from 'simple-icons';
 import type { SocialProviderId } from '../data/social-contests';
 
 interface Props { provider: SocialProviderId; }
@@ -9,11 +9,12 @@ const icons: Partial<Record<SocialProviderId, SimpleIcon>> = {
   youtube:siYoutube, youtube_live:siYoutube, vimeo:siVimeo, soundcloud:siSoundcloud, mixcloud:siMixcloud, twitch:siTwitch, kick:siKick, discord:siDiscord,
   bluesky:siBluesky, mastodon:siMastodon, lemmy:siLemmy, github:siGithub,
   gitlab:siGitlab,
+  devto:siDevdotto,
   stackexchange:siStackoverflow, instagram:siInstagram, facebook:siFacebook,
   x:siX, tiktok:siTiktok, reddit:siReddit,
 };
 const icon=icons[provider];
-const preserveThemeColor=['github','x','tiktok'].includes(provider);
+const preserveThemeColor=['github','devto','x','tiktok'].includes(provider);
 ---
 <svg
   class:list={['social-provider-icon', `social-provider-icon--${provider}`]}

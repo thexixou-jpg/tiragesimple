@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'devto' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -158,6 +158,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API REST et GraphQL officielles de GitLab.com, sans connexion pour les projets publics.',
     limitations: ['Projets publics sur gitlab.com uniquement.', 'Les notes système, internes et confidentielles sont exclues.', 'Les discussions de revue de code, approbations, commits et réactions ne sont pas incluses.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'devto', name: 'DEV Community', status: 'available', statusLabel: 'Disponible · sans connexion',
+    title: 'Tirage au sort DEV Community : commentaires d’un article',
+    description: 'Tirez des gagnants parmi les commentaires et réponses d’un article DEV Community public, avec comptes uniques, filtres et exclusions.',
+    intro: 'Importez tout le fil de commentaires d’un article DEV.to public et tirez vos gagnants avec les identifiants stables des membres.',
+    connection: 'API Forem officielle de DEV Community, accessible en lecture publique sans clé API.',
+    limitations: ['Articles publics de dev.to uniquement.', 'Les réactions et abonnés ne sont pas exposés comme listes de participants.', 'Les commentaires masqués ou sans compte identifiable sont exclus.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {
     id: 'stackexchange', name: 'Stack Overflow', status: 'available', statusLabel: 'Disponible · questions publiques',

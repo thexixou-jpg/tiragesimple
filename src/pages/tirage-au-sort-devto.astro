@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DevToContestTool from '../components/DevToContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('devto');
+const faq=[
+  {q:'Faut-il connecter un compte DEV Community ?',a:'Non. L’article et son fil public sont lus avec l’API Forem officielle, sans demander votre mot de passe ni une clé personnelle.'},
+  {q:'Les réponses aux commentaires sont-elles incluses ?',a:'Oui si vous activez cette option. TirageSimple parcourt la structure imbriquée complète fournie par l’API et peut aussi ne garder que les commentaires principaux.'},
+  {q:'Comment les doublons sont-ils détectés ?',a:'Chaque membre est identifié avec son identifiant numérique stable DEV Community, et non uniquement avec son nom visible.'},
+  {q:'Les réactions ou abonnements peuvent-ils être exigés ?',a:'Non. L’outil ne prétend pas vérifier les réactions, abonnements ou lectures car ces listes ne sont pas utilisées comme source de participants.'},
+];
+const schema=[
+  {'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort DEV Community',url:'https://tiragesimple.fr/tirage-au-sort-devto/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}},
+  {'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(item=>({'@type':'Question',name:item.q,acceptedAnswer:{'@type':'Answer',text:item.a}}))},
+];
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-devto/">
+  <header class="tool-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="devto" /><p class="social-status social-status-available">Articles et fils publics · sans connexion</p></div><h1>Tirage au sort DEV Community</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube"><DevToContestTool /><article class="tool-content prose">
+    <h2>Tirer au sort parmi les commentaires d’un article DEV.to</h2><p>Collez l’adresse complète d’un article public publié sur DEV Community. L’aperçu confirme d’abord le titre, l’auteur, la date et l’image de couverture. TirageSimple importe ensuite le fil officiel pour constituer les participations sans vous demander de recopier des noms.</p><p>Vous pouvez définir plusieurs gagnants et suppléants, exiger un mot ou une expression, exclure des membres et choisir si plusieurs commentaires donnent plusieurs chances.</p>
+    <h2>Commentaires principaux ou conversation complète</h2><p>DEV Community structure les discussions avec des réponses imbriquées. L’option « Inclure les réponses » parcourt toute cette arborescence ; désactivez-la si votre règlement limite la participation aux commentaires placés directement sous l’article. Un commentaire sans membre identifiable n’entre pas dans le tirage.</p>
+    <h2>Déduplication par identifiant membre</h2><p>Le nom visible peut évoluer. Pour éviter qu’un changement de pseudo crée artificiellement un second participant, la déduplication s’appuie sur l’identifiant numérique stable fourni par l’API Forem. Même lorsque chaque commentaire vaut une chance, une même personne ne peut être choisie qu’une seule fois parmi les gagnants et suppléants.</p>
+    <h2>Des règles transparentes, sans promesse impossible</h2><p>Le texte est utilisé seulement pour appliquer le filtre facultatif. Les réactions, lectures et abonnements ne sont pas présentés comme vérifiés et n’influencent pas les chances. Le résultat utilise une source aléatoire cryptographiquement robuste ; il peut produire un reçu JSON et, sur demande, une page publique limitée aux gagnants, aux règles et aux empreintes techniques.</p>
+    <h2>Confidentialité des participants</h2><p>La liste complète n’apparaît jamais sur la page publique de résultat. Les données normalisées nécessaires au concours sont temporaires et le texte brut des commentaires n’est pas conservé dans la liste finale des participants. TirageSimple n’annonce aucune certification externe inexistante.</p>
+    <h2>Questions fréquentes</h2>{faq.map(item=><><h3>{item.q}</h3><p>{item.a}</p></>)}<p>Pour d’autres communautés techniques, utilisez aussi le <a href="/tirage-au-sort-github/">tirage GitHub</a>, le <a href="/tirage-au-sort-gitlab/">tirage GitLab</a> ou le <a href="/tirage-au-sort-stack-overflow/">tirage Stack Overflow</a>.</p>
+  </article></div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

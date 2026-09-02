@@ -16,6 +16,7 @@ export const providerCapabilities: Record<ProviderId, ProviderCapabilities> = {
   reddit: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   github: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   gitlab: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  devto: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   stackexchange: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   instagram: { comments: true, likes: false, reposts: false, mentions: true, followers: false, replies: true },
   facebook: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
@@ -44,6 +45,7 @@ export function providerStatus(env: Env): Record<ProviderId, string> {
     reddit: env.REDDIT_ENABLED === 'true' && Boolean(env.REDDIT_CLIENT_ID && env.REDDIT_CLIENT_SECRET && env.REDDIT_USER_AGENT && env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'setup_required',
     github: env.GITHUB_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     gitlab: env.GITLAB_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
+    devto: env.DEVTO_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     stackexchange: env.STACKEXCHANGE_ENABLED === 'true' && Boolean(env.DB && env.SOCIAL_IMPORT_QUEUE) ? 'enabled' : 'disabled',
     instagram: 'limited', facebook: 'limited', x: 'disabled', tiktok: 'unsupported',
   };
