@@ -107,6 +107,7 @@ button { cursor: pointer; }
 .social-provider-icon { display: block; width: 2.7rem; height: 2.7rem; flex: 0 0 auto; }
 .social-provider-icon--youtube { color: #ff0033; }
 .social-provider-icon--mastodon { color: #6364ff; }
+.social-provider-icon--pixelfed { color: #6366f1; }
 .social-provider-icon--lemmy { color: #67a331; }
 .social-provider-icon--github { color: var(--color-text); }
 .social-provider-icon--stackexchange { color: #f48024; }

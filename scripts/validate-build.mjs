@@ -119,6 +119,7 @@ else {
     'https://tiragesimple.fr/tirage-au-sort-youtube/',
     'https://tiragesimple.fr/tirage-au-sort-bluesky/',
     'https://tiragesimple.fr/tirage-au-sort-mastodon/',
+    'https://tiragesimple.fr/tirage-au-sort-pixelfed/',
     'https://tiragesimple.fr/tirage-au-sort-lemmy/',
     'https://tiragesimple.fr/tirage-au-sort-github/',
     'https://tiragesimple.fr/tirage-au-sort-stack-overflow/',

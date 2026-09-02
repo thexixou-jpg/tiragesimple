@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'peertube' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'peertube' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'pixelfed' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -130,6 +130,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     intro: 'Importez les favoris ou les boosts d’un post Mastodon public et effectuez un tirage transparent sans connecter votre compte.',
     connection: 'API REST publique Mastodon, sans mot de passe ni connexion.',
     limitations: ['13 instances vérifiées, dont mastodon.social, piaille.fr, Framapiaf, Mamot et Mastodon.art.', 'Favoris ou boosts, sans combiner les deux.', 'Les réponses, abonnements et interactions privées ne sont pas vérifiés.'],
+    capabilities: { comments: false, likes: true, reposts: true, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'pixelfed', name: 'Pixelfed', status: 'available', statusLabel: 'Disponible · OAuth officiel',
+    title: 'Tirage au sort Pixelfed : likes ou partages | TirageSimple',
+    description: 'Tirez des gagnants parmi les likes ou partages d’une publication Pixelfed publique avec OAuth officiel, comptes uniques et résultat partageable.',
+    intro: 'Connectez le compte organisateur Pixelfed puis transformez les likes ou partages de sa photo publique en tirage transparent.',
+    connection: 'OAuth officiel Pixelfed avec permission de lecture ; aucun mot de passe ni jeton manuel.',
+    limitations: ['Instances prises en charge : pixelfed.social et pixelfed.fr.', 'Le compte connecté doit être l’auteur de la publication afin que l’API fournisse la pagination complète.', 'Likes ou partages uniquement ; commentaires, abonnements et interactions privées ne sont pas utilisés.'],
     capabilities: { comments: false, likes: true, reposts: true, mentions: false, followers: false, replies: false },
   },
   {

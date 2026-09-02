@@ -35,8 +35,8 @@ export function socialRulesSummary(provider: string, rules: SummaryRules): strin
       'Participation via la réaction Discord sélectionnée',
       'Une seule chance par identifiant utilisateur Discord ; bots exclus',
       'Contenu, rôles, présence et autres réactions non utilisés',
-    ] : provider === 'mastodon' ? [
-      rules.interaction === 'reposts' ? 'Participation via un boost Mastodon' : 'Participation via un favori Mastodon',
+    ] : provider === 'mastodon' || provider === 'pixelfed' ? [
+      rules.interaction === 'reposts' ? `Participation via un ${provider === 'pixelfed' ? 'partage Pixelfed' : 'boost Mastodon'}` : `Participation via un ${provider === 'pixelfed' ? 'like Pixelfed' : 'favori Mastodon'}`,
       'Une seule chance par identifiant de compte ActivityPub',
       'Abonnement au compte non vérifié',
     ] : [

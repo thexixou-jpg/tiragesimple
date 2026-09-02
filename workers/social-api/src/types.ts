@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'peertube' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'peertube' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'pixelfed' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -59,6 +59,9 @@ export interface Env {
   BLUESKY_ENABLED?: string;
   MASTODON_ENABLED?: string;
   MASTODON_ALLOWED_HOSTS?: string;
+  PIXELFED_ENABLED?: string;
+  PIXELFED_ALLOWED_HOSTS?: string;
+  PIXELFED_REDIRECT_URI?: string;
   LEMMY_ENABLED?: string;
   LEMMY_ALLOWED_HOSTS?: string;
   REDDIT_ENABLED?: string;

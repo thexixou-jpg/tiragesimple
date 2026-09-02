@@ -10,7 +10,7 @@ interface Draw {
 }
 
 for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]')) {
-  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'reddit' ? 'reddit' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'gitlab' ? 'gitlab' : root.dataset.provider === 'bitbucket' ? 'bitbucket' : root.dataset.provider === 'devto' ? 'devto' : root.dataset.provider === 'hackernews' ? 'hackernews' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'wordpress' ? 'wordpress' : root.dataset.provider === 'peertube' ? 'peertube' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'vimeo' ? 'vimeo' : root.dataset.provider === 'soundcloud' ? 'soundcloud' : root.dataset.provider === 'mixcloud' ? 'mixcloud' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : root.dataset.provider === 'trovo' ? 'trovo' : root.dataset.provider === 'discord' ? 'discord' : 'youtube';
+  const provider = root.dataset.provider === 'bluesky' ? 'bluesky' : root.dataset.provider === 'mastodon' ? 'mastodon' : root.dataset.provider === 'pixelfed' ? 'pixelfed' : root.dataset.provider === 'lemmy' ? 'lemmy' : root.dataset.provider === 'reddit' ? 'reddit' : root.dataset.provider === 'github' ? 'github' : root.dataset.provider === 'gitlab' ? 'gitlab' : root.dataset.provider === 'bitbucket' ? 'bitbucket' : root.dataset.provider === 'devto' ? 'devto' : root.dataset.provider === 'hackernews' ? 'hackernews' : root.dataset.provider === 'stackexchange' ? 'stackexchange' : root.dataset.provider === 'wordpress' ? 'wordpress' : root.dataset.provider === 'peertube' ? 'peertube' : root.dataset.provider === 'youtube_live' ? 'youtube_live' : root.dataset.provider === 'vimeo' ? 'vimeo' : root.dataset.provider === 'soundcloud' ? 'soundcloud' : root.dataset.provider === 'mixcloud' ? 'mixcloud' : root.dataset.provider === 'twitch' ? 'twitch' : root.dataset.provider === 'kick' ? 'kick' : root.dataset.provider === 'trovo' ? 'trovo' : root.dataset.provider === 'discord' ? 'discord' : 'youtube';
   const api = (root.dataset.apiUrl || '/_tiragesimple').replace(/\/$/u, '');
   const form = root.querySelector<HTMLFormElement>('[data-contest-form]')!;
   const input = root.querySelector<HTMLInputElement>('[data-video-url]')!;
@@ -123,6 +123,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
         const path = decodeURIComponent(url.pathname);
         return hosts.includes(url.hostname.toLowerCase()) && [/^\/@[^/]+\/[A-Za-z0-9_-]+\/?$/u, /^\/users\/[^/]+\/statuses\/[A-Za-z0-9_-]+\/?$/u, /^\/web\/statuses\/[A-Za-z0-9_-]+\/?$/u].some(pattern => pattern.test(path));
       }
+      if (provider === 'pixelfed') { const hosts=(root.dataset.allowedHosts||'').split(','); return hosts.includes(url.hostname.toLowerCase()) && /^\/p\/[A-Za-z0-9_.-]{1,64}\/[1-9]\d{5,24}\/?$/u.test(url.pathname) && !url.search && !url.hash; }
       if (provider === 'lemmy') {
         const hosts = (root.dataset.allowedHosts || '').split(',');
         return hosts.includes(url.hostname.toLowerCase()) && /^\/post\/[1-9]\d{0,19}\/?$/u.test(url.pathname);

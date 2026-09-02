@@ -17,7 +17,7 @@ import worker from './index';
 
 function fixture(maximum = '10000') {
   const sqlite = new DatabaseSync(':memory:');
-  for (const migration of ['0001_initial.sql', '0002_import_pages.sql', '0003_kick_live_collections.sql']) sqlite.exec(readFileSync(new URL(`../migrations/${migration}`, import.meta.url), 'utf8'));
+  for (const migration of ['0001_initial.sql', '0002_import_pages.sql', '0003_kick_live_collections.sql', '0004_pixelfed_oauth_clients.sql']) sqlite.exec(readFileSync(new URL(`../migrations/${migration}`, import.meta.url), 'utf8'));
   const prepare = (sql: string) => {
     let args: unknown[] = [];
     const run = () => sqlite.prepare(sql).run(...args as never[]);
