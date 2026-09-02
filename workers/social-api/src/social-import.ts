@@ -21,6 +21,7 @@ import { getDevParticipants } from './devto';
 import { getHackerNewsParticipantsBatch } from './hackernews';
 import { getBitbucketParticipantsPage } from './bitbucket';
 import { getWordPressParticipantsPage } from './wordpress';
+import { getPeerTubeCommentPage, getPeerTubeReplyPage, peerTubeParticipants } from './peertube';
 
 export function nextYouTubeJob(job: SocialImportJob, nextPageToken?: string, replyParentIds: string[] = []): SocialImportJob | undefined {
   const base = { provider: job.provider, importId: job.importId };
@@ -94,7 +95,7 @@ export async function createRecordedSocialImport(env: Env, sessionId: string, pu
 export async function processSocialImport(job: SocialImportJob, env: Env): Promise<void> {
   const context = await getImportContext(env, job.importId);
   if (!context || ['ready', 'failed'].includes(context.import.status) || context.import.expires_at <= new Date().toISOString()) return;
-  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'vimeo', 'soundcloud', 'mixcloud', 'twitch', 'discord', 'bluesky', 'mastodon', 'lemmy', 'reddit', 'github', 'gitlab', 'bitbucket', 'devto', 'hackernews', 'stackexchange', 'wordpress'].includes(job.provider)) throw new Error('Invalid import provider');
+  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'vimeo', 'soundcloud', 'mixcloud', 'peertube', 'twitch', 'discord', 'bluesky', 'mastodon', 'lemmy', 'reddit', 'github', 'gitlab', 'bitbucket', 'devto', 'hackernews', 'stackexchange', 'wordpress'].includes(job.provider)) throw new Error('Invalid import provider');
   const key = await sha256(JSON.stringify([job.phase ?? 'main', job.pageToken ?? '', job.parentIds ?? [], job.nextThreadToken ?? '']));
   const previous = await getImportPage(env, job.importId, key);
   if (previous) {
@@ -131,6 +132,13 @@ export async function processSocialImport(job: SocialImportJob, env: Env): Promi
       participants = page.participants;
       analyzed = page.totalResults;
       next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;
+    } else if (job.provider === 'peertube') {
+      const page = job.phase === 'replies'
+        ? await getPeerTubeReplyPage(context.publication.providerPublicationId, job.parentIds![0], env)
+        : await getPeerTubeCommentPage(context.publication.providerPublicationId, job.pageToken, context.rules.includeReplies, env);
+      participants = peerTubeParticipants(page.comments, context.rules);
+      analyzed = page.totalResults;
+      next = nextYouTubeJob(job, 'nextPageToken' in page && typeof page.nextPageToken === 'string' ? page.nextPageToken : undefined, 'replyParentIds' in page && Array.isArray(page.replyParentIds) ? page.replyParentIds : []);
     } else if (job.provider === 'youtube_live') {
       const page = await getYouTubeLiveChatSnapshot(context.publication.providerPublicationId, env);
       participants = createParticipants(page.comments, context.rules, getProviderCapabilities('youtube_live'));

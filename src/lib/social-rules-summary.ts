@@ -12,9 +12,18 @@ export interface SummaryRules {
 }
 
 export function socialRulesSummary(provider: string, rules: SummaryRules): string[] {
+  if (provider === 'peertube') return [
+    `${rules.winnerCount} gagnant(s) · ${rules.alternateCount} suppléant(s), tous distincts`,
+    rules.includeReplies ? 'Commentaires publics et réponses PeerTube inclus' : 'Commentaires principaux PeerTube uniquement, sans les réponses',
+    rules.duplicateEntries ? 'Chaque commentaire éligible donne une chance ; un compte ne peut être sélectionné qu’une fois' : 'Une seule chance par identité ActivityPub',
+    rules.requiredKeyword ? `Texte contenant « ${rules.requiredKeyword} » (sans distinction majuscules/minuscules)` : 'Aucun filtre sur le texte',
+    'Likes, abonnements, vues et commentaires modérés non utilisés',
+    rules.excludePublicationAuthor ? 'Compte organisateur exclu' : 'Compte organisateur autorisé à participer',
+    `${rules.excludedAccountCount} exclusion(s) configurée(s) — identités non publiées`,
+  ];
   return [
     `${rules.winnerCount} gagnant(s) · ${rules.alternateCount} suppléant(s), tous distincts`,
-    ...(provider === 'youtube' || provider === 'youtube_live' || provider === 'vimeo' || provider === 'soundcloud' || provider === 'mixcloud' || provider === 'twitch' || provider === 'kick' || provider === 'trovo' || provider === 'lemmy' || provider === 'reddit' || provider === 'github' || provider === 'gitlab' || provider === 'bitbucket' || provider === 'devto' || provider === 'hackernews' || provider === 'stackexchange' || provider === 'wordpress' ? [
+    ...(provider === 'youtube' || provider === 'youtube_live' || provider === 'vimeo' || provider === 'soundcloud' || provider === 'mixcloud' || provider === 'peertube' || provider === 'twitch' || provider === 'kick' || provider === 'trovo' || provider === 'lemmy' || provider === 'reddit' || provider === 'github' || provider === 'gitlab' || provider === 'bitbucket' || provider === 'devto' || provider === 'hackernews' || provider === 'stackexchange' || provider === 'wordpress' ? [
       provider === 'twitch' ? 'Comptes présents dans le chat Twitch au moment de l’import' :
       provider === 'kick' ? 'Auteurs des messages reçus pendant la fenêtre de collecte Kick' :
       provider === 'trovo' ? 'Auteurs des messages normaux reçus pendant la fenêtre de collecte Trovo' :

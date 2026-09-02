@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'peertube' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -24,6 +24,15 @@ export interface SocialProviderDefinition {
 }
 
 export const socialProviders: SocialProviderDefinition[] = [
+  {
+    id: 'peertube', name: 'PeerTube', status: 'available', statusLabel: 'Disponible · instances sélectionnées',
+    title: 'Tirage au sort PeerTube : commentaires d’une vidéo',
+    description: 'Tirez gratuitement des gagnants parmi les commentaires et réponses d’une vidéo PeerTube publique, avec identités fédérées uniques.',
+    intro: 'Importez les commentaires d’une vidéo PeerTube publique et tirez vos gagnants avec l’identité ActivityPub stable de chaque compte.',
+    connection: 'API REST officielle PeerTube, sans connexion sur les instances publiques sélectionnées.',
+    limitations: ['Instances prises en charge : Framatube, PeerTube.tv, Blender, Tchncs, Skeptikon et Aquilenet.', 'Les commentaires supprimés, masqués ou en attente de modération sont exclus.', 'Likes, abonnements et vues ne sont pas des critères ; un fil tronqué interrompt le tirage.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
   {
     id: 'youtube_live', name: 'YouTube Live', status: 'available', statusLabel: 'Disponible · directs en cours',
     title: 'Tirage au sort YouTube Live : participants du chat en direct',
