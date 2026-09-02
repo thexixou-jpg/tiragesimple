@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SoundCloudContestTool from '../components/SoundCloudContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import {getSocialProvider} from '../data/social-contests';
+const provider=getSocialProvider('soundcloud');
+const schema={'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort SoundCloud',url:'https://tiragesimple.fr/tirage-au-sort-soundcloud/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}};
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-soundcloud/">
+  <header class="tool-hero soundcloud-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="soundcloud" /><p class="social-status social-status-limited">Commentaires publics · clé API requise</p></div><h1>Tirage au sort SoundCloud</h1><p>{provider.intro}</p></div></header>
+  <main class="container section"><SoundCloudContestTool /><article class="content-section legal-copy">
+    <h2>Créer un tirage parmi les commentaires SoundCloud</h2><p>Collez le lien d’une piste publique. Le service résout ce lien avec l’API SoundCloud, affiche son titre, l’artiste et la pochette, puis parcourt tous les commentaires au moyen de la pagination officielle. Le tirage ne devient disponible qu’après la fin complète de l’import.</p>
+    <h2>Pourquoi l’URN du compte est utilisé</h2><p>Un nom visible ou un permalink peut changer. L’URN utilisateur fourni par SoundCloud reste la clé technique de déduplication : plusieurs commentaires du même compte peuvent donner une ou plusieurs chances selon votre règle, sans permettre au même compte de gagner deux places.</p>
+    <h2>Règles disponibles</h2><p>Vous pouvez choisir le nombre de gagnants et de suppléants, imposer un mot ou une expression, exclure l’artiste et retirer certains comptes par permalink ou URN. SoundCloud ne structure pas ici de réponses imbriquées : l’outil n’invente donc pas une option « inclure les réponses ».</p>
+    <h2>Likes, reposts et abonnements</h2><p>L’API propose différentes ressources sociales, mais ce connecteur définit volontairement la participation par commentaire. Les likes, reposts, followers et écoutes ne sont pas combinés ni présentés comme des conditions vérifiées. Le règlement du concours doit refléter exactement ces capacités.</p>
+    <h2>Accès officiel et limites</h2><p>Une application SoundCloud est nécessaire côté serveur. SoundCloud indique actuellement qu’un compte Artist Pro est requis pour obtenir des identifiants d’application. Aucun participant ne fournit son mot de passe ou son jeton ; le backend réutilise et renouvelle son jeton d’application afin de respecter les limites d’authentification.</p>
+    <h2>Questions fréquentes</h2><h3>Les participants doivent-ils connecter SoundCloud ?</h3><p>Non. Seuls les commentaires publics accessibles à l’application sont consultés.</p><h3>Une piste privée fonctionne-t-elle ?</h3><p>Non. Ce parcours accepte uniquement une piste publique dont les commentaires sont accessibles. Pour un concours vidéo, consultez aussi le <a href="/tirage-au-sort-youtube/">tirage YouTube</a> ou le <a href="/tirage-au-sort-vimeo/">tirage Vimeo</a>.</p>
+  </article></main>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+<style>.soundcloud-hero{background:radial-gradient(circle at 82% 40%,#ff550026,transparent 30%),var(--color-bg)}</style>

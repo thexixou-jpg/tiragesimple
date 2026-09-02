@@ -14,6 +14,7 @@ import { getTwitchChattersPage } from './twitch';
 import { getDiscordParticipantsPage } from './discord';
 import { getRedditParticipants } from './reddit';
 import { getVimeoCommentPage, getVimeoReplyPage } from './vimeo';
+import { getSoundCloudCommentPage } from './soundcloud';
 
 export function nextYouTubeJob(job: SocialImportJob, nextPageToken?: string, replyParentIds: string[] = []): SocialImportJob | undefined {
   const base = { provider: job.provider, importId: job.importId };
@@ -87,7 +88,7 @@ export async function createRecordedSocialImport(env: Env, sessionId: string, pu
 export async function processSocialImport(job: SocialImportJob, env: Env): Promise<void> {
   const context = await getImportContext(env, job.importId);
   if (!context || ['ready', 'failed'].includes(context.import.status) || context.import.expires_at <= new Date().toISOString()) return;
-  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'vimeo', 'twitch', 'discord', 'bluesky', 'mastodon', 'lemmy', 'reddit', 'github', 'stackexchange'].includes(job.provider)) throw new Error('Invalid import provider');
+  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'vimeo', 'soundcloud', 'twitch', 'discord', 'bluesky', 'mastodon', 'lemmy', 'reddit', 'github', 'stackexchange'].includes(job.provider)) throw new Error('Invalid import provider');
   const key = await sha256(JSON.stringify([job.phase ?? 'main', job.pageToken ?? '', job.parentIds ?? [], job.nextThreadToken ?? '']));
   const previous = await getImportPage(env, job.importId, key);
   if (previous) {
@@ -114,6 +115,11 @@ export async function processSocialImport(job: SocialImportJob, env: Env): Promi
       participants = createParticipants(page.comments, context.rules, getProviderCapabilities('vimeo'));
       analyzed = page.totalResults;
       next = nextYouTubeJob(job, page.nextPageToken, 'replyParentIds' in page && Array.isArray(page.replyParentIds) ? page.replyParentIds as string[] : []);
+    } else if (job.provider === 'soundcloud') {
+      const page = await getSoundCloudCommentPage(context.publication.providerPublicationId, job.pageToken, env);
+      participants = createParticipants(page.comments, context.rules, getProviderCapabilities('soundcloud'));
+      analyzed = page.totalResults;
+      next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;
     } else if (job.provider === 'youtube_live') {
       const page = await getYouTubeLiveChatSnapshot(context.publication.providerPublicationId, env);
       participants = createParticipants(page.comments, context.rules, getProviderCapabilities('youtube_live'));

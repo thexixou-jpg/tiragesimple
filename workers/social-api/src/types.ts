@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -73,6 +73,9 @@ export interface Env {
   VIMEO_ENABLED?: string;
   VIMEO_CLIENT_ID?: string;
   VIMEO_CLIENT_SECRET?: string;
+  SOUNDCLOUD_ENABLED?: string;
+  SOUNDCLOUD_CLIENT_ID?: string;
+  SOUNDCLOUD_CLIENT_SECRET?: string;
   TWITCH_ENABLED?: string;
   TWITCH_CLIENT_ID?: string;
   TWITCH_CLIENT_SECRET?: string;

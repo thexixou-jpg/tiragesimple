@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -95,6 +95,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API Vimeo officielle avec jeton d’application limité aux données publiques.',
     limitations: ['Une application Vimeo doit être configurée côté serveur.', 'Vidéos publiques et commentaires accessibles uniquement.', 'Likes, followers, vues et collections ne sont pas utilisés comme listes de participants.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
+  },
+  {
+    id: 'soundcloud', name: 'SoundCloud', status: 'limited', statusLabel: 'Connecteur prêt · clé API requise',
+    title: 'Tirage au sort SoundCloud : commentaires d’une piste',
+    description: 'Tirez des gagnants parmi les commentaires d’une piste SoundCloud publique, avec comptes uniques, filtre textuel et exclusions.',
+    intro: 'Transformez les commentaires horodatés d’une piste SoundCloud publique en une liste de participants transparente et dédupliquée.',
+    connection: 'API SoundCloud officielle avec jeton OAuth d’application pour les ressources publiques.',
+    limitations: ['Une application SoundCloud et un abonnement Artist Pro sont actuellement requis pour obtenir les identifiants API.', 'Pistes publiques dont les commentaires sont accessibles uniquement.', 'Likes, reposts, abonnements et écoutes ne sont pas utilisés comme listes de participants.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   },
   {
     id: 'mastodon', name: 'Mastodon', status: 'available', statusLabel: 'Disponible sur 13 instances',
