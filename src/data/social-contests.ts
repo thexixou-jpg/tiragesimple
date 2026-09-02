@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -148,6 +148,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     intro: 'Importez les commentaires généraux d’une issue ou pull request publique et choisissez vos gagnants sans connecter de compte GitHub.',
     connection: 'API REST publique GitHub, avec quota gratuit strict sans authentification.',
     limitations: ['Dépôts publics uniquement.', 'Les revues de code, réactions, commits et discussions GitHub ne sont pas inclus.', 'Quota public partagé limité tant qu’aucun jeton serveur n’est configuré.'],
+    capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'gitlab', name: 'GitLab', status: 'available', statusLabel: 'Disponible · projets publics',
+    title: 'Tirage au sort GitLab : commentaires d’issue ou merge request',
+    description: 'Tirez des gagnants parmi les commentaires d’une issue ou merge request GitLab.com publique, avec comptes uniques, filtre et exclusions.',
+    intro: 'Importez les commentaires humains d’une conversation GitLab publique et tirez vos gagnants avec une identité numérique stable.',
+    connection: 'API REST et GraphQL officielles de GitLab.com, sans connexion pour les projets publics.',
+    limitations: ['Projets publics sur gitlab.com uniquement.', 'Les notes système, internes et confidentielles sont exclues.', 'Les discussions de revue de code, approbations, commits et réactions ne sont pas incluses.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   },
   {

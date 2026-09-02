@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GitLabContestTool from '../components/GitLabContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('gitlab');
+const faq=[
+  {q:'Quels commentaires GitLab sont inclus ?',a:'Les commentaires publics non système d’une issue ou merge request GitLab.com publique. Les notes internes, confidentielles et automatiques sont exclues.'},
+  {q:'Les discussions de revue de code participent-elles ?',a:'Non. Les discussions attachées au diff, approbations, commits et réactions ne sont pas utilisés comme participations.'},
+  {q:'Faut-il connecter un compte GitLab ?',a:'Non pour les projets publics sur GitLab.com. Aucun mot de passe ni jeton utilisateur ne vous est demandé.'},
+  {q:'Comment les doublons sont-ils détectés ?',a:'TirageSimple s’appuie sur l’identifiant numérique stable du compte GitLab, et non uniquement sur le nom visible.'},
+];
+const schema=[
+  {'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort GitLab',url:'https://tiragesimple.fr/tirage-au-sort-gitlab/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}},
+  {'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(item=>({'@type':'Question',name:item.q,acceptedAnswer:{'@type':'Answer',text:item.a}}))},
+];
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-gitlab/">
+  <header class="tool-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="gitlab" /><p class="social-status social-status-available">Issues et merge requests publiques</p></div><h1>Tirage au sort GitLab</h1><p>{provider.intro}</p></div></header>
+  <div class="container tool-page tool-page--youtube"><GitLabContestTool /><article class="tool-content prose">
+    <h2>Tirer au sort parmi les commentaires GitLab</h2><p>Collez le lien complet d’une issue ou d’une merge request publique hébergée sur GitLab.com. Un aperçu confirme le titre, l’auteur et la date. TirageSimple parcourt ensuite toutes les pages de commentaires avant d’activer le tirage : une réponse incomplète interrompt l’opération plutôt que de produire un résultat trompeur.</p><p>Vous choisissez le nombre de gagnants et de suppléants, un filtre textuel facultatif, les comptes à exclure et la façon de traiter plusieurs commentaires du même auteur.</p>
+    <h2>Une identité stable pour chaque participant</h2><p>La déduplication repose sur l’identifiant numérique fourni par l’API officielle GitLab. Un changement de nom utilisateur ne crée donc pas une deuxième identité. Si chaque commentaire vaut une chance, les chances augmentent mais un même compte ne peut toujours occuper qu’une seule place parmi les gagnants et suppléants.</p>
+    <h2>Ce que l’outil vérifie réellement</h2><p>Seuls les commentaires publics classiques participent. Les notes système, internes ou confidentielles sont rejetées, tout comme les contenus supprimés ou les auteurs sans identifiant exploitable. Les discussions de revue attachées au code, approbations, réactions, commits et membres du projet ne constituent pas des critères vérifiés.</p><p>L’outil couvre les projets publics de GitLab.com. Les instances GitLab auto-hébergées et projets privés demanderaient une configuration et des autorisations propres ; ils ne sont pas annoncés comme compatibles.</p>
+    <h2>Résultat vérifiable et respectueux des données</h2><p>Le tirage utilise une source aléatoire cryptographiquement robuste et génère un reçu JSON. Le partage public est facultatif : il présente la conversation, les gagnants, les règles et des empreintes techniques, sans publier la liste complète des participants. Cette transparence permet de contrôler le résultat sans prétendre à une certification externe.</p>
+    <h2>Questions fréquentes</h2>{faq.map(item=><><h3>{item.q}</h3><p>{item.a}</p></>)}<p>Vous organisez aussi des concours de développement ? Découvrez le <a href="/tirage-au-sort-github/">tirage GitHub</a> et le <a href="/tirage-au-sort-stack-overflow/">tirage Stack Overflow</a>.</p>
+  </article></div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

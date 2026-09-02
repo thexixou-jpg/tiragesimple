@@ -1,4 +1,4 @@
-export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type ProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 
 export interface ContestRules {
   winnerCount: number;
@@ -67,6 +67,8 @@ export interface Env {
   REDDIT_USER_AGENT?: string;
   GITHUB_ENABLED?: string;
   GITHUB_API_TOKEN?: string;
+  GITLAB_ENABLED?: string;
+  GITLAB_API_TOKEN?: string;
   STACKEXCHANGE_ENABLED?: string;
   STACKEXCHANGE_API_KEY?: string;
   YOUTUBE_API_KEY?: string;

@@ -1,0 +1,41 @@
+---
+const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
+---
+<section class="tool-shell gitlab-tool" data-social-contest data-provider="gitlab" data-api-url={apiUrl} aria-labelledby="gitlab-import-title">
+  <div class="tool-panel-intro"><div><p class="eyebrow">API GitLab officielle · Projets publics</p><h2 id="gitlab-import-title">Une conversation publique, un tirage transparent.</h2><p>Collez une issue ou merge request GitLab.com : l’aperçu confirme la source avant l’import complet des commentaires éligibles.</p></div></div>
+  <form class="social-import-form" data-contest-form>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Source du concours</strong><small>Issue ou merge request appartenant à un projet public.</small></div></div>
+      <label class="field"><span>URL GitLab.com</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://gitlab.com/groupe/projet/-/issues/…" required data-video-url /><small>Formats acceptés : /-/issues/123 et /-/merge_requests/123.</small></label>
+      <aside class="youtube-preview gitlab-preview" data-preview data-state="idle" aria-live="polite"><div class="youtube-preview__empty"><span aria-hidden="true">GL</span><div><strong>Aperçu de la conversation</strong><small>Le titre, l’auteur et la date apparaîtront avant l’import.</small></div></div><div class="gitlab-post" data-publication hidden><p class="eyebrow">Conversation sélectionnée</p><p data-publication-title></p><small data-publication-meta></small></div></aside>
+    </div>
+    <div class="youtube-form-section">
+      <div class="youtube-section-heading"><span>02</span><div><strong>Règles d’éligibilité</strong><small>Les notes système, internes et confidentielles sont toujours écartées.</small></div></div>
+      <div class="form-row"><label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label><label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label></div>
+      <label class="field"><span>Mot ou expression obligatoire <small>facultatif</small></span><input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. je participe" /><small>Le filtre ignore les différences entre majuscules et minuscules.</small></label>
+      <label class="field"><span>Comptes à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="organisateur, 123456" /><small>Noms utilisateur ou identifiants numériques GitLab, séparés par une virgule.</small></label>
+      <div class="social-rule-grid gitlab-rule-grid">
+        <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par identifiant GitLab.</small></span></label>
+        <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>Le créateur de l’issue ou merge request ne participe pas.</small></span></label>
+      </div>
+    </div>
+    <div class="actions"><button class="button button-secondary" type="submit">Analyser la conversation</button><button class="button button-primary" type="button" data-import disabled>Importer tous les commentaires</button></div>
+  </form>
+  <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
+  <div class="social-draw-panel" data-draw hidden><p data-progress></p><section class="social-rules-summary" aria-label="Règles appliquées"><h3>Ce que le tirage vérifie</h3><p>Les règles sont figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section><label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>La source, les gagnants, les règles et les empreintes sont partagés, jamais la liste complète.</small></span></label><button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button><div class="result-card" data-result hidden></div></div>
+</section>
+<script>import '../scripts/social-contest';</script>
+<style>
+  .gitlab-tool { --color-primary:#fc6d26; }
+  .gitlab-tool .youtube-form-section { border-color:color-mix(in srgb,#fc6d26 30%,var(--color-border)); }
+  .gitlab-tool .youtube-form-section--source,.gitlab-preview { background:linear-gradient(125deg,color-mix(in srgb,#fc6d26 10%,var(--color-surface)),color-mix(in srgb,#7759c2 7%,var(--color-surface))); }
+  .gitlab-tool .youtube-section-heading > span { color:#fff;background:linear-gradient(135deg,#fc6d26,#e24329);box-shadow:0 7px 18px color-mix(in srgb,#fc6d26 25%,transparent); }
+  .gitlab-preview { margin-top:1rem;border-color:color-mix(in srgb,#fc6d26 35%,var(--color-border));color:var(--color-text); }
+  .gitlab-preview::after { background:none; }
+  .gitlab-preview .youtube-preview__empty > span { background:linear-gradient(135deg,#fc6d26,#7759c2);color:#fff;border:0; }
+  .gitlab-preview .youtube-preview__empty small,.gitlab-post small { color:var(--color-text-muted); }
+  .gitlab-post { padding:1.25rem;overflow-wrap:anywhere; }
+  .gitlab-post > p[data-publication-title] { font-size:1.08rem;line-height:1.55; }
+  .gitlab-rule-grid { margin-top:1rem;grid-template-columns:repeat(2,minmax(0,1fr)); }
+  @media (max-width:650px) { .gitlab-rule-grid { grid-template-columns:1fr; } }
+</style>
