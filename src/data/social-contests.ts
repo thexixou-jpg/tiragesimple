@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'lemmy' | 'reddit' | 'github' | 'stackexchange' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -104,6 +104,15 @@ export const socialProviders: SocialProviderDefinition[] = [
     connection: 'API SoundCloud officielle avec jeton OAuth d’application pour les ressources publiques.',
     limitations: ['Une application SoundCloud et un abonnement Artist Pro sont actuellement requis pour obtenir les identifiants API.', 'Pistes publiques dont les commentaires sont accessibles uniquement.', 'Likes, reposts, abonnements et écoutes ne sont pas utilisés comme listes de participants.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
+  },
+  {
+    id: 'mixcloud', name: 'Mixcloud', status: 'available', statusLabel: 'Disponible · sans connexion',
+    title: 'Tirage au sort Mixcloud : commentaires, favoris ou auditeurs',
+    description: 'Tirez des gagnants parmi les commentaires, favoris ou auditeurs identifiés d’une émission Mixcloud publique, sans connecter de compte.',
+    intro: 'Choisissez une émission Mixcloud et transformez ses interactions publiques en un tirage transparent avec pagination complète.',
+    connection: 'API publique Mixcloud officielle, en lecture seule et sans OAuth.',
+    limitations: ['Commentaires, favoris ou auditeurs identifiés : un seul mode par tirage.', 'Le filtre textuel et les chances multiples concernent uniquement les commentaires.', 'Les écoutes anonymes et les reposts ne deviennent pas des participations.'],
+    capabilities: { comments: true, likes: true, reposts: false, mentions: false, followers: false, replies: false },
   },
   {
     id: 'mastodon', name: 'Mastodon', status: 'available', statusLabel: 'Disponible sur 13 instances',

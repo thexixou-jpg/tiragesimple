@@ -1,12 +1,12 @@
 ---
 import type { SimpleIcon } from 'simple-icons';
-import { siBluesky, siDiscord, siFacebook, siGithub, siInstagram, siKick, siLemmy, siMastodon, siReddit, siSoundcloud, siStackoverflow, siTiktok, siTwitch, siVimeo, siX, siYoutube } from 'simple-icons';
+import { siBluesky, siDiscord, siFacebook, siGithub, siInstagram, siKick, siLemmy, siMastodon, siMixcloud, siReddit, siSoundcloud, siStackoverflow, siTiktok, siTwitch, siVimeo, siX, siYoutube } from 'simple-icons';
 import type { SocialProviderId } from '../data/social-contests';
 
 interface Props { provider: SocialProviderId; }
 const { provider } = Astro.props;
 const icons: Partial<Record<SocialProviderId, SimpleIcon>> = {
-  youtube:siYoutube, youtube_live:siYoutube, vimeo:siVimeo, soundcloud:siSoundcloud, twitch:siTwitch, kick:siKick, discord:siDiscord,
+  youtube:siYoutube, youtube_live:siYoutube, vimeo:siVimeo, soundcloud:siSoundcloud, mixcloud:siMixcloud, twitch:siTwitch, kick:siKick, discord:siDiscord,
   bluesky:siBluesky, mastodon:siMastodon, lemmy:siLemmy, github:siGithub,
   stackexchange:siStackoverflow, instagram:siInstagram, facebook:siFacebook,
   x:siX, tiktok:siTiktok, reddit:siReddit,

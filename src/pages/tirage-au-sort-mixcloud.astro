@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MixcloudContestTool from '../components/MixcloudContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import {getSocialProvider} from '../data/social-contests';
+const provider=getSocialProvider('mixcloud');
+const schema={'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Mixcloud',url:'https://tiragesimple.fr/tirage-au-sort-mixcloud/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'}};
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-mixcloud/">
+  <header class="tool-hero mixcloud-hero"><div class="container tool-heading"><a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux</a><div class="social-tool-identity"><SocialProviderIcon provider="mixcloud" /><p class="social-status social-status-available">Disponible · sans connexion</p></div><h1>Tirage au sort Mixcloud</h1><p>{provider.intro}</p></div></header>
+  <main class="container section"><MixcloudContestTool /><article class="content-section legal-copy">
+    <h2>Tirer parmi les interactions d’une émission Mixcloud</h2><p>Collez l’adresse publique d’un show, d’un mix ou d’un podcast. TirageSimple affiche son aperçu puis importe, selon votre choix, les commentaires, les profils ayant ajouté l’émission aux favoris ou les auditeurs identifiés visibles dans l’API Mixcloud.</p>
+    <h2>Commentaires, favoris ou auditeurs</h2><p>Ces trois listes correspondent à des actions différentes et ne sont jamais mélangées silencieusement. Le reçu indique le mode choisi. Pour les commentaires, un filtre textuel et plusieurs chances par profil sont possibles. Pour les favoris et les auditeurs, chaque profil dispose d’une seule chance.</p>
+    <h2>Identité et déduplication</h2><p>Chaque objet Mixcloud possède une clé officielle. Cette clé de profil, plutôt que le seul nom affiché, sert à réunir les participations d’un même compte. Les entrées sans clé exploitable sont ignorées, et le créateur de l’émission peut être exclu automatiquement.</p>
+    <h2>Import complet et gros volumes</h2><p>L’API renvoie les résultats par pages. Chaque page est traitée dans la file du backend et le lien « suivant » est contrôlé avant de poursuivre. Si Mixcloud limite une requête ou si la pagination devient incohérente, le tirage reste bloqué afin qu’une liste partielle ne soit pas présentée comme complète.</p>
+    <h2>Ce que l’outil ne vérifie pas</h2><p>Une écoute anonyme n’apparaît pas comme participant identifiable. Les reposts, abonnements et actions privées ne sont pas ajoutés. Le mode « auditeurs identifiés » signifie uniquement que Mixcloud rend ces profils visibles dans la connexion publique de l’émission ; il ne prouve pas une durée minimale d’écoute.</p>
+    <h2>Questions fréquentes</h2><h3>Faut-il connecter son compte Mixcloud ?</h3><p>Non. La lecture des émissions et de leurs listes publiques ne nécessite pas OAuth selon la documentation officielle Mixcloud.</p><h3>Puis-je cumuler commentaire et favori ?</h3><p>Non dans un même import. Créez deux tirages séparés si votre règlement prévoit deux catégories, ou choisissez une condition unique clairement annoncée.</p>
+  </article></main>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+<style>.mixcloud-hero{background:radial-gradient(circle at 82% 40%,#5000ff2b,transparent 30%),var(--color-bg)}</style>

@@ -15,6 +15,7 @@ import { getDiscordParticipantsPage } from './discord';
 import { getRedditParticipants } from './reddit';
 import { getVimeoCommentPage, getVimeoReplyPage } from './vimeo';
 import { getSoundCloudCommentPage } from './soundcloud';
+import { getMixcloudParticipantsPage } from './mixcloud';
 
 export function nextYouTubeJob(job: SocialImportJob, nextPageToken?: string, replyParentIds: string[] = []): SocialImportJob | undefined {
   const base = { provider: job.provider, importId: job.importId };
@@ -88,7 +89,7 @@ export async function createRecordedSocialImport(env: Env, sessionId: string, pu
 export async function processSocialImport(job: SocialImportJob, env: Env): Promise<void> {
   const context = await getImportContext(env, job.importId);
   if (!context || ['ready', 'failed'].includes(context.import.status) || context.import.expires_at <= new Date().toISOString()) return;
-  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'vimeo', 'soundcloud', 'twitch', 'discord', 'bluesky', 'mastodon', 'lemmy', 'reddit', 'github', 'stackexchange'].includes(job.provider)) throw new Error('Invalid import provider');
+  if (job.provider !== context.publication.provider || !['youtube', 'youtube_live', 'vimeo', 'soundcloud', 'mixcloud', 'twitch', 'discord', 'bluesky', 'mastodon', 'lemmy', 'reddit', 'github', 'stackexchange'].includes(job.provider)) throw new Error('Invalid import provider');
   const key = await sha256(JSON.stringify([job.phase ?? 'main', job.pageToken ?? '', job.parentIds ?? [], job.nextThreadToken ?? '']));
   const previous = await getImportPage(env, job.importId, key);
   if (previous) {
@@ -118,6 +119,11 @@ export async function processSocialImport(job: SocialImportJob, env: Env): Promi
     } else if (job.provider === 'soundcloud') {
       const page = await getSoundCloudCommentPage(context.publication.providerPublicationId, job.pageToken, env);
       participants = createParticipants(page.comments, context.rules, getProviderCapabilities('soundcloud'));
+      analyzed = page.totalResults;
+      next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;
+    } else if (job.provider === 'mixcloud') {
+      const page = await getMixcloudParticipantsPage(context.publication.providerPublicationId, job.pageToken, context.rules, env);
+      participants = page.participants;
       analyzed = page.totalResults;
       next = page.nextPageToken ? { ...job, pageToken: page.nextPageToken } : undefined;
     } else if (job.provider === 'youtube_live') {
