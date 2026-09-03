@@ -19,7 +19,8 @@ n’est appelé directement : toutes les requêtes vont à
 
 - Réutilise `STACKEXCHANGE_ENABLED=true`, D1 et la file SOCIAL_IMPORT_QUEUE.
 - `STACKEXCHANGE_API_KEY` est facultative et reste un secret serveur.
-- Pas de nouvelle migration, d’OAuth ni de compte utilisateur à configurer.
+- Migration `0005_provider_cooldowns.sql` : mémorise les pauses de l’API pour
+  tous les visiteurs. Pas d’OAuth ni de compte utilisateur à configurer.
 - Page réseau : `/tirage-au-sort-stack-exchange/`.
 - L’ancienne page Stack Overflow et les références numériques existantes restent valides.
 - Pour les autres sites, la référence est `site|question_id`. Les identités
@@ -29,6 +30,9 @@ n’est appelé directement : toutes les requêtes vont à
 - Votes, réputation, badges et réponse acceptée ne sont pas vérifiés.
 - Une réponse API sans tableau `items` ou indicateur `has_more` interrompt l’import.
 - Le délai `backoff` est transmis à la file pour ne pas relancer plus tôt.
+- Les erreurs HTTP 400 `throttle_violation` sont également reconnues ; leur
+  délai est enregistré en base. Aucun appel amont pendant la pause, et le statut
+  public devient `rate_limited` avec l’heure de reprise.
 - La bascule automatique du serveur vers une autre IP dans le navigateur a
   été retirée pour ce connecteur. Les anciennes routes de reçus/imports restent
   compatibles, mais l’interface n’utilise plus ce repli pour éviter un quota.
@@ -40,6 +44,11 @@ pagination, le backoff, les métadonnées, les exclusions et un tirage avec
 suppléant sur chacune des quatre nouvelles communautés (API simulée).
 Les domaines et paramètres ont également été vérifiés avec `/sites`,
 et des questions publiques chargées depuis les quatre API réelles.
+
+Le contrôle du Worker de production a révélé un quota IP partagé épuisé :
+`throttle_violation`, reprise annoncée vers 10:45 UTC (12:45 à Paris) le 3 septembre 2026.
+La pause a été enregistrée à partir de cette réponse, sans multiplier les essais.
+L’import complet en production reste à revérifier après la levée du quota.
 
 Sources officielles :
 

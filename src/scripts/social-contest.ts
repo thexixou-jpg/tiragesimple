@@ -300,8 +300,13 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-social-contest]
     } catch (error) { say(errorText(error)); }
     finally { lock(false); visibility.disabled = false; }
   });
-  void request<{ providers: Record<string, string> }>('/v1/providers').then(data => {
+  void request<{ providers: Record<string, string>; retryAt?: Record<string,number> }>('/v1/providers').then(data => {
     ready = data.providers[provider] === 'enabled';
+    if (data.providers[provider] === 'rate_limited') {
+      const retryAt = data.retryAt?.[provider];
+      say(`Quota de la plateforme temporairement atteint.${retryAt ? ' Réessayez après le ' + new Date(retryAt).toLocaleString('fr-FR') + '.' : ' Réessayez plus tard.'} Aucun tirage partiel ne sera effectué.`);
+      return;
+    }
     say(ready ? provider === 'kick' ? 'Prêt. Connectez votre chaîne puis démarrez la collecte au début du concours.' : provider === 'trovo' ? 'Prêt. Indiquez une chaîne Trovo puis démarrez la collecte.' : 'Prêt. Collez le lien de votre publication.' : 'Ce connecteur est temporairement indisponible.');
     if (ready && provider !== 'kick' && provider !== 'trovo' && eligibleUrl(input.value.trim())) void analyze();
   }).catch(error => say(errorText(error)));

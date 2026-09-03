@@ -13,6 +13,7 @@ import { getGitHubPublication, parseGitHubUrl } from './github';
 import { getStackExchangePublication } from './stackexchange';
 import { parseStackExchangeUrl } from '../../../src/lib/stackexchange-sites';
 import { ProviderRequestError } from './provider-http';
+import { providerCooldown } from './provider-cooldown';
 import { getYouTubeLivePublication } from './youtube-live';
 import { completeTwitchOAuth, disconnectTwitch, getTwitchAccount, getTwitchPublication, twitchOAuthUrl } from './twitch';
 import { completeKickOAuth, disconnectKick, finishKickCollection, getKickAccount, kickOAuthUrl, receiveKickWebhook, startKickCollection } from './kick';
@@ -117,7 +118,12 @@ export default {
     // It avoids a separate host and common blocker patterns such as "api"/"social".
     const pathname = url.pathname.startsWith('/_tiragesimple/') ? url.pathname.slice('/_tiragesimple'.length) : url.pathname;
     if (request.method === 'POST' && pathname === '/v1/kick/webhook') return receiveKickWebhook(request, env);
-    if (request.method === 'GET' && pathname === '/v1/providers') return json({ providers: providerStatus(env) }, 200, origin);
+    if (request.method === 'GET' && pathname === '/v1/providers') {
+      const providers: Record<string,string> = providerStatus(env);
+      const retryAt = await providerCooldown(env, 'stackexchange');
+      if (retryAt && providers.stackexchange === 'enabled') providers.stackexchange = 'rate_limited';
+      return json({ providers, retryAt: retryAt ? {stackexchange:retryAt} : {} }, 200, origin);
+    }
     if (request.method === 'GET' && pathname === '/v1/discord/install') {
       try { if (providerStatus(env).discord !== 'enabled') throw new Error('Discord is not enabled'); return Response.redirect(discordInstallUrl(env), 302); }
       catch { return new Response('Le connecteur Discord doit encore être activé.', { status:503, headers:{ 'content-type':'text/plain; charset=utf-8', 'cache-control':'no-store' } }); }

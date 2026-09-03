@@ -27,9 +27,9 @@ const structuredData = {
     </div>
   </header>
   <div class="container tool-page">
-    <section class="social-provider-grid" aria-label="Plateformes disponibles">
+    <section class="social-provider-grid" aria-label="Plateformes disponibles" data-provider-status-api={import.meta.env.PUBLIC_SOCIAL_API_URL || '/_tiragesimple'}>
       {socialProviders.map((provider) => provider.status === 'available' || provider.id === 'vimeo' || provider.id === 'soundcloud' || provider.id === 'twitch' || provider.id === 'kick' || provider.id === 'trovo' || provider.id === 'discord' || provider.id === 'reddit' ? (
-        <a class="social-provider-card" href={`/tirage-au-sort-${providerSlug(provider.id)}`}>
+        <a class="social-provider-card" data-status-provider={provider.id} href={`/tirage-au-sort-${providerSlug(provider.id)}`}>
           <span class="social-provider-card__top"><SocialProviderIcon provider={provider.id} /><span class:list={['social-status', `social-status-${provider.status}`]}>{provider.statusLabel}</span></span>
           <h2>{provider.name}</h2>
           <p>{provider.description}</p>
@@ -79,4 +79,24 @@ const structuredData = {
     </article>
   </div>
 </BaseLayout>
+<script>
+  const grid=document.querySelector<HTMLElement>('[data-provider-status-api]');
+  if(grid) {
+    const api=grid.dataset.providerStatusApi!.replace(/\/$/u,'');
+    void fetch(api+'/v1/providers',{signal:AbortSignal.timeout(10000)})
+      .then(response=>{if(!response.ok)throw new Error('status unavailable');return response.json();})
+      .then((data:{providers:Record<string,string>})=>{
+        for(const card of grid.querySelectorAll<HTMLElement>('[data-status-provider]')) {
+          const status=data.providers[card.dataset.statusProvider!];
+          const badge=card.querySelector<HTMLElement>('.social-status');
+          if(!badge || status==='enabled')continue;
+          badge.textContent=status==='rate_limited'?'Quota atteint · temporairement limité':status==='setup_required'?'Configuration nécessaire':'Temporairement indisponible';
+          badge.className='social-status social-status-limited';
+        }
+      }).catch(()=>{
+        const badge=grid.querySelector<HTMLElement>('[data-status-provider="stackexchange"] .social-status');
+        if(badge)badge.textContent='Disponibilité à vérifier';
+      });
+  }
+</script>
 <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />

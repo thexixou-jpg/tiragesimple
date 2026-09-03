@@ -17,7 +17,7 @@ import worker from './index';
 
 function fixture(maximum = '10000') {
   const sqlite = new DatabaseSync(':memory:');
-  for (const migration of ['0001_initial.sql', '0002_import_pages.sql', '0003_kick_live_collections.sql', '0004_pixelfed_oauth_clients.sql']) sqlite.exec(readFileSync(new URL(`../migrations/${migration}`, import.meta.url), 'utf8'));
+  for (const migration of ['0001_initial.sql', '0002_import_pages.sql', '0003_kick_live_collections.sql', '0004_pixelfed_oauth_clients.sql', '0005_provider_cooldowns.sql']) sqlite.exec(readFileSync(new URL(`../migrations/${migration}`, import.meta.url), 'utf8'));
   const prepare = (sql: string) => {
     let args: unknown[] = [];
     const run = () => sqlite.prepare(sql).run(...args as never[]);
@@ -42,6 +42,25 @@ const response = (value: unknown) => new Response(JSON.stringify(value), { heade
 afterEach(() => vi.unstubAllGlobals());
 
 describe('official social connectors', () => {
+  it('exposes a shared cooldown and makes no upstream calls until it expires', async () => {
+    const {env,sqlite}=fixture();
+    const retryAt=Date.now()+3600000;
+    sqlite.prepare('INSERT INTO provider_cooldowns (provider,retry_at) VALUES (?,?)').run('stackexchange',retryAt);
+    const fetchMock=vi.fn(); vi.stubGlobal('fetch',fetchMock);
+    await expect(getStackExchangePublication('https://askubuntu.com/questions/42',env)).rejects.toThrow('Quota');
+    expect(fetchMock).not.toHaveBeenCalled();
+    const result=await worker.fetch(new Request('https://example.test/v1/providers'),env);
+    expect(await result.json()).toMatchObject({providers:{stackexchange:'rate_limited'},retryAt:{stackexchange:retryAt}});
+    sqlite.prepare('UPDATE provider_cooldowns SET retry_at=0').run();
+    const resumed=await worker.fetch(new Request('https://example.test/v1/providers'),env);
+    expect(await resumed.json()).toMatchObject({providers:{stackexchange:'enabled'}});
+  });
+  it('recognizes HTTP 400 throttle errors and persists their cooldown', async () => {
+    const {env,sqlite}=fixture();
+    vi.stubGlobal('fetch',vi.fn(async () => new Response(JSON.stringify({error_id:502,error_name:'throttle_violation',error_message:'too many requests from this IP, more requests available in 13378 seconds'}),{status:400})));
+    await expect(getStackExchangePublication('https://superuser.com/questions/42',env)).rejects.toThrow('Quota');
+    expect(sqlite.prepare('SELECT retry_at FROM provider_cooldowns').get()?.retry_at).toBeGreaterThan(Date.now()+13000000);
+  });
   it('waits the Stack Exchange backoff before retrying a queued import', async () => {
     const {env,jobs} = fixture();
     vi.stubGlobal('fetch',vi.fn(async () => response({items:[],has_more:true,backoff:180})));
