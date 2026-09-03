@@ -124,6 +124,7 @@ else {
     'https://tiragesimple.fr/tirage-au-sort-github/',
     'https://tiragesimple.fr/tirage-au-sort-stack-overflow/',
     'https://tiragesimple.fr/tirage-au-sort-stack-exchange/',
+    'https://tiragesimple.fr/tirage-au-sort-discourse/',
     'https://tiragesimple.fr/tirage-au-sort-wordpress/',
     'https://tiragesimple.fr/tirage-au-sort-peertube/',
     'https://tiragesimple.fr/roue-des-prenoms/',

@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DiscourseContestTool from '../components/DiscourseContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider=getSocialProvider('discourse');
+const faq=[
+  {q:'Quels forums sont compatibles ?',a:'Les sujets publics de Home Assistant (community.home-assistant.io), Docker Community (forums.docker.com) et Discourse Meta (meta.discourse.org). Un autre forum Discourse n’est pas automatiquement accepté : son domaine doit être vérifié avant d’être ajouté.'},
+  {q:'Faut-il un compte administrateur ou une clé API ?',a:'Non. Seules les données accessibles par l’API publique sans authentification sont utilisées. Les espaces privés et les forums qui exigent une connexion restent inaccessibles ; nous ne demandons aucun cookie ou mot de passe.'},
+  {q:'Pourquoi le premier message ne participe-t-il pas ?',a:'Il présente le sujet et n’est pas une réponse. Il est toujours exclu. L’auteur peut participer avec ses messages suivants si vous décochez son exclusion.'},
+  {q:'Comment sont définies les réponses entre membres ?',a:'L’option concerne les messages qui référencent explicitement un autre message que le premier. Une citation ou une mention dans le texte ne suffit pas à classer un message comme réponse : seule la relation fournie par l’API est utilisée.'},
+  {q:'Est-ce une preuve certifiée ?',a:'Non. Le reçu et ses empreintes documentent le tirage, mais ni Discourse ni les forums ne le certifient. Les messages peuvent évoluer entre l’aperçu et la collecte ; la liste d’identifiants est fixée au démarrage de l’import.'},
+];
+const schema={'@context':'https://schema.org','@type':'WebApplication',name:'Tirage au sort Discourse',url:'https://tiragesimple.fr/tirage-au-sort-discourse/',applicationCategory:'UtilitiesApplication',operatingSystem:'Web',inLanguage:'fr-FR',description:provider.description};
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-discourse/">
+  <header class="tool-hero"><div class="container tool-heading">
+    <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux et communautés</a>
+    <div class="social-tool-identity"><SocialProviderIcon provider="discourse" /><p class="social-status social-status-available">API officielle · forums publics</p></div>
+    <h1>Tirage au sort dans un forum Discourse</h1>
+    <p>Home Assistant, Docker Community et Discourse Meta : un lien de sujet, des participants identifiés et un résultat prêt à partager.</p>
+  </div></header>
+  <div class="container tool-page tool-page--youtube"><DiscourseContestTool />
+    <article class="tool-content prose">
+      <h2>Une discussion, des contributions et des règles claires</h2>
+      <p>Les forums Discourse accueillent des discussions structurées : domotique sur Home Assistant, conteneurs sur Docker Community, gestion de communautés sur Discourse Meta. Cet outil permet de sélectionner au hasard les auteurs de messages publics d’un sujet, par exemple pour choisir une contribution à présenter lors d’un atelier. Il ne publie aucun message sur le forum.</p>
+      <p>Collez le lien du sujet ou d’un message de ce sujet. L’aperçu confirme le titre et l’auteur. Les règles s’appliquent ensuite au sujet entier, pas seulement au message présent dans le lien. Si vous organisez un concours, vérifiez auparavant les règles du forum : la disponibilité technique de l’API n’autorise pas à y publier du contenu promotionnel.</p>
+      <h2>Un import par lots, pas seulement les vingt premiers messages</h2>
+      <p>L’<a href="https://meta.discourse.org/t/fetch-all-posts-from-a-topic-using-the-api/260886" target="_blank" rel="noopener noreferrer">API officielle Discourse</a> renvoie une première page puis la liste des identifiants publics. TirageSimple conserve cette liste au début de l’import et récupère les messages restants par lots de vingt. Une réponse manquante, une redirection ou une erreur bloque l’import au lieu de produire un résultat incomplet.</p>
+      <p>Cette version accepte jusqu’à 5 000 messages par sujet. Les pauses du forum sont respectées et partagées entre les visiteurs du service. Les messages ajoutés après le début de la collecte ne font pas partie de l’instantané ; relancez un import pour les intégrer. Un message modifié peut être lu dans son état courant au moment du passage de l’outil.</p>
+      <h2>Une identité stable sur chaque forum</h2>
+      <p>La déduplication utilise l’identifiant numérique du compte, jamais seulement son nom affiché. Chaque import reste lié à un seul forum. Un identifiant Docker ne représente pas nécessairement la même personne sur Home Assistant. Le premier message, les messages système, les messages masqués et les comptes supprimés sont exclus.</p>
+      <p>Une seule chance par membre est appliquée par défaut. Vous pouvez compter chaque message éligible, filtrer le texte avec un mot ou une expression, exclure l’organisateur et écarter des identifiants précis. Les gagnants et suppléants restent des comptes distincts, même si plusieurs messages ont augmenté leurs chances.</p>
+      <h2>Partager sans publier toute la liste</h2>
+      <p>Le tirage utilise une source aléatoire cryptographique et fournit un reçu. La publication du résultat est facultative : le lien montre les gagnants, la source, les règles publiques et les empreintes techniques, pas la liste complète ni les exclusions. Les données suivent la durée de conservation indiquée dans notre <a href="/confidentialite/">politique de confidentialité</a>.</p>
+      <h2>Questions fréquentes</h2>{faq.map(item=><><h3>{item.q}</h3><p>{item.a}</p></>)}
+      <p>Pour d’autres communautés techniques : <a href="/tirage-au-sort-github/">GitHub</a>, <a href="/tirage-au-sort-stack-exchange/">Stack Exchange</a> ou <a href="/tirage-au-sort-devto/">DEV Community</a>.</p>
+    </article>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

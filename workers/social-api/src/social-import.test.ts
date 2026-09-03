@@ -42,6 +42,20 @@ const response = (value: unknown) => new Response(JSON.stringify(value), { heade
 afterEach(() => vi.unstubAllGlobals());
 
 describe('official social connectors', () => {
+  it('imports a Discourse snapshot across batches, excludes the author and draws distinct winners',async()=>{
+    const {env,jobs}=fixture();env.DISCOURSE_ENABLED='true';
+    const post=(id:number,user:number)=>({id,topic_id:42,post_number:id,post_type:1,user_id:user,username:'u'+user,cooked:'concours'});
+    vi.stubGlobal('fetch',vi.fn(async(url:string)=>response(url.includes('posts.json')
+      ?{post_stream:{posts:[post(3,2),post(4,3),post(5,4)]}}
+      :{id:42,title:'Topic',post_stream:{posts:[post(1,1),post(2,2)],stream:[1,2,3,4,5]}})));
+    const imported=await queueSocialImport(env,'session',{provider:'discourse',providerPublicationId:'forums.docker.com|42',canonicalUrl:'https://forums.docker.com/t/42',authorProviderId:'1'},normalizeRules({alternateCount:1,excludedUsers:['4'],requiredKeyword:'concours'}));
+    while(jobs.length)await processSocialImport(jobs.shift()!,env);
+    expect(await getImport(env,imported.id)).toMatchObject({status:'ready',participant_count:2,progress_current:5});
+    const draw=await createYouTubeDraw(env,imported.id,false);
+    expect(draw.winners[0].providerUserId).not.toBe(draw.alternates[0].providerUserId);
+    expect(JSON.stringify(draw.receipt)).toContain('forums.docker.com');
+    expect(draw.receipt.rulesSummary.join(' ')).toContain('Premier message');
+  });
   it('exposes a shared cooldown and makes no upstream calls until it expires', async () => {
     const {env,sqlite}=fixture();
     const retryAt=Date.now()+3600000;

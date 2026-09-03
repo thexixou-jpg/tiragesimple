@@ -1,0 +1,54 @@
+---
+import SocialProviderIcon from './SocialProviderIcon.astro';
+const apiUrl = (import.meta.env.PUBLIC_SOCIAL_API_URL ?? '').replace(/\/$/u, '');
+---
+<section class="tool-shell discourse-tool" data-social-contest data-provider="discourse" data-api-url={apiUrl} aria-labelledby="discourse-import-title">
+  <div class="tool-panel-intro"><div><p class="eyebrow">API Discourse officielle · Sans connexion</p><h2 id="discourse-import-title">Transformez un fil de discussion en tirage clair.</h2><p>Collez un sujet public Home Assistant, Docker Community ou Discourse Meta. Vérifiez son aperçu, choisissez les règles, puis importez le fil complet sans copier de pseudos.</p></div></div>
+  <form class="social-import-form" data-contest-form>
+    <div class="youtube-form-section youtube-form-section--source">
+      <div class="youtube-section-heading"><span>01</span><div><strong>Sujet du tirage</strong><small>Sujets publics uniquement, jusqu’à 5 000 messages.</small></div></div>
+      <label class="field"><span>URL du sujet Discourse</span><input name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://community.home-assistant.io/t/titre-du-sujet/12345" required data-video-url /><small>L’aperçu est chargé avant toute collecte des commentaires.</small></label>
+      <aside class="youtube-preview discourse-preview" data-preview data-state="idle" aria-live="polite">
+        <div class="youtube-preview__empty"><span aria-hidden="true"><SocialProviderIcon provider="discourse" /></span><div><strong>Aperçu du sujet</strong><small>Le titre, l’auteur et la date apparaîtront ici.</small></div></div>
+        <div class="discourse-article" data-publication hidden><div><p class="eyebrow">Sujet sélectionné</p><p data-publication-title></p><small data-publication-meta></small></div></div>
+      </aside>
+    </div>
+    <div class="discourse-settings">
+      <div class="youtube-form-section">
+        <div class="youtube-section-heading"><span>02</span><div><strong>Format du tirage</strong><small>Configurez les places et le filtre de texte.</small></div></div>
+        <div class="form-row"><label class="field"><span>Gagnants</span><input name="winnerCount" type="number" min="1" max="100" value="1" required /></label><label class="field"><span>Suppléants</span><input name="alternateCount" type="number" min="0" max="100" value="0" required /></label></div>
+        <label class="field"><span>Mot ou expression obligatoire <small>facultatif</small></span><input name="requiredKeyword" type="text" maxlength="120" placeholder="Ex. je participe" /><small>Le filtre porte sur le texte visible du commentaire.</small></label>
+        <label class="field"><span>Membres à exclure <small>facultatif</small></span><input name="excludedUsers" type="text" maxlength="2500" placeholder="123456, 789012" /><small>Identifiants numériques du forum sélectionné, séparés par une virgule.</small></label>
+      </div>
+      <div class="youtube-form-section">
+        <div class="youtube-section-heading"><span>03</span><div><strong>Éligibilité</strong><small>Les choix correspondent aux données réellement disponibles.</small></div></div>
+        <div class="social-rule-grid discourse-rule-grid">
+          <label class="option-card"><input name="duplicateEntries" type="checkbox" /><span><strong>Chaque commentaire compte</strong><small>Sinon, une seule chance par identifiant membre.</small></span></label>
+          <label class="option-card"><input name="includeReplies" type="checkbox" checked /><span><strong>Inclure les réponses entre membres</strong><small>Messages qui répondent explicitement à un autre message du sujet.</small></span></label>
+          <label class="option-card"><input name="excludePublicationAuthor" type="checkbox" checked /><span><strong>Exclure l’auteur</strong><small>L’auteur du sujet ne participe pas.</small></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="actions"><button class="button button-secondary" type="submit">Analyser le sujet</button><button class="button button-primary" type="button" data-import disabled>Importer le fil complet</button></div>
+  </form>
+  <div class="social-import-feedback" data-feedback role="status" aria-live="polite">Vérification du connecteur…</div>
+  <div class="social-draw-panel" data-draw hidden><p data-progress></p><section class="social-rules-summary" aria-label="Règles appliquées"><h3>Ce que le tirage vérifie</h3><p>Les règles sont figées pour cet import. Toute modification nécessite un nouvel import.</p><ul data-rules-summary></ul></section><label class="option-card"><input data-public-visibility type="checkbox" /><span><strong>Créer un lien de résultat public</strong><small>La source, les gagnants, les règles et les empreintes sont partagés, jamais la liste complète.</small></span></label><button class="button button-primary" type="button" data-draw-button disabled>Lancer le tirage</button><div class="result-card" data-result hidden></div></div>
+</section>
+<script>import '../scripts/social-contest';</script>
+<style>
+  .discourse-tool { --color-primary:#3b49df; }
+  .discourse-tool .youtube-form-section { border-color:color-mix(in srgb,#3b49df 27%,var(--color-border)); }
+  .discourse-tool .youtube-form-section--source { background:linear-gradient(130deg,color-mix(in srgb,#3b49df 9%,var(--color-surface)),color-mix(in srgb,#0a0a0a 11%,var(--color-surface))); }
+  .discourse-tool .youtube-section-heading > span { color:#fff;background:linear-gradient(135deg,#3b49df,#0a0a0a);box-shadow:0 7px 18px color-mix(in srgb,#3b49df 25%,transparent); }
+  .discourse-preview { margin-top:1rem;min-height:180px;border-color:color-mix(in srgb,#3b49df 34%,var(--color-border));background:var(--color-surface);color:var(--color-text); }
+  .discourse-preview::after { background:none; }
+  .discourse-preview .youtube-preview__empty > span { width:3.5rem;border-radius:.8rem;background:#0a0a0a;color:#fff;border:0;font-size:.73rem;font-weight:900;letter-spacing:-.04em; }
+  .discourse-preview .youtube-preview__empty small,.discourse-article small { color:var(--color-text-muted); }
+  .discourse-article { display:grid;grid-template-columns:1fr;min-height:180px;align-items:stretch; }
+  .discourse-article img { width:100%;height:100%;min-height:180px;object-fit:cover;background:color-mix(in srgb,#3b49df 8%,var(--color-surface)); }
+  .discourse-article > div { padding:1.4rem;display:flex;flex-direction:column;justify-content:center;overflow-wrap:anywhere; }
+  .discourse-article > div > p[data-publication-title] { margin:.35rem 0;font-size:1.12rem;font-weight:800;line-height:1.45; }
+  .discourse-settings { display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:1rem; }
+  .discourse-rule-grid { grid-template-columns:1fr; }
+  @media (max-width:800px) { .discourse-settings,.discourse-article { grid-template-columns:1fr; }.discourse-article img { aspect-ratio:16/9;min-height:0; }.discourse-preview { min-height:0; } }
+</style>

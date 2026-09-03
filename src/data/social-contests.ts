@@ -1,4 +1,4 @@
-export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'peertube' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'pixelfed' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
+export type SocialProviderId = 'youtube' | 'youtube_live' | 'vimeo' | 'soundcloud' | 'mixcloud' | 'peertube' | 'twitch' | 'kick' | 'trovo' | 'discord' | 'bluesky' | 'mastodon' | 'pixelfed' | 'lemmy' | 'reddit' | 'github' | 'gitlab' | 'bitbucket' | 'discourse' | 'devto' | 'hackernews' | 'stackexchange' | 'wordpress' | 'instagram' | 'facebook' | 'x' | 'tiktok';
 export type ProviderStatus = 'available' | 'beta' | 'limited' | 'unavailable';
 
 export interface ProviderCapabilities {
@@ -24,6 +24,13 @@ export interface SocialProviderDefinition {
 }
 
 export const socialProviders: SocialProviderDefinition[] = [
+  {id:'discourse',name:'Discourse',status:'available',statusLabel:'Disponible · forums sélectionnés',
+   title:'Tirage au sort Discourse : forums Docker et Home Assistant',
+   description:'Importez les messages publics d’un sujet Home Assistant, Docker Community ou Discourse Meta. Comptes uniques, filtres, gagnants et suppléants.',
+   intro:'Un lien suffit pour retrouver les participants d’une discussion publique.',
+   connection:'API JSON officielle Discourse, sans compte connecté.',
+   limitations:['Forums Home Assistant, Docker Community et Discourse Meta.','5 000 messages maximum, aucun tirage partiel.','Likes, présence et abonnements non vérifiés.'],
+   capabilities:{comments:true,likes:false,reposts:false,mentions:false,followers:false,replies:true}},
   {
     id: 'peertube', name: 'PeerTube', status: 'available', statusLabel: 'Disponible · instances sélectionnées',
     title: 'Tirage au sort PeerTube : commentaires d’une vidéo',

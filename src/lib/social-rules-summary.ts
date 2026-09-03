@@ -12,6 +12,16 @@ export interface SummaryRules {
 }
 
 export function socialRulesSummary(provider: string, rules: SummaryRules): string[] {
+  if(provider==='discourse')return [
+    `${rules.winnerCount} gagnant(s) · ${rules.alternateCount} suppléant(s), tous distincts`,
+    rules.includeReplies?'Messages du sujet et réponses entre membres inclus':'Messages du sujet inclus ; réponses explicitement adressées à un autre message exclues',
+    'Premier message, messages système, privés, masqués et comptes supprimés exclus',
+    rules.duplicateEntries?'Chaque message éligible donne une chance ; un compte ne gagne qu’une fois':'Une seule chance par identifiant utilisateur du forum',
+    rules.requiredKeyword?`Texte contenant « ${rules.requiredKeyword} » (casse ignorée)`:'Aucun filtre textuel',
+    rules.excludePublicationAuthor?'Auteur du sujet exclu':'Auteur du sujet autorisé via ses messages suivants',
+    `${rules.excludedAccountCount} exclusion(s) configurée(s) — identités non publiées`,
+    'Likes, badges, statut de membre et présence non vérifiés',
+  ];
   if (provider === 'peertube') return [
     `${rules.winnerCount} gagnant(s) · ${rules.alternateCount} suppléant(s), tous distincts`,
     rules.includeReplies ? 'Commentaires publics et réponses PeerTube inclus' : 'Commentaires principaux PeerTube uniquement, sans les réponses',
