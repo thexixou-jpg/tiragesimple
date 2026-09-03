@@ -1,6 +1,6 @@
 /** Only used with fixed, official API origins; user URLs are never fetched. */
 export class ProviderRequestError extends Error {
-  constructor(message: string, public retryable: boolean) { super(message); }
+  constructor(message: string, public retryable: boolean, public retryAfterSeconds = 0) { super(message); }
 }
 
 export async function providerJson<T>(url: URL): Promise<T> {

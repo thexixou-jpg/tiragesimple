@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StackOverflowContestTool from '../components/StackOverflowContestTool.astro';
+import SocialProviderIcon from '../components/SocialProviderIcon.astro';
+import { getSocialProvider } from '../data/social-contests';
+const provider = getSocialProvider('stackexchange');
+const faq = [
+  { q: 'Quels sites sont compatibles ?', a: 'Stack Overflow, Super User, Server Fault, Ask Ubuntu et Arqade (gaming.stackexchange.com). Collez un lien HTTPS de question : la communauté est détectée automatiquement. Les autres sites et les espaces privés ne sont pas pris en charge.' },
+  { q: 'Faut-il connecter un compte ou fournir une clé API ?', a: 'Non. Les contributions publiques sont lues par le serveur via l’API officielle Stack Exchange. L’utilisation reste soumise aux quotas de cette API ; aucune connexion personnelle n’est demandée.' },
+  { q: 'Les commentaires sous les réponses sont-ils inclus ?', a: 'Non. Le mode commentaires lit uniquement ceux de la question. Le mode réponses prend les auteurs des réponses. Ces deux sources ne sont pas mélangées.' },
+  { q: 'Puis-je combiner plusieurs communautés dans un tirage ?', a: 'Non. Chaque import concerne une seule question sur un seul site. Les identifiants utilisateur sont propres à ce site et ne permettent pas de fusionner automatiquement les comptes du réseau.' },
+  { q: 'Le tirage est-il certifié par Stack Exchange ?', a: 'Non. TirageSimple est indépendant. Le reçu décrit la collecte et le tirage, avec des empreintes techniques ; il ne constitue ni une certification externe ni une preuve que la liste publique n’a jamais changé.' },
+];
+const schema = { '@context':'https://schema.org', '@type':'WebApplication', name:'Tirage au sort Stack Exchange', url:'https://tiragesimple.fr/tirage-au-sort-stack-exchange/', applicationCategory:'UtilitiesApplication', operatingSystem:'Web', inLanguage:'fr-FR', description:provider.description };
+---
+<BaseLayout title={provider.title} description={provider.description} canonicalPath="/tirage-au-sort-stack-exchange/">
+  <header class="tool-hero"><div class="container tool-heading">
+    <a class="breadcrumb" href="/tirage-au-sort-reseaux-sociaux/">Tirages réseaux sociaux et communautés</a>
+    <div class="social-tool-identity"><SocialProviderIcon provider="stackexchange" /><p class="social-status social-status-available">5 communautés · API officielle</p></div>
+    <h1>Tirage au sort Stack Exchange</h1><p>Programmation, informatique, Linux ou jeux vidéo : retrouvez les contributeurs d’une question et tirez vos gagnants avec des règles explicites.</p>
+  </div></header>
+  <div class="container tool-page tool-page--youtube">
+    <StackOverflowContestTool network />
+    <article class="tool-content prose">
+      <h2>Une communauté reconnue depuis votre lien</h2>
+      <p>Super User rassemble les échanges sur les ordinateurs et les logiciels ; Ask Ubuntu se concentre sur Ubuntu ; Server Fault traite de l’administration des systèmes et des réseaux. Arqade est consacré aux jeux vidéo, tandis que <a href="/tirage-au-sort-stack-overflow/">Stack Overflow</a> couvre les questions de programmation. L’outil affiche la communauté détectée avec le titre de la question, son auteur et sa date avant de lancer l’import.</p>
+      <p>Vous pouvez, par exemple, sélectionner au hasard une contribution à examiner lors d’un atelier. Cet outil ne publie rien sur ces sites. Si vous organisez un concours, vérifiez leurs règles et annoncez vos conditions ailleurs si nécessaire : ne sollicitez pas de réponses ou commentaires promotionnels contraires aux usages de la communauté.</p>
+      <h2>Réponses ou commentaires : choisissez la bonne liste</h2>
+      <p>Le mode réponses sélectionne les personnes ayant répondu à la question. Le mode commentaires sélectionne celles ayant commenté directement la question, sans parcourir les commentaires sous les réponses. Une seule chance par utilisateur est appliquée par défaut ; l’option « chaque contribution compte » permet de pondérer les chances avec les contributions éligibles, sans attribuer deux places au même compte.</p>
+      <p>Vous pouvez exclure l’auteur de la question, écarter des identifiants utilisateur du site concerné et appliquer un filtre textuel. Choisissez ensuite le nombre de gagnants et de suppléants. Les votes, la réputation, les badges et la réponse acceptée ne constituent pas des critères vérifiés.</p>
+      <h2>Des identifiants propres à chaque site</h2>
+      <p>Un identifiant Super User n’est pas un identifiant Ask Ubuntu. La référence technique de la publication conserve donc sa communauté, et chaque liste reste isolée dans son import. Les noms visibles peuvent changer sans créer un participant supplémentaire lorsque l’identifiant est identique. Les comptes supprimés dépourvus d’identifiant exploitable sont exclus.</p>
+      <h2>Quotas, pagination et limites de collecte</h2>
+      <p>L’import utilise les <a href="https://api.stackexchange.com/docs/answers-on-questions" target="_blank" rel="noopener noreferrer">endpoints officiels Stack Exchange</a> avec une pagination de 100 contributions au maximum par requête. Les pauses demandées par la plateforme sont prises en compte. Une erreur, une limite atteinte ou une page incomplète bloque le tirage ; aucune liste tronquée n’est présentée comme complète. Les contenus restent susceptibles d’être modifiés ou supprimés pendant la collecte.</p>
+      <h2>Un résultat à conserver, un partage facultatif</h2>
+      <p>Le moteur utilise une source aléatoire cryptographique. Vous pouvez conserver le reçu et copier le résultat. Le lien public est facultatif : il affiche la question, les gagnants, les règles publiques et les empreintes du tirage, pas la liste complète des participants. N’activez le partage que si cela convient à votre usage et aux personnes concernées. Consultez la <a href="/confidentialite/">politique de confidentialité</a> pour la conservation des données.</p>
+      <h2>Questions fréquentes</h2>{faq.map(item => <><h3>{item.q}</h3><p>{item.a}</p></>)}
+      <p>Pour une discussion de projet, découvrez aussi le <a href="/tirage-au-sort-github/">tirage GitHub</a>, le <a href="/tirage-au-sort-gitlab/">tirage GitLab</a> et le <a href="/tirage-au-sort-devto/">tirage DEV Community</a>.</p>
+    </article>
+  </div>
+</BaseLayout>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

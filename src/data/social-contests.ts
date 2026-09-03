@@ -205,12 +205,12 @@ export const socialProviders: SocialProviderDefinition[] = [
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: true },
   },
   {
-    id: 'stackexchange', name: 'Stack Overflow', status: 'available', statusLabel: 'Disponible · questions publiques',
-    title: 'Tirage au sort Stack Overflow : réponses ou commentaires',
-    description: 'Tirez des gagnants parmi les auteurs de réponses ou de commentaires d’une question Stack Overflow publique. Import officiel et comptes uniques.',
-    intro: 'Importez les réponses ou commentaires d’une question Stack Overflow et effectuez un tirage sans connecter de compte.',
+    id: 'stackexchange', name: 'Stack Exchange', status: 'available', statusLabel: 'Disponible · questions publiques',
+    title: 'Tirage au sort Stack Exchange : cinq communautés',
+    description: 'Tirage parmi les réponses ou commentaires de Stack Overflow, Super User, Ask Ubuntu, Server Fault et Arqade. API officielle, comptes uniques et suppléants.',
+    intro: 'Choisissez une question de Stack Overflow, Super User, Server Fault, Ask Ubuntu ou Arqade. Importez ses contributeurs sans connecter de compte.',
     connection: 'API publique Stack Exchange, sans mot de passe ni connexion.',
-    limitations: ['Questions publiques de Stack Overflow uniquement.', 'Choisissez les réponses ou les commentaires de la question, sans les combiner.', 'Les utilisateurs supprimés sans identifiant stable ne sont pas éligibles.'],
+    limitations: ['Questions publiques de cinq communautés explicitement prises en charge.', 'Choisissez les réponses ou les commentaires de la question, sans les combiner.', 'Les utilisateurs supprimés sans identifiant stable ne sont pas éligibles.'],
     capabilities: { comments: true, likes: false, reposts: false, mentions: false, followers: false, replies: false },
   },
   {

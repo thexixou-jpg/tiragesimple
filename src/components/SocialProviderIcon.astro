@@ -1,9 +1,9 @@
 ---
 import type { SimpleIcon } from 'simple-icons';
-import { siBitbucket, siBluesky, siDevdotto, siDiscord, siFacebook, siGithub, siGitlab, siInstagram, siKick, siLemmy, siMastodon, siMixcloud, siPeertube, siPixelfed, siReddit, siSoundcloud, siStackoverflow, siTiktok, siTwitch, siVimeo, siWordpress, siX, siYcombinator, siYoutube } from 'simple-icons';
+import { siBitbucket, siBluesky, siDevdotto, siDiscord, siFacebook, siGithub, siGitlab, siInstagram, siKick, siLemmy, siMastodon, siMixcloud, siPeertube, siPixelfed, siReddit, siSoundcloud, siStackexchange, siStackoverflow, siTiktok, siTwitch, siVimeo, siWordpress, siX, siYcombinator, siYoutube } from 'simple-icons';
 import type { SocialProviderId } from '../data/social-contests';
 
-interface Props { provider: SocialProviderId; }
+interface Props { provider: SocialProviderId; stackOverflow?: boolean; }
 const { provider } = Astro.props;
 const icons: Partial<Record<SocialProviderId, SimpleIcon>> = {
   youtube:siYoutube, youtube_live:siYoutube, vimeo:siVimeo, soundcloud:siSoundcloud, mixcloud:siMixcloud, twitch:siTwitch, kick:siKick, discord:siDiscord,
@@ -17,7 +17,7 @@ const icons: Partial<Record<SocialProviderId, SimpleIcon>> = {
   peertube:siPeertube,
   x:siX, tiktok:siTiktok, reddit:siReddit,
 };
-const icon=icons[provider];
+const icon=provider === 'stackexchange' && !Astro.props.stackOverflow ? siStackexchange : icons[provider];
 const preserveThemeColor=['github','devto','x','tiktok'].includes(provider);
 ---
 <svg

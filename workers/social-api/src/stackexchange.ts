@@ -2,6 +2,7 @@ import { createParticipants } from './contest-rules';
 import { getProviderCapabilities } from './providers';
 import { ProviderRequestError } from './provider-http';
 import type { ContestRules, Env, SocialComment, SocialPublication } from './types';
+import { parseStackExchangeUrl, parseStackExchangeReference } from '../../../src/lib/stackexchange-sites';
 
 const apiOrigin = 'https://api.stackexchange.com';
 const pageSize = 100;
@@ -12,18 +13,14 @@ interface StackContribution { answer_id?: number; comment_id?: number; body?: st
 interface StackResponse<T> { items?: T[]; has_more?: boolean; backoff?: number; quota_remaining?: number; error_id?: number; error_message?: string }
 
 export function parseStackOverflowUrl(input: string): string | null {
-  try {
-    const url = new URL(input);
-    if (url.protocol !== 'https:' || !['stackoverflow.com', 'www.stackoverflow.com'].includes(url.hostname.toLowerCase()) || url.port || url.username || url.password) return null;
-    const match = url.pathname.match(/^\/questions\/([1-9]\d{0,11})(?:\/[^/]*)?\/?$/u);
-    return match?.[1] ?? null;
-  } catch { return null; }
+  const parsed = parseStackExchangeUrl(input);
+  return parsed?.site === 'stackoverflow' ? parsed.id : null;
 }
 
-function assertEnabled(env: Env) { if (env.STACKEXCHANGE_ENABLED !== 'true') throw new Error('Le connecteur Stack Overflow n’est pas activé (not enabled).'); }
-function endpoint(path: string, page: number, env: Env): URL {
+function assertEnabled(env: Env) { if (env.STACKEXCHANGE_ENABLED !== 'true') throw new Error('Le connecteur Stack Exchange n’est pas activé (not enabled).'); }
+function endpoint(path: string, page: number, env: Env, site: string): URL {
   const url = new URL(`/2.3${path}`, apiOrigin);
-  url.search = new URLSearchParams({ site: 'stackoverflow', filter: 'withbody', pagesize: String(pageSize), page: String(page), order: 'asc', sort: 'creation' }).toString();
+  url.search = new URLSearchParams({ site, filter: 'withbody', pagesize: String(pageSize), page: String(page), order: 'asc', sort: 'creation' }).toString();
   if (env.STACKEXCHANGE_API_KEY) url.searchParams.set('key', env.STACKEXCHANGE_API_KEY);
   return url;
 }
@@ -37,29 +34,32 @@ function decodeEntities(value: string): string {
 async function stackJson<T>(url: URL): Promise<StackResponse<T>> {
   let response: Response;
   try { response = await fetch(url, { signal: AbortSignal.timeout(15000), redirect: 'manual', headers: { accept: 'application/json', 'user-agent': 'TirageSimple' } }); }
-  catch { throw new ProviderRequestError('Stack Overflow ne répond pas. Une nouvelle tentative sera effectuée.', true); }
+  catch { throw new ProviderRequestError('Stack Exchange ne répond pas. Une nouvelle tentative sera effectuée.', true); }
   if (!response.ok) {
     const detail = (await response.text()).slice(0, 300);
     console.warn('stackexchange_api_error', { status: response.status, detail });
-    if (response.status === 429 || response.status >= 500) throw new ProviderRequestError('Le quota Stack Overflow est atteint ou le service est temporairement indisponible.', true);
-    throw new ProviderRequestError(`Question Stack Overflow indisponible (${response.status}). Vérifiez qu’elle est publique.`, false);
+    if (response.status === 429 || response.status >= 500) throw new ProviderRequestError('Le quota Stack Exchange est atteint ou le service est temporairement indisponible.', true);
+    throw new ProviderRequestError(`Question Stack Exchange indisponible (${response.status}). Vérifiez qu’elle est publique.`, false);
   }
   let payload: StackResponse<T>;
   try { payload = await response.json() as StackResponse<T>; }
-  catch { throw new ProviderRequestError('Réponse Stack Overflow invalide : le tirage est interrompu.', false); }
-  if (payload.error_id) throw new ProviderRequestError(`Stack Overflow refuse la requête (${payload.error_message || payload.error_id}).`, payload.error_id === 502 || payload.error_id === 503);
-  if (payload.backoff && payload.backoff > 0) throw new ProviderRequestError(`Stack Overflow demande une pause de ${payload.backoff} secondes. L’import sera repris.`, true);
+  catch { throw new ProviderRequestError('Réponse Stack Exchange invalide : le tirage est interrompu.', false); }
+  if (payload.backoff && payload.backoff > 0) {
+    if (!Number.isSafeInteger(payload.backoff) || payload.backoff > 43200) throw new ProviderRequestError('La pause demandée dépasse la durée de reprise autorisée. Réessayez plus tard.', false);
+    throw new ProviderRequestError(`Stack Exchange demande une pause de ${payload.backoff} secondes. L’import sera repris.`, true, payload.backoff);
+  }
+  if (payload.error_id) throw new ProviderRequestError(`Stack Exchange refuse la requête (${payload.error_message || payload.error_id}).`, payload.error_id === 502 || payload.error_id === 503);
   return payload;
 }
 
 export async function getStackExchangePublication(input: string, env: Env): Promise<SocialPublication> {
   assertEnabled(env);
-  const id = parseStackOverflowUrl(input);
-  if (!id) throw new Error('Utilisez le lien public d’une question Stack Overflow.');
-  const payload = await stackJson<StackQuestion>(endpoint(`/questions/${id}`, 1, env));
+  const parsed = parseStackExchangeUrl(input);
+  if (!parsed) throw new Error('Utilisez une question publique de Stack Overflow, Super User, Server Fault, Ask Ubuntu ou Arqade.');
+  const payload = await stackJson<StackQuestion>(endpoint(`/questions/${parsed.id}`, 1, env, parsed.site));
   const question = payload.items?.[0];
-  if (!question?.question_id || !question.title || !question.link) throw new Error('Question Stack Overflow introuvable ou incomplète.');
-  return { provider: 'stackexchange', providerPublicationId: String(question.question_id), canonicalUrl: question.link,
+  if (String(question?.question_id) !== parsed.id || !question?.title || !question.link) throw new Error('Question Stack Exchange introuvable ou incomplète.');
+  return { provider: 'stackexchange', providerPublicationId: parsed.publicationId, canonicalUrl: parsed.canonicalUrl,
     authorProviderId: question.owner?.user_id ? String(question.owner.user_id) : undefined,
     authorName: question.owner?.display_name ? decodeEntities(question.owner.display_name) : undefined,
     title: decodeEntities(question.title).slice(0, 1000), publishedAt: question.creation_date ? new Date(question.creation_date * 1000).toISOString() : undefined };
@@ -67,12 +67,14 @@ export async function getStackExchangePublication(input: string, env: Env): Prom
 
 export async function getStackExchangeParticipantsPage(questionId: string, pageToken: string | undefined, rules: ContestRules, env: Env) {
   assertEnabled(env);
-  if (!/^[1-9]\d{0,11}$/u.test(questionId)) throw new Error('Référence Stack Overflow invalide.');
-  const page = pageToken ? Number.parseInt(pageToken, 10) : 1;
-  if (!Number.isSafeInteger(page) || page < 1 || page > 1000) throw new Error('Pagination Stack Overflow invalide.');
+  const parsed = parseStackExchangeReference(questionId);
+  if (!parsed) throw new Error('Référence Stack Exchange invalide.');
+  if (pageToken !== undefined && !/^[1-9]\d{0,3}$/u.test(pageToken)) throw new Error('Pagination Stack Exchange invalide.');
+  const page = pageToken ? Number(pageToken) : 1;
+  if (!Number.isSafeInteger(page) || page < 1 || page > 1000) throw new Error('Pagination Stack Exchange invalide.');
   const mode = rules.interaction === 'comments' ? 'comments' : 'answers';
-  const payload = await stackJson<StackContribution>(endpoint(`/questions/${questionId}/${mode}`, page, env));
-  if (!Array.isArray(payload.items)) throw new Error('Réponse Stack Overflow incomplète : le tirage est interrompu.');
+  const payload = await stackJson<StackContribution>(endpoint(`/questions/${parsed.id}/${mode}`, page, env, parsed.site));
+  if (!Array.isArray(payload.items) || typeof payload.has_more !== 'boolean') throw new Error('Réponse Stack Exchange incomplète : le tirage est interrompu.');
   const comments: SocialComment[] = payload.items.flatMap(item => {
     const contributionId = mode === 'comments' ? item.comment_id : item.answer_id;
     if (!contributionId || !item.owner?.user_id) return [];

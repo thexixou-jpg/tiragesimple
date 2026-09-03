@@ -42,6 +42,40 @@ const response = (value: unknown) => new Response(JSON.stringify(value), { heade
 afterEach(() => vi.unstubAllGlobals());
 
 describe('official social connectors', () => {
+  it('waits the Stack Exchange backoff before retrying a queued import', async () => {
+    const {env,jobs} = fixture();
+    vi.stubGlobal('fetch',vi.fn(async () => response({items:[],has_more:true,backoff:180})));
+    await queueSocialImport(env,'session',{provider:'stackexchange',providerPublicationId:'askubuntu|42',canonicalUrl:'https://askubuntu.com/questions/42'},normalizeRules({interaction:'answers'}));
+    const retry=vi.fn(), ack=vi.fn();
+    await worker.queue({messages:[{body:jobs.shift()!,attempts:1,retry,ack}]} as never,env,{} as never);
+    expect(retry).toHaveBeenCalledWith({delaySeconds:180});
+    expect(ack).not.toHaveBeenCalled();
+  });
+  it.each(['superuser', 'serverfault', 'askubuntu', 'gaming'])('imports and draws independently on %s', async site => {
+    const { env, jobs } = fixture();
+    vi.stubGlobal('fetch', vi.fn(async (url: URL) => {
+      expect(url.searchParams.get('site')).toBe(site);
+      expect(url.pathname).toBe('/2.3/questions/42/answers');
+      return response({items:[
+        {answer_id:1,body:'concours',owner:{user_id:1,display_name:'Organisateur'}},
+        {answer_id:2,body:'concours',owner:{user_id:2,display_name:'Alice'}},
+        {answer_id:3,body:'concours',owner:{user_id:2,display_name:'Alice renommée'}},
+        {answer_id:4,body:'concours',owner:{user_id:3,display_name:'Bob'}},
+        {answer_id:5,body:'concours',owner:{user_id:4,display_name:'Exclu'}},
+      ],has_more:false});
+    }));
+    const host = site === 'gaming' ? 'gaming.stackexchange.com' : site + '.com';
+    const imported = await queueSocialImport(env, 'session', {
+      provider:'stackexchange',providerPublicationId:`${site}|42`,canonicalUrl:`https://${host}/questions/42`,authorProviderId:'1',
+    },normalizeRules({interaction:'answers',alternateCount:1,excludedUsers:['4'],requiredKeyword:'concours'}));
+    while (jobs.length) await processSocialImport(jobs.shift()!,env);
+    expect(await getImport(env,imported.id)).toMatchObject({status:'ready',participant_count:2,progress_current:5});
+    const draw = await createYouTubeDraw(env,imported.id,false);
+    expect(draw.winners).toHaveLength(1);
+    expect(draw.alternates).toHaveLength(1);
+    expect(draw.winners[0].providerUserId).not.toBe(draw.alternates[0].providerUserId);
+    expect(JSON.stringify(draw.receipt)).toContain(host);
+  });
   it('accepts only canonical Stack Overflow question URLs', () => {
     expect(parseStackOverflowUrl('https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster')).toBe('11227809');
     expect(parseStackOverflowUrl('https://www.stackoverflow.com/questions/42')).toBe('42');

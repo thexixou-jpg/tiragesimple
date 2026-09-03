@@ -10,7 +10,9 @@ import { socialRulesSummary } from '../../../src/lib/social-rules-summary';
 import { getMastodonPublication } from './mastodon';
 import { getLemmyPublication } from './lemmy';
 import { getGitHubPublication, parseGitHubUrl } from './github';
-import { getStackExchangePublication, parseStackOverflowUrl } from './stackexchange';
+import { getStackExchangePublication } from './stackexchange';
+import { parseStackExchangeUrl } from '../../../src/lib/stackexchange-sites';
+import { ProviderRequestError } from './provider-http';
 import { getYouTubeLivePublication } from './youtube-live';
 import { completeTwitchOAuth, disconnectTwitch, getTwitchAccount, getTwitchPublication, twitchOAuthUrl } from './twitch';
 import { completeKickOAuth, disconnectKick, finishKickCollection, getKickAccount, kickOAuthUrl, receiveKickWebhook, startKickCollection } from './kick';
@@ -94,7 +96,7 @@ function publicDrawPage(payload: Record<string, unknown>): string {
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101220;color:#eff1ff;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(calc(100% - 2rem),52rem);margin:clamp(1rem,5vw,4rem) auto}.card{padding:clamp(1.25rem,4vw,2.5rem);border:1px solid #343953;border-radius:24px;background:#191d30}.tag{display:inline-block;padding:.3rem .7rem;border-radius:999px;background:#2a294c;color:#c5baff;font-size:.8rem;font-weight:700}h1{font-size:clamp(1.5rem,5vw,2.4rem);line-height:1.2;letter-spacing:-.04em}h2{font-size:1.2rem;margin-top:2rem}a{color:#c1b3ff}a:focus-visible,summary:focus-visible{outline:2px solid #fff;outline-offset:4px}p,h1,strong,li,a,code{overflow-wrap:anywhere}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}.stats div{padding:1rem;background:#101524;border-radius:14px}.stats strong{display:block;font-size:1.7rem}.stats span,small{color:#b7bed4}.winners{padding:0;list-style:none}.winners li{display:flex;flex-wrap:wrap;padding:1rem;justify-content:space-between;gap:.5rem 1rem;border-radius:12px;background:#242b44}.winners li+li{margin-top:.5rem}.winners span{color:#c4cbe0}.rules{padding-left:1.2rem;color:#d1d7eb}.rules li+li{margin-top:.45rem}.proof{margin-top:2rem;padding:1rem;border:1px solid #343953;border-radius:14px;background:#111628}.proof summary{cursor:pointer;font-weight:700}.proof dl{margin-bottom:0}.proof dt{margin-top:.8rem;color:#b7bed4;font-size:.8rem}.proof dd{margin:.15rem 0 0}.proof code{display:block;padding:.55rem;border-radius:8px;background:#090c16;font-size:.72rem;word-break:break-all;user-select:all}footer{border-top:1px solid #343953;margin-top:2rem;padding-top:1rem}footer p{margin-bottom:0}@media(max-width:360px){.stats{grid-template-columns:1fr}}
 </style></head><body><main class="wrap"><article class="card">
-<a href="https://tiragesimple.fr/">TirageSimple</a><p><span class="tag">Résultat partagé · ${escapeHtml(draw.platform === 'youtube' ? 'YouTube' : draw.platform === 'youtube_live' ? 'YouTube Live' : draw.platform === 'vimeo' ? 'Vimeo' : draw.platform === 'soundcloud' ? 'SoundCloud' : draw.platform === 'mixcloud' ? 'Mixcloud' : draw.platform === 'peertube' ? 'PeerTube' : draw.platform === 'twitch' ? 'Twitch' : draw.platform === 'kick' ? 'Kick' : draw.platform === 'trovo' ? 'Trovo' : draw.platform === 'discord' ? 'Discord' : draw.platform === 'mastodon' ? 'Mastodon' : draw.platform === 'pixelfed' ? 'Pixelfed' : draw.platform === 'lemmy' ? 'Lemmy' : draw.platform === 'reddit' ? 'Reddit' : draw.platform === 'github' ? 'GitHub' : draw.platform === 'gitlab' ? 'GitLab' : draw.platform === 'bitbucket' ? 'Bitbucket' : draw.platform === 'devto' ? 'DEV Community' : draw.platform === 'hackernews' ? 'Hacker News' : draw.platform === 'stackexchange' ? 'Stack Overflow' : draw.platform === 'wordpress' ? 'WordPress.com' : 'Bluesky')}</span></p>
+<a href="https://tiragesimple.fr/">TirageSimple</a><p><span class="tag">Résultat partagé · ${escapeHtml(draw.platform === 'youtube' ? 'YouTube' : draw.platform === 'youtube_live' ? 'YouTube Live' : draw.platform === 'vimeo' ? 'Vimeo' : draw.platform === 'soundcloud' ? 'SoundCloud' : draw.platform === 'mixcloud' ? 'Mixcloud' : draw.platform === 'peertube' ? 'PeerTube' : draw.platform === 'twitch' ? 'Twitch' : draw.platform === 'kick' ? 'Kick' : draw.platform === 'trovo' ? 'Trovo' : draw.platform === 'discord' ? 'Discord' : draw.platform === 'mastodon' ? 'Mastodon' : draw.platform === 'pixelfed' ? 'Pixelfed' : draw.platform === 'lemmy' ? 'Lemmy' : draw.platform === 'reddit' ? 'Reddit' : draw.platform === 'github' ? 'GitHub' : draw.platform === 'gitlab' ? 'GitLab' : draw.platform === 'bitbucket' ? 'Bitbucket' : draw.platform === 'devto' ? 'DEV Community' : draw.platform === 'hackernews' ? 'Hacker News' : draw.platform === 'stackexchange' ? 'Stack Exchange' : draw.platform === 'wordpress' ? 'WordPress.com' : 'Bluesky')}</span></p>
 <h1>Tirage ${escapeHtml(draw.id)}</h1><p>${date(draw.createdAt)} (heure de Paris)</p>
 <p><a href="${escapeHtml(draw.publication.url)}" rel="noopener noreferrer">${escapeHtml(draw.publication.title || 'Voir la publication')}</a></p>
 <div class="stats"><div><strong>${escapeHtml(draw.participantCount)}</strong><span>comptes éligibles</span></div><div><strong>${escapeHtml(draw.analyzedCount)}</strong><span>interactions analysées</span></div></div>
@@ -248,12 +250,12 @@ export default {
         const publishedAt = typeof input.publication.publishedAt === 'string' && !Number.isNaN(Date.parse(input.publication.publishedAt)) ? new Date(input.publication.publishedAt).toISOString() : undefined;
         if (!title) throw new Error('Métadonnées de publication incomplètes.');
         const github = provider === 'github' ? parseGitHubUrl(input.url) : null;
-        const stackId = provider === 'stackexchange' ? parseStackOverflowUrl(input.url) : null;
+        const stackId = provider === 'stackexchange' ? parseStackExchangeUrl(input.url) : null;
         if (provider === 'github' && !github || provider === 'stackexchange' && !stackId) throw new Error('URL de publication invalide.');
         const trovo = provider === 'trovo' ? (await getTrovoCollection(input.url, env)).publication : null;
         const publication = provider === 'github'
           ? { provider, providerPublicationId: `${github!.owner}|${github!.repo}|${github!.number}`, canonicalUrl: `https://github.com/${github!.owner}/${github!.repo}/${github!.kind}/${github!.number}`, authorProviderId, authorName, title, publishedAt }
-          : provider === 'stackexchange' ? { provider, providerPublicationId: stackId!, canonicalUrl: `https://stackoverflow.com/questions/${stackId}`, authorProviderId, authorName, title, publishedAt }
+          : provider === 'stackexchange' ? { provider, providerPublicationId: stackId!.publicationId, canonicalUrl: stackId!.canonicalUrl, authorProviderId, authorName, title, publishedAt }
             : { provider, providerPublicationId: trovo!.providerPublicationId, canonicalUrl: trovo!.canonicalUrl, authorProviderId: trovo!.authorProviderId, authorName: trovo!.authorName, title: trovo!.title, thumbnailUrl: trovo!.thumbnailUrl, publishedAt: trovo!.publishedAt };
         const rules = normalizeRules(input.rules ?? {});
         if (provider === 'github') {
@@ -378,8 +380,8 @@ export default {
         }
         if (provider === 'stackexchange') {
           if (!['answers', 'comments'].includes(input.rules?.interaction ?? '')) throw new Error('Choisissez les réponses ou les commentaires de la question.');
-          if (rules.includeReplies || rules.minimumMentions) throw new Error('Les réponses imbriquées et mentions ne sont pas des critères Stack Overflow disponibles.');
-          if (rules.excludedUsers.some(value => !/^[1-9]\d{0,11}$/u.test(value))) throw new Error('Pour les exclusions Stack Overflow, utilisez uniquement les identifiants utilisateur numériques.');
+          if (rules.includeReplies || rules.minimumMentions) throw new Error('Les réponses imbriquées et mentions ne sont pas des critères Stack Exchange disponibles.');
+          if (rules.excludedUsers.some(value => !/^[1-9]\d{0,11}$/u.test(value))) throw new Error('Pour les exclusions Stack Exchange, utilisez uniquement les identifiants utilisateur numériques.');
         }
         const imported = await queueSocialImport(env, session.id, publication, rules);
         return json({ import: imported, rulesSummary: socialRulesSummary(provider, { ...rules, excludedAccountCount: rules.excludedUsers.length }), requestedCount: rules.winnerCount + rules.alternateCount }, 202, origin, session.setCookie);
@@ -422,11 +424,11 @@ export default {
       try {
         await processSocialImport(message.body, env);
         message.ack();
-      } catch {
+      } catch (error) {
         if (message.attempts >= 4) {
           await setImportStatus(env, message.body.importId, 'failed', { errorMessage: 'Import interrompu après plusieurs tentatives. Aucun tirage partiel ne sera effectué.' });
           message.ack();
-        } else message.retry({ delaySeconds: Math.min(300, 15 * 2 ** message.attempts) });
+        } else message.retry({ delaySeconds: Math.min(43200, Math.max(15 * 2 ** message.attempts, error instanceof ProviderRequestError ? error.retryAfterSeconds : 0)) });
       }
     }
   },

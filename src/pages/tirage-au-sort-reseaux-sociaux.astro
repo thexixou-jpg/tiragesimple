@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SocialProviderIcon from '../components/SocialProviderIcon.astro';
 import { socialProviders } from '../data/social-contests';
 const availableProviders = socialProviders.filter((provider) => provider.status === 'available');
-const providerSlug = (id: string) => id === 'stackexchange' ? 'stack-overflow' : id === 'youtube_live' ? 'youtube-live' : id === 'hackernews' ? 'hacker-news' : id;
+const providerSlug = (id: string) => id === 'stackexchange' ? 'stack-exchange' : id === 'youtube_live' ? 'youtube-live' : id === 'hackernews' ? 'hacker-news' : id;
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
@@ -62,7 +62,7 @@ const structuredData = {
       <p><a href="/tirage-au-sort-bitbucket/">Bitbucket</a> couvre les commentaires et réponses d’une pull request publique, y compris les échanges attachés au code. Les participants sont identifiés par leur UUID de compte et le quota anonyme d’Atlassian est clairement pris en compte.</p>
       <p><a href="/tirage-au-sort-devto/">DEV Community</a> importe le fil public d’un article via l’API Forem officielle. Les réponses imbriquées sont facultatives et les membres sont dédupliqués avec leur identifiant numérique stable, jamais uniquement avec leur pseudo.</p>
       <p><a href="/tirage-au-sort-hacker-news/">Hacker News</a> parcourt par lots les commentaires et réponses d’une story, d’un Ask HN ou d’un Show HN. Les identifiants sont sensibles à la casse ; votes, score et karma n’entrent pas dans les règles du tirage.</p>
-      <p><a href="/tirage-au-sort-stack-overflow/">Stack Overflow</a> permet de choisir entre les auteurs de réponses et les auteurs de commentaires d’une question publique. La déduplication utilise l’identifiant numérique du compte ; les votes et la réputation ne modifient jamais les chances.</p>
+      <p><a href="/tirage-au-sort-stack-exchange/">Stack Exchange : Stack Overflow, Super User, Ask Ubuntu, Server Fault et Arqade</a> permet de choisir entre les auteurs de réponses et les auteurs de commentaires d’une question publique. La déduplication utilise l’identifiant numérique du compte ; les votes et la réputation ne modifient jamais les chances.</p>
       <p><a href="/tirage-au-sort-wordpress/">WordPress.com</a> importe les commentaires approuvés et leurs réponses sur les articles publics hébergés par la plateforme. Les visiteurs sans identifiant de compte stable sont exclus afin de préserver une déduplication fiable.</p>
       <p><a href="/tirage-au-sort-peertube/">PeerTube</a> importe les commentaires et réponses de vidéos publiques sur plusieurs instances reconnues. Les comptes fédérés sont dédupliqués avec leur identité ActivityPub et tout fil tronqué bloque le tirage.</p>
       <p>Le connecteur YouTube classique est opérationnel pour les commentaires de vidéos et de Shorts publics. Il utilise l’API officielle, identifie les participants par leur chaîne et permet un filtre textuel. Les likes, abonnements et publications Communauté ne sont pas annoncés comme vérifiés.</p>
